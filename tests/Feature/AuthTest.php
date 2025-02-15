@@ -1,11 +1,7 @@
 <?php
 
-use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(TestCase::class, RefreshDatabase::class)->in(__DIR__);
 
 test('Root route returns Ok status', function () {
     $response = $this->get('/');

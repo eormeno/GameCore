@@ -10,6 +10,8 @@ Route::post('/register', [AuthController::class, 'register']);
 // Login y generación de token
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/game-app', [GameAppController::class, 'all'])->name('all');
+
 // Ruta protegida (ejemplo)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);

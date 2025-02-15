@@ -7,4 +7,5 @@ return [
 	'prefab_name' => 'gtn.root-prefab',		// The name of the prefab that define the root GameObject.
 	'prefab_attributes' => ['value' => 1],  // The init attributes for the prefab. Like a constructor parameters.
 	'client' => 'blade',
+    'active' => false
 ];
