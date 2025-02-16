@@ -42,7 +42,34 @@ class AuthController extends Controller
         }
 
         return response()->json([
+            'status' => 'success',
             'token' => $user->createToken('auth_token')->plainTextToken,
+        ]);
+    }
+
+    public function loginUI()
+    {
+        return response()->json([
+            'form' => [
+                'action' => 'api/login',
+                'method' => 'POST',
+                'email' => [
+                    'label' => 'Correo:',
+                    'type' => 'email'
+                ],
+                'password' => [
+                    'label' => 'Contraseña:',
+                    'type' => 'password'
+                ],
+                'login' => [
+                    'text' => 'Iniciar sesión',
+                    'type' => 'submit'
+                ],
+                'register' => [
+                    'text' => 'Registrarse',
+                    'type' => 'button',
+                ]
+            ],
         ]);
     }
 

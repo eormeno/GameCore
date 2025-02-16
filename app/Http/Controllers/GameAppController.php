@@ -13,7 +13,7 @@ class GameAppController extends Controller
 
     public function all()
     {
-        $gameApps = GameApp::where('active', true)->get(['prefix', 'name', 'description', 'image']);
+        $gameApps = GameApp::where('active', true)->get(['id', 'prefix', 'name', 'description', 'image']);
         return response()->json($gameApps);
     }
 

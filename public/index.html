@@ -1,133 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juegos Disponibles</title>
-    <style>
-        .games-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .game-card {
-            width: 300px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .game-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .game-content {
-            padding: 15px;
-        }
-
-        .game-title {
-            margin: 0 0 10px 0;
-            color: #333;
-        }
-
-        .game-description {
-            margin: 0 0 15px 0;
-            color: #666;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .play-button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-        }
-
-        .play-button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/loadGames.js"></script>
+    <script src="js/renderLoginForm.js"></script>
 </head>
+
 <body>
     <div class="games-container" id="gamesContainer"></div>
-
     <script>
-        // Función para crear las tarjetas de juego
-        function createGameCards(games) {
-            const container = document.getElementById('gamesContainer');
-
-            games.forEach(game => {
-                // Crear elementos HTML
-                const card = document.createElement('div');
-                card.className = 'game-card';
-
-                const image = document.createElement('img');
-                image.className = 'game-image';
-                image.src = 'storage/' + game.image;
-                image.alt = game.name;
-
-                const content = document.createElement('div');
-                content.className = 'game-content';
-
-                const title = document.createElement('h2');
-                title.className = 'game-title';
-                title.textContent = game.name;
-
-                const description = document.createElement('p');
-                description.className = 'game-description';
-                description.textContent = game.description;
-
-                const playButton = document.createElement('button');
-                playButton.className = 'play-button';
-                playButton.textContent = 'Jugar';
-                playButton.onclick = () => playGame(game.prefix);
-
-                // Ensamblar la tarjeta
-                content.appendChild(title);
-                content.appendChild(description);
-                content.appendChild(playButton);
-
-                card.appendChild(image);
-                card.appendChild(content);
-
-                container.appendChild(card);
-            });
-        }
-
-        // Función para manejar el clic en el botón Jugar
-        function playGame(prefix) {
-            console.log(`Iniciando juego con prefijo: ${prefix}`);
-            // Aquí iría la lógica para redirigir al juego
-            // window.location.href = `/jugar/${prefix}`;
-        }
-
-        fetch('api/game-app')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la respuesta de la red');
-                }
-                return response.json();
-            })
-            .then(games => {
-                createGameCards(games);
-            })
-            .catch(error => {
-                console.error('Error al cargar los juegos:', error);
-                document.getElementById('gamesContainer').innerHTML =
-                    '<p>Error al cargar los juegos. Por favor intenta nuevamente más tarde.</p>';
-            });
+        loadGames();
     </script>
 </body>
+
 </html>
