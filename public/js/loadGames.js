@@ -34,7 +34,8 @@ function playGame(prefix) {
         if (game.form) {
             renderLoginForm(game);
         } else {
-            console.log(JSON.stringify(game, null, 2));
+            renderGameContainer(game);
+            startGame(game.game);
         }
     }).catch(error => {
         console.error('Error al cargar el juego:', error);
