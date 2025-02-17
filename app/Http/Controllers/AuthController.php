@@ -50,7 +50,7 @@ class AuthController extends Controller
     public function loginUI()
     {
         return response()->json([
-            'form' => [
+            'login' => [
                 'action' => 'api/login',
                 'method' => 'POST',
                 'email' => [

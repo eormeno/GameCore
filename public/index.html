@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juegos Disponibles</title>
     <link rel="stylesheet" href="css/main.css">
+    <script src="js/pageStateFunctions.js"></script>
+    <script src="js/main.js"></script>
     <script src="js/loadGames.js"></script>
     <script src="js/renderLoginForm.js"></script>
     <script src="js/renderContainer.js"></script>
@@ -15,7 +17,7 @@
 <body>
     <div class="games-container" id="gamesContainer"></div>
     <script>
-        loadGames();
+        main(getPageState().state);
     </script>
 </body>
 

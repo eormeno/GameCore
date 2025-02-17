@@ -7,7 +7,7 @@ function loadGames() {
             return response.json();
         })
         .then(games => {
-            createGameCards(games);
+            renderGamesCards(games);
         })
         .catch(error => {
             console.error('Error al cargar los juegos:', error);
@@ -44,7 +44,7 @@ function playGame(prefix) {
 }
 
 // Función para crear las tarjetas de juego
-function createGameCards(games) {
+function renderGamesCards(games) {
     const container = document.getElementById('gamesContainer');
     // remover contenido previo
     container.innerHTML = '';
@@ -73,7 +73,8 @@ function createGameCards(games) {
         const playButton = document.createElement('button');
         playButton.className = 'play-button';
         playButton.textContent = 'Jugar';
-        playButton.onclick = () => playGame(game.id);
+        // playButton.onclick = () => playGame(game.id);
+        playButton.onclick = () => setPageState('game', { id: game.id });
 
         // Ensamblar la tarjeta
         content.appendChild(title);

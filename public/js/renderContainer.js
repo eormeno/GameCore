@@ -1,4 +1,5 @@
 function renderGameContainer(game) {
+    console.log(JSON.stringify(game, null, 2));
     const container = document.getElementById('gamesContainer');
 
     // Crear elemento de título
