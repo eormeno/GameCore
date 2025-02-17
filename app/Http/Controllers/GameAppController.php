@@ -14,7 +14,7 @@ class GameAppController extends Controller
     public function all()
     {
         $gameApps = GameApp::where('active', true)->get(['id', 'prefix', 'name', 'description', 'image']);
-        return response()->json(['gameApps' => $gameApps]);
+        return response()->json(['displaying_games_gallery' => $gameApps, 'is_page' => true, 'is_modal' => false]);
     }
 
     public function play(
@@ -26,6 +26,8 @@ class GameAppController extends Controller
         //return view("game-app.$gameApp->client", compact('gameApp', 'currentGame'));
         return response()->json([
             'game' => [
+                'is_page' => true,
+                'is_modal' => false,
                 'title' => $currentGame->title,
                 'eventUrl' => route('event', $currentGame->id),
                 'resourcesUrl' => route('res', $gameApp->id),

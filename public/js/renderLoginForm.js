@@ -1,7 +1,6 @@
 function renderLoginForm(formData) {
     const container = document.getElementById('gamesContainer');
     container.innerHTML = '';
-    const formConfig = formData.form;
 
     // Estilos dinámicos actualizados
     const style = document.createElement('style');
@@ -97,8 +96,8 @@ function renderLoginForm(formData) {
 
     // Crear formulario
     const form = document.createElement('form');
-    form.action = formConfig.action;
-    form.method = formConfig.method;
+    form.action = formData.action;
+    form.method = formData.method;
 
     // Manejar el evento submit
     form.addEventListener('submit', async (e) => {
@@ -107,25 +106,31 @@ function renderLoginForm(formData) {
         // Crear objeto con los datos del formulario
         const formValues = Object.fromEntries(new FormData(form));
 
+        setPageState('trying_login', {
+            action: formData.action,
+            method: formData.method,
+            body: JSON.stringify(formValues)
+        });
+
         // Llamar a la función de manejo de respuesta
-        try {
-            const response = await fetch(formConfig.action, {
-                method: formConfig.method,
-                body: JSON.stringify(formValues),
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await response.json();
-            handleFormResponse(data);
-        } catch (error) {
-            handleFormResponse({
-                status: 'error',
-                message: error.message
-            });
-        }
+        // try {
+        //     const response = await fetch(formData.action, {
+        //         method: formData.method,
+        //         body: JSON.stringify(formValues),
+        //         headers: { 'Content-Type': 'application/json' }
+        //     });
+        //     const data = await response.json();
+        //     handleFormResponse(data);
+        // } catch (error) {
+        //     handleFormResponse({
+        //         status: 'error',
+        //         message: error.message
+        //     });
+        // }
     });
 
     // Crear campos del formulario
-    Object.entries(formConfig).forEach(([key, value]) => {
+    Object.entries(formData).forEach(([key, value]) => {
         if (typeof value === 'object' && !['login', 'register'].includes(key)) {
             const formGroup = document.createElement('div');
             formGroup.className = 'form-group';
@@ -154,15 +159,15 @@ function renderLoginForm(formData) {
 
     // Botón de login
     const loginButton = document.createElement('button');
-    loginButton.type = formConfig.login.type;
+    loginButton.type = formData.login.type;
     loginButton.className = 'primary-btn';
-    loginButton.textContent = formConfig.login.text;
+    loginButton.textContent = formData.login.text;
 
     // Botón de registro
     const registerButton = document.createElement('button');
-    registerButton.type = formConfig.register.type;
+    registerButton.type = formData.register.type;
     registerButton.className = 'secondary-btn';
-    registerButton.textContent = formConfig.register.text;
+    registerButton.textContent = formData.register.text;
 
     buttonGroup.appendChild(loginButton);
     buttonGroup.appendChild(registerButton);

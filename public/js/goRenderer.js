@@ -21,6 +21,7 @@ const backendMs = [];
 let eventsAlreadyPending = [];
 let resourceUrl = '';
 let eventUrl = '';
+let stopGame = false;
 
 function startGame(game) {
 	pingAvgElement = document.getElementById('pingAvg');
@@ -34,6 +35,26 @@ function startGame(game) {
     eventUrl=game.eventUrl;
 	pushEvent('reload', {});
 	pullWithTimeout(10);
+}
+
+function stopGameLoop() {
+    stopGame = true;
+}
+
+function resetValues() {
+    elementsMap.clear();
+    eventQueue.length = 0;
+    pings.length = 0;
+    backendMs.length = 0;
+    eventsAlreadyPending.length = 0;
+    arrCachedViews = {};
+    arrClientRenderings.length = 0;
+    previousMillis = 500;
+    lowPing = 1000;
+    highPing = 0;
+    backendMin = 1000;
+    backendMax = 0;
+    stopGame = false;
 }
 
 async function sendEvent(event, formData = {}, destination = null) {
@@ -367,6 +388,7 @@ const pullWithTimeout = async (interval) => {
 			console.error('Error:', error);
 		} finally {
 			updatePingMetrics(startTime);
+            if (stopGame) return;
 			setTimeout(fetchData, interval);
 		}
 	};

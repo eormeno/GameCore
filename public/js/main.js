@@ -1,33 +1,42 @@
 document.addEventListener("stateChanged", function (event) {
     console.log(JSON.stringify(event.detail, null, 2));
-    // state is the first key name in the JSON object
-    let state = Object.keys(event.detail)[0];
-    main(state, event.detail[state]);
+    main(event.detail);
 });
 
-function main(state = 'init', data = {}) {
+function main(state = initialState) {
+    let data = state.data;
+    console.log('State:', state.name);
 
-    console.log('State:', state);
-
-    switch (state) {
-        case 'init':
+    switch (state.name) {
+        case initialState.name:
             fetchApi('api/game-app', 'GET');
             break;
-        case 'gameApps':
+        case 'displaying_games_gallery':
             renderGamesCards(data);
             break;
-        case 'game':
-            let gameAppId = getPageState().parameters.id;
-            fetchApi(`api/game-app/${gameAppId}/play`, 'GET');
+        case 'fetching_game':
+            previousState = state;
+            fetchApi(`api/game-app/${data.id}/play`, 'GET');
             break;
-        case 'login':
+        case 'game':
+            renderGameContainer(data);
+            startGame(data);
+            break;
+        case 'displaying_login':
             renderLoginForm(data);
+            break;
+        case 'trying_login':
+            fetchApi(data.action, data.method, data.body);
+            break;
+        case 'successful_login':
+            localStorage.setItem('token', data.token);
+            setPageState(previousState.name, previousState.data);
             break;
         case 'register':
             renderRegisterForm();
             break;
         default:
-            console.log('State not found:', state);
+            console.log('State not found:', state.name);
             break;
     }
 }
@@ -36,6 +45,7 @@ function fetchApi(endpoint, method = 'GET', body = null) {
     let token = localStorage.getItem('token');
     fetch(endpoint, {
         method: method,
+        body: body,
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -44,12 +54,22 @@ function fetchApi(endpoint, method = 'GET', body = null) {
         if (!response.ok) {
             throw new Error('Error en la respuesta de la red');
         }
+        // if response is not json, return response
+        if (!response.headers.get('content-type').includes('application/json')) {
+            console.log(response);
+            return response;
+        }
         return response.json();
     }).then(data => {
-        document.dispatchEvent(new CustomEvent('stateChanged', { detail: data }));
+        let stateName = Object.keys(data)[0];
+        setPageState(stateName, data[stateName]);
+        // let state = {
+        //     name: stateName,
+        //     data: data[stateName]
+        // };
+        // document.dispatchEvent(new CustomEvent('stateChanged', { detail: state }));
     }).catch(error => {
         console.error('Error al cargar los juegos:', error);
-        document.getElementById('gamesContainer').innerHTML =
-            '<p>Error al cargar los juegos. Por favor intenta nuevamente más tarde.</p>';
+        document.getElementById('gamesContainer').innerHTML = error;
     });
 }

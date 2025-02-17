@@ -1,10 +1,9 @@
 function renderGameContainer(game) {
-    console.log(JSON.stringify(game, null, 2));
     const container = document.getElementById('gamesContainer');
 
     // Crear elemento de título
     const title = document.createElement('h1');
-    title.textContent = game.game.title;
+    title.textContent = game.title;
 
     // Crear contenedor del canvas
     const canvasContainer = document.createElement('div');
@@ -155,14 +154,15 @@ function renderGameContainer(game) {
     const statsPanel = createStatsPanel();
 
     // Aplicar dimensiones del JSON
-    canvasContainer.style.width = `${game.game.width}px`;
-    canvasContainer.style.height = `${game.game.height}px`;
+    canvasContainer.style.width = `${game.width}px`;
+    canvasContainer.style.height = `${game.height}px`;
 
      // Evento para el botón de cierre
      closeButton.addEventListener('click', () => {
         gamesContainer.innerHTML = '';
         document.head.removeChild(styles);
-        // Aquí puedes agregar lógica adicional al cerrar
+        stopGameLoop();
+        setPageState(initialState.name, initialState.data);
     });
 
     // Limpiar contenedor existente y añadir elementos

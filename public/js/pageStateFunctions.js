@@ -1,17 +1,32 @@
-const defaultState = {
-    state: 'init',
-    parameters: {}
+const initialState = {
+    name: 'fetch_games_gallery',
+    data: {
+        is_page: true,
+        is_modal: false
+    }
 }
 
-function setPageState(state, parameters = {}) {
-    localStorage.setItem('state', JSON.stringify({
-        state: state,
-        parameters: parameters
-    }));
-    // pageState = state;
+let previousState = initialState;
+
+function setPageState(name, data = {}) {
+    let state = {
+        name: name,
+        data: data
+    };
+    let isPage = data.hasOwnProperty('is_page') ? data.is_page : false;
+    let isModal = data.hasOwnProperty('is_modal') ? data.is_modal : false;
+    if (isPage && !isModal) {
+        // previousState = getPageState();
+        storeState(state);
+    }
+    document.dispatchEvent(new CustomEvent('stateChanged', { detail: state }));
     // window.history.pushState({pageState: state}, '', '?state=' + state);
 }
 
 function getPageState() {
-    return JSON.parse(localStorage.getItem('state')) || defaultState;
+    return JSON.parse(localStorage.getItem('state')) || initialState;
+}
+
+function storeState(state) {
+    localStorage.setItem('state', JSON.stringify(state));
 }

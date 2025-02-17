@@ -74,7 +74,7 @@ function renderGamesCards(games) {
         playButton.className = 'play-button';
         playButton.textContent = 'Jugar';
         // playButton.onclick = () => playGame(game.id);
-        playButton.onclick = () => setPageState('game', { id: game.id });
+        playButton.onclick = () => setPageState('fetching_game', { id: game.id });
 
         // Ensamblar la tarjeta
         content.appendChild(title);
