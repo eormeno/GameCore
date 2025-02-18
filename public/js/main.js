@@ -63,11 +63,6 @@ function fetchApi(endpoint, method = 'GET', body = null) {
     }).then(data => {
         let stateName = Object.keys(data)[0];
         setPageState(stateName, data[stateName]);
-        // let state = {
-        //     name: stateName,
-        //     data: data[stateName]
-        // };
-        // document.dispatchEvent(new CustomEvent('stateChanged', { detail: state }));
     }).catch(error => {
         console.error('Error al cargar los juegos:', error);
         document.getElementById('gamesContainer').innerHTML = error;

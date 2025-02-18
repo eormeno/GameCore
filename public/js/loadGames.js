@@ -1,56 +1,9 @@
-function loadGames() {
-    fetch('api/game-app')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error en la respuesta de la red');
-            }
-            return response.json();
-        })
-        .then(games => {
-            renderGamesCards(games);
-        })
-        .catch(error => {
-            console.error('Error al cargar los juegos:', error);
-            document.getElementById('gamesContainer').innerHTML =
-                '<p>Error al cargar los juegos. Por favor intenta nuevamente más tarde.</p>';
-        });
-}
-
-// Función para manejar el clic en el botón Jugar
-function playGame(prefix) {
-    let token = localStorage.getItem('token');
-    fetch('api/game-app/' + prefix + '/play', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    }).then(response => {
-        if (!response.ok) {
-            console.error('Error en la respuesta de la red:', response);
-        }
-        return response.json();
-    }).then(game => {
-        // Si el json comienza con una key 'form', renderizar el formulario
-        if (game.form) {
-            renderLoginForm(game);
-        } else {
-            renderGameContainer(game);
-            startGame(game.game);
-        }
-    }).catch(error => {
-        console.error('Error al cargar el juego:', error);
-    });
-
-}
-
-// Función para crear las tarjetas de juego
 function renderGamesCards(games) {
     const container = document.getElementById('gamesContainer');
-    // remover contenido previo
     container.innerHTML = '';
+    renderAuthButtons(container);
 
     games.forEach(game => {
-        // Crear elementos HTML
         const card = document.createElement('div');
         card.className = 'game-card';
 
@@ -73,10 +26,8 @@ function renderGamesCards(games) {
         const playButton = document.createElement('button');
         playButton.className = 'play-button';
         playButton.textContent = 'Jugar';
-        // playButton.onclick = () => playGame(game.id);
         playButton.onclick = () => setPageState('fetching_game', { id: game.id });
 
-        // Ensamblar la tarjeta
         content.appendChild(title);
         content.appendChild(description);
         content.appendChild(playButton);
@@ -86,4 +37,40 @@ function renderGamesCards(games) {
 
         container.appendChild(card);
     });
+}
+
+function renderAuthButtons(container) {
+    // Create auth container
+    const authContainer = document.createElement('div');
+    authContainer.id = 'authContainer';
+    authContainer.className = 'auth-container';
+    container.appendChild(authContainer);
+    authContainer.innerHTML = '';
+
+    // Display the user's name
+    const usernameDisplay = document.createElement('p');
+    usernameDisplay.className = 'username-display';
+    // If window.userName is not defined, default to 'Invitado'
+    usernameDisplay.textContent = 'Usuario: ' + (window.userName || 'Invitado');
+    authContainer.appendChild(usernameDisplay);
+
+    // Create auth buttons
+    const loginButton = document.createElement('button');
+    loginButton.className = 'auth-button';
+    loginButton.textContent = 'Login';
+    loginButton.onclick = () => alert('Login clicked');
+
+    const logoutButton = document.createElement('button');
+    logoutButton.className = 'auth-button';
+    logoutButton.textContent = 'Logout';
+    logoutButton.onclick = () => alert('Logout clicked');
+
+    const registerButton = document.createElement('button');
+    registerButton.className = 'auth-button';
+    registerButton.textContent = 'Register';
+    registerButton.onclick = () => alert('Register clicked');
+
+    authContainer.appendChild(loginButton);
+    authContainer.appendChild(logoutButton);
+    authContainer.appendChild(registerButton);
 }
