@@ -1,16 +1,47 @@
+/* Estilo general de la pantalla principal */
+body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Encabezado con estilo vibrante y profesional */
+header {
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    padding: 20px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Contenedor principal centrado y con márgenes adecuados */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Estilo para la galería de videojuegos */
 .games-container {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     padding: 20px;
+    justify-content: center; /* Centra las tarjetas */
 }
 
 .game-card {
     width: 300px;
-    border: 1px solid #ddd;
+    height: 450px; /* Altura predefinida para las tarjetas */
+    display: flex;
+    flex-direction: column;
+    background-color: #2b2b2b; /* Fondo oscuro y elegante */
+    border: 1px solid #444; /* Borde sutil */
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .game-image {
@@ -20,17 +51,20 @@
 }
 
 .game-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     padding: 15px;
 }
 
 .game-title {
     margin: 0 0 10px 0;
-    color: #333;
+    color: #f0f0f0;
 }
 
 .game-description {
     margin: 0 0 15px 0;
-    color: #666;
+    color: #cccccc;
     font-size: 14px;
     line-height: 1.5;
 }
@@ -39,15 +73,17 @@
     display: block;
     width: 100%;
     padding: 10px;
-    background-color: #4CAF50;
+    background: linear-gradient(90deg, #ff5722, #e64a19); /* Toque vibrante propio de videojuegos */
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     text-align: center;
     text-decoration: none;
+    transition: background 0.3s ease;
+    margin-top: auto; /* Empuja el botón hacia el fondo de la tarjeta */
 }
 
 .play-button:hover {
-    background-color: #45a049;
+    background: linear-gradient(90deg, #e64a19, #d84315);
 }
