@@ -7,11 +7,12 @@ Ubicarse en la carpeta del proyecto
 ```bash
 cd GameCore
 ```
-## Instalar dependencias
+## Instalación local para desarrollo
+### Instalar dependencias
 ```bash
 composer install
 ```
-## Crear el archivo .env
+### Crear el archivo .env
 En base al archivo .env.example, crear un archivo .env haciendo una copia.
 ```bash
 cp .env.example .env
@@ -27,12 +28,12 @@ ADMIN_PASSWORD=CHANGEME
 ```
 Modifique las claves de los usuarios falsos y del usuario raíz que dicen CHANGEME por una clave segura.
 
-##  Crear la clave de la aplicación
+###  Crear la clave de la aplicación
 ```bash
 php artisan key:generate
 ```
 
-## Crear la base de datos y ejecutar las migraciones
+### Crear la base de datos y ejecutar las migraciones
 ```bash
 php artisan migrate --force --seed
 ```
@@ -40,9 +41,14 @@ Posteriormente, ejecute el comando para migrar los objetos de juego, prefabs, y 
 ```bash
 php artisan games
 ```
-
-## Iniciar el servidor
+### Iniciar el servidor
 ```bash
 php artisan serve
 ```
 
+## Instalación para producción en un servidor Ubuntu
+### Requisitos
+- PHP. con las extensiones habilitadas en php.ini (openssl, pdo_mysql, mbstring, etc.).
+- Composer
+- Nginx
+- MySQL

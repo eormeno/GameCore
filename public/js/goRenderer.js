@@ -34,7 +34,7 @@ function startGame(game) {
     resourceUrl=game.resourcesUrl;
     eventUrl=game.eventUrl;
 	pushEvent('reload', {});
-	pullWithTimeout(10);
+	pullWithTimeout(100);
 }
 
 function stopGameLoop() {
