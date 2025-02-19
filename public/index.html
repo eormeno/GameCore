@@ -5,23 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juegos Disponibles</title>
+
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="css/game.css">
     <link rel="stylesheet" href="css/auth.css">
-    <script src="js/pageStateFunctions.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/loadGames.js"></script>
-    <script src="js/renderLoginForm.js"></script>
-    <script src="js/renderContainer.js"></script>
-    <script src="js/goRenderer.js"></script>
+
+    <!-- <script type="module" src="js/pageStateFunctions.js"></script> -->
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/loadGames.js"></script>
+    <script type="module" src="js/renderLoginForm.js"></script>
+    <script type="module" src="js/renderContainer.js"></script>
+    <!-- <script type="module" src="js/goRenderer.js"></script> -->
 </head>
 
 <body>
     <div class="games-container" id="gamesContainer"></div>
-    <script>
-        main(getPageState());
+
+    <script type="module">
+        import { main } from './js/main.js';
+        // import { getPageState } from './js/pageStateFunctions.js';
+        import pageStateManager from './js/modules/PageStateManager.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            main(pageStateManager.getPageState());
+            //main(pageStateManager.current);
+        });
     </script>
+    <!-- <script>
+        main(getPageState());
+    </script> -->
 </body>
 
 </html>

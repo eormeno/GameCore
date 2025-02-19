@@ -74,3 +74,5 @@ function renderAuthButtons(container) {
     authContainer.appendChild(logoutButton);
     authContainer.appendChild(registerButton);
 }
+
+export { renderGamesCards };

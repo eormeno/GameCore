@@ -30,3 +30,5 @@ function getPageState() {
 function storeState(state) {
     localStorage.setItem('state', JSON.stringify(state));
 }
+
+export { initialState, setPageState, getPageState, storeState };

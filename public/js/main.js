@@ -1,14 +1,18 @@
+import { GameEngine } from './modules/GameEngine.js';
+import pageStateManager from './modules/PageStateManager.js';
+import { renderGamesCards } from './loadGames.js';
+
 document.addEventListener("stateChanged", function (event) {
-    console.log(JSON.stringify(event.detail, null, 2));
+    // console.log(JSON.stringify(event.detail, null, 2));
     main(event.detail);
 });
 
-function main(state = initialState) {
+function main(state = pageStateManager.initialState) {
     let data = state.data;
     console.log('State:', state.name);
 
     switch (state.name) {
-        case initialState.name:
+        case pageStateManager.initialState.name:
             fetchApi('api/game-app', 'GET');
             break;
         case 'displaying_games_gallery':
@@ -20,7 +24,8 @@ function main(state = initialState) {
             break;
         case 'game':
             renderGameContainer(data);
-            startGame(data);
+            const gameEngine = new GameEngine(gameConfig);
+            gameEngine.start(data);
             break;
         case 'displaying_login':
             renderLoginForm(data);
@@ -62,9 +67,12 @@ function fetchApi(endpoint, method = 'GET', body = null) {
         return response.json();
     }).then(data => {
         let stateName = Object.keys(data)[0];
-        setPageState(stateName, data[stateName]);
+        //setPageState(stateName, data[stateName]);
+        pageStateManager.setPageState(stateName, data[stateName]);
     }).catch(error => {
         console.error('Error al cargar los juegos:', error);
         document.getElementById('gamesContainer').innerHTML = error;
     });
 }
+
+export { main };
