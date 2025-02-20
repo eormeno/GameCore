@@ -1,3 +1,5 @@
+import pageState from './modules/PageStateManager.js';
+
 class GameRenderer {
     constructor() {
         this.rootId = '';
@@ -92,9 +94,15 @@ class GameRenderer {
                 document.write(data);
             } else {
                 const json = JSON.parse(data);
-                backendElapsed = json.elapsed || -1;
-                delete json.elapsed;
-                if (Object.keys(json).length > 0) this.renderComponents(json, 'glCanvas');
+                // if json has a 'displaying_login' key, it means the user is not logged in
+                if (json.displaying_login) {
+                    let stateName = Object.keys(json)[0];
+                    pageState.setPageState(stateName, json[stateName]);
+                } else {
+                    backendElapsed = json.elapsed || -1;
+                    delete json.elapsed;
+                    if (Object.keys(json).length > 0) this.renderComponents(json, 'glCanvas');
+                }
             }
         } catch (error) {
             console.error(error);
@@ -137,13 +145,15 @@ class GameRenderer {
                 case 'container':
                     element = document.createElement('div');
                     element.className = component.layout || 'vertical';
+                    element.style.width = "100%";
+                    element.style.height = "100%";
                     if (component.width) element.style.width = `${component.width}px`;
                     if (component.height) element.style.height = `${component.height}px`;
                     if (component.image) {
                         this.fetchResourceWithCacheAndBearer(`${this.resourceUrl}/${component.image}`, (url) => {
                             element.style.backgroundImage = `url(${url})`;
                         });
-                        element.style.backgroundSize = '100% 100%';
+                        element.style.backgroundSize = 'cover';
                         element.style.backgroundPosition = 'center';
                         element.style.backgroundRepeat = 'no-repeat';
                     }
@@ -256,7 +266,6 @@ class GameRenderer {
                 "flex-direction": "column",
                 "align-items": "center",
                 "width": "100%",
-                "height": "100%",
             },
             ".title": {
                 "font-size": "48px",
@@ -327,7 +336,7 @@ class GameRenderer {
                 setTimeout(fetchData, interval);
             }
         };
-        fetchData(10);
+        fetchData(interval);
     }
 
     pushEvent(event, data = {}, destination = null) {

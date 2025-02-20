@@ -38,7 +38,8 @@ function main(state = pageState.initialState) {
             break;
         case 'successful_login':
             localStorage.setItem('token', data.token);
-            pageState.setPageState(pageState.previousState.name, pageState.previousState.data);
+            let redirect = pageState.previousState ? pageState.previousState : pageState.initialState;
+            pageState.setPageState(redirect.name, redirect.data);
             break;
         case 'register':
             renderRegisterForm();
