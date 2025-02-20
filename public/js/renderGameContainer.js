@@ -1,4 +1,6 @@
-function renderGameContainer(game) {
+import pageState from './modules/PageStateManager.js';
+
+function renderGameContainer(game, gameRenderer) {
     const container = document.getElementById('gamesContainer');
 
     const title = document.createElement('h1');
@@ -23,8 +25,8 @@ function renderGameContainer(game) {
 
      closeButton.addEventListener('click', () => {
         gamesContainer.innerHTML = '';
-        stopGameLoop();
-        setPageState(initialState.name, initialState.data);
+        gameRenderer.stopGameLoop();
+        pageState.setPageState(pageState.initialState.name, pageState.initialState.data);
     });
 
     container.innerHTML = '';
@@ -67,3 +69,5 @@ function createStatsPanel() {
 
     return statsPanel;
 }
+
+export { renderGameContainer };

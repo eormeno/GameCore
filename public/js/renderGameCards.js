@@ -1,3 +1,5 @@
+import pageState from './modules/PageStateManager.js';
+
 function renderGamesCards(games) {
     const container = document.getElementById('gamesContainer');
     container.innerHTML = '';
@@ -26,7 +28,7 @@ function renderGamesCards(games) {
         const playButton = document.createElement('button');
         playButton.className = 'play-button';
         playButton.textContent = 'Jugar';
-        playButton.onclick = () => setPageState('fetching_game', { id: game.id });
+        playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id });
 
         content.appendChild(title);
         content.appendChild(description);

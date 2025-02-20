@@ -1,3 +1,5 @@
+import pageState from './modules/PageStateManager.js';
+
 function renderLoginForm(formData) {
     const container = document.getElementById('gamesContainer');
     container.innerHTML = '';
@@ -14,7 +16,7 @@ function renderLoginForm(formData) {
 
         const formValues = Object.fromEntries(new FormData(form));
 
-        setPageState('trying_login', {
+        pageState.setPageState('trying_login', {
             action: formData.action,
             method: formData.method,
             body: JSON.stringify(formValues)
@@ -64,3 +66,5 @@ function renderLoginForm(formData) {
     loginContainer.appendChild(form);
     container.appendChild(loginContainer);
 }
+
+export { renderLoginForm };

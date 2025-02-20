@@ -1,31 +1,34 @@
-import { GameEngine } from './modules/GameEngine.js';
-import pageStateManager from './modules/PageStateManager.js';
-import { renderGamesCards } from './loadGames.js';
+import { renderGamesCards } from './renderGameCards.js';
+import { renderLoginForm} from './renderLoginForm.js';
+import { renderGameContainer } from './renderGameContainer.js';
+import { GameRenderer } from './GameRenderer.js';
+
+import pageState from './modules/PageStateManager.js';
 
 document.addEventListener("stateChanged", function (event) {
     // console.log(JSON.stringify(event.detail, null, 2));
     main(event.detail);
 });
 
-function main(state = pageStateManager.initialState) {
+function main(state = pageState.initialState) {
     let data = state.data;
-    console.log('State:', state.name);
+    // console.log('State:', state.name);
 
     switch (state.name) {
-        case pageStateManager.initialState.name:
+        case pageState.initialState.name:
             fetchApi('api/game-app', 'GET');
             break;
         case 'displaying_games_gallery':
             renderGamesCards(data);
             break;
         case 'fetching_game':
-            previousState = state;
+            pageState.previousState = state;
             fetchApi(`api/game-app/${data.id}/play`, 'GET');
             break;
         case 'game':
-            renderGameContainer(data);
-            const gameEngine = new GameEngine(gameConfig);
-            gameEngine.start(data);
+            let gameRenderer = new GameRenderer();
+            renderGameContainer(data, gameRenderer);
+            gameRenderer.startGame(data);
             break;
         case 'displaying_login':
             renderLoginForm(data);
@@ -35,7 +38,7 @@ function main(state = pageStateManager.initialState) {
             break;
         case 'successful_login':
             localStorage.setItem('token', data.token);
-            setPageState(previousState.name, previousState.data);
+            pageState.setPageState(pageState.previousState.name, pageState.previousState.data);
             break;
         case 'register':
             renderRegisterForm();
@@ -68,7 +71,7 @@ function fetchApi(endpoint, method = 'GET', body = null) {
     }).then(data => {
         let stateName = Object.keys(data)[0];
         //setPageState(stateName, data[stateName]);
-        pageStateManager.setPageState(stateName, data[stateName]);
+        pageState.setPageState(stateName, data[stateName]);
     }).catch(error => {
         console.error('Error al cargar los juegos:', error);
         document.getElementById('gamesContainer').innerHTML = error;
