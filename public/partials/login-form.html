@@ -1,0 +1,30 @@
+<div class="login-container">
+    <form id="loginForm" action="api/login" method="post">
+        <div class="form-group">
+            <label class="form-label" for="email">E-mail</label>
+            <input type="email" id="email" name="email" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-input" required>
+        </div>
+        <div class="button-group">
+            <button type="submit" class="primary-btn">Sign in</button>
+            <button type="button" class="secondary-btn">Sign up</button>
+        </div>
+    </form>
+    <script type="module">
+        import pageState from '../js/modules/PageStateManager.js';
+
+        // Se añade el listener al submit del formulario
+        document.getElementById("loginForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const formValues = Object.fromEntries(new FormData(event.target));
+            pageState.setPageState("trying_login", {
+                action: event.target.action,
+                method: event.target.method,
+                body: JSON.stringify(formValues)
+            });
+        });
+    </script>
+</div>

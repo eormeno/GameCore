@@ -11,12 +11,7 @@
     <link rel="stylesheet" href="css/game.css">
     <link rel="stylesheet" href="css/auth.css">
 
-    <!-- <script type="module" src="js/pageStateFunctions.js"></script> -->
     <script type="module" src="js/main.js"></script>
-    <!-- <script type="module" src="js/renderGameCards.js"></script>
-    <script type="module" src="js/renderLoginForm.js"></script>
-    <script type="module" src="js/renderContainer.js"></script> -->
-    <!-- <script type="module" src="js/goRenderer.js"></script> -->
 </head>
 
 <body>
@@ -24,17 +19,12 @@
 
     <script type="module">
         import { main } from './js/main.js';
-        // import { getPageState } from './js/pageStateFunctions.js';
         import pageStateManager from './js/modules/PageStateManager.js';
 
         document.addEventListener('DOMContentLoaded', () => {
             main(pageStateManager.getPageState());
-            //main(pageStateManager.current);
         });
     </script>
-    <!-- <script>
-        main(getPageState());
-    </script> -->
 </body>
 
 </html>
