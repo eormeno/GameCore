@@ -29,16 +29,20 @@ header {
     flex-wrap: wrap;
     gap: 20px;
     padding: 20px;
-    justify-content: center; /* Centra las tarjetas */
+    justify-content: center;
+    /* Distribución horizontal por defecto */
 }
 
 .game-card {
     width: 300px;
-    height: 450px; /* Altura predefinida para las tarjetas */
+    height: 450px;
+    /* Altura predefinida para las tarjetas */
     display: flex;
     flex-direction: column;
-    background-color: #2b2b2b; /* Fondo oscuro y elegante */
-    border: 1px solid #444; /* Borde sutil */
+    background-color: #2b2b2b;
+    /* Fondo oscuro y elegante */
+    border: 1px solid #444;
+    /* Borde sutil */
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -73,7 +77,8 @@ header {
     display: block;
     width: 100%;
     padding: 10px;
-    background: linear-gradient(90deg, #ff5722, #e64a19); /* Toque vibrante propio de videojuegos */
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    /* Toque vibrante propio de videojuegos */
     color: white;
     border: none;
     border-radius: 4px;
@@ -81,9 +86,58 @@ header {
     text-align: center;
     text-decoration: none;
     transition: background 0.3s ease;
-    margin-top: auto; /* Empuja el botón hacia el fondo de la tarjeta */
+    margin-top: auto;
+    /* Empuja el botón hacia el fondo de la tarjeta */
 }
 
 .play-button:hover {
     background: linear-gradient(90deg, #e64a19, #d84315);
+}
+
+/* Diseño responsive para pantallas medianas y pequeñas */
+@media (max-width: 768px) {
+    header {
+        font-size: 1.5rem;
+        padding: 15px;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .games-container {
+        flex-direction: column;
+        /* Distribución vertical en dispositivos medianos y pequeños */
+        align-items: center;
+    }
+
+    .game-card {
+        width: 90%;
+        height: auto;
+        /* Se permite que la altura se ajuste al contenido */
+    }
+
+    .game-image {
+        height: auto;
+    }
+
+    .game-content {
+        padding: 10px;
+    }
+}
+
+/* Ajustes adicionales para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    header {
+        font-size: 1.2rem;
+        padding: 10px;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+
+    .game-card {
+        width: 100%;
+    }
 }
