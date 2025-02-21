@@ -2,16 +2,16 @@
     <div class="menu-container">
         <div class="menu">
             <div class="menu-header" id="menuToggle">
-                <img src="" alt="Imagen de perfil">
+                <!-- <img src="" alt="Imagen de perfil"> -->
                 <span id="username">Usuario invitado</span>
             </div>
             <ul class="menu-items" id="menuItems">
                 <!-- Opciones para usuario logueado -->
-                <li class="logged"><a href="#">Modificar Perfil</a></li>
-                <li class="logged"><a href="#">Cerrar Sesión</a></li>
+                <li id="profileButon" class="logged">Perfil</li>
+                <li id="logoutButton" class="logged">Cerrar Sesión</li>
                 <!-- Opciones para usuario invitado -->
-                <li class="guest"><a href="#">Login</a></li>
-                <li class="guest"><a href="#">Register</a></li>
+                <li id="loginButton" class="guest">Login</li>
+                <li id="registerButton" class="guest">Register</li>
             </ul>
         </div>
     </div>
@@ -25,25 +25,26 @@
         //};
 
         const container = document.getElementById('auth-menu');
-        const { user } = container._partialParams || {};
-        console.log(user);
+        const { user, pageState } = container._partialParams || {};
 
         const menuToggle = document.getElementById('menuToggle');
         const menuItems = document.getElementById('menuItems');
         const usernameSpan = document.getElementById('username');
         const profileImg = menuToggle.querySelector('img');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const registerButton = document.getElementById('registerButton');
 
         function initMenu() {
+            usernameSpan.textContent = user.name;
             if (user.isLoggedIn) {
-                usernameSpan.textContent = user.name;
-                profileImg.style.display = 'block';
-                profileImg.src = user.profileImage;
+                // profileImg.style.display = 'block';
+                // profileImg.src = user.profileImage;
                 // Mostrar únicamente las opciones para usuario logueado
                 document.querySelectorAll('.logged').forEach(item => item.style.display = 'block');
                 document.querySelectorAll('.guest').forEach(item => item.style.display = 'none');
             } else {
-                usernameSpan.textContent = "Usuario invitado";
-                profileImg.style.display = 'none';
+                // profileImg.style.display = 'none';
                 // profileImg.src = "https://i.pravatar.cc/48?u=Guest";
                 // Mostrar únicamente las opciones para invitado
                 document.querySelectorAll('.logged').forEach(item => item.style.display = 'none');
@@ -54,6 +55,24 @@
         // Alterna la visualización del menú al hacer clic en la cabecera
         menuToggle.addEventListener('click', () => {
             menuItems.style.display = menuItems.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Un click en cualquier parte del documento oculta el menú
+        document.addEventListener('click', (e) => {
+            if (e.target !== menuToggle && e.target !== menuItems) {
+                menuItems.style.display = 'none';
+            }
+        });
+
+        loginButton.addEventListener('click', () => {
+            pageState.setPageState('displaying_login', {});
+        });
+
+        logoutButton.addEventListener('click', () => {
+            pageState.setPageState('logout', {});
+        });
+
+        registerButton.addEventListener('click', () => {
         });
 
         initMenu();

@@ -59,9 +59,6 @@
 
     .menu-items li {
         border-top: 1px solid #333;
-    }
-
-    .menu-items li a {
         display: block;
         padding: 10px 12px;
         text-decoration: none;
@@ -69,7 +66,7 @@
         transition: background 0.3s;
     }
 
-    .menu-items li a:hover {
+    .menu-items li:hover {
         background: #333;
     }
 

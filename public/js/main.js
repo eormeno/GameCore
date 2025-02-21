@@ -53,6 +53,11 @@ async function main(state = pageState.initialState) {
         case 'register':
             renderRegisterForm();
             break;
+        case 'logout':
+            localStorage.removeItem('token');
+            await fetchApi('api/logout', 'POST');
+            await updateAuthMenu(authMenuContainer);
+            break;
         case 'error':
             const errorContainer = document.getElementById('error-container');
             errorContainer.innerHTML = data.error;
@@ -71,15 +76,14 @@ async function updateAuthMenu(authContainer) {
     }
     await fetchApi('api/user', 'GET', null, (stateName, data) => {
         const user = {};
-        console.log(stateName, data);
         if (stateName === 'displaying_login') {
             user.isLoggedIn = false;
-            user.username = 'Invitado';
+            user.name = 'Invitado';
         } else {
             user.isLoggedIn = true;
-            user.username = data.name;
+            user.name = data.name;
         }
-        loadPartial('auth-menu', authContainer, { user: user });
+        loadPartial('auth-menu', authContainer, { user: user, pageState: pageState });
     });
 }
 
