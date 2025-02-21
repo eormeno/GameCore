@@ -54,8 +54,9 @@ async function main(state = pageState.initialState) {
             renderRegisterForm();
             break;
         case 'logout':
-            localStorage.removeItem('token');
-            await fetchApi('api/logout', 'POST');
+            await closeSession();
+            break;
+        case 'auth_state_changed':
             await updateAuthMenu(authMenuContainer);
             break;
         case 'error':
@@ -71,7 +72,13 @@ async function main(state = pageState.initialState) {
 async function updateAuthMenu(authContainer) {
     const token = localStorage.getItem('token');
     if (!token) {
-        loadPartial('auth-menu', authContainer, { user: { isLoggedIn: false, username: 'Invitado' } });
+        loadPartial('auth-menu', authContainer, {
+            user: {
+                isLoggedIn: false,
+                name: 'Invitado'
+            },
+            pageState: pageState
+        });
         return;
     }
     await fetchApi('api/user', 'GET', null, (stateName, data) => {
@@ -83,7 +90,17 @@ async function updateAuthMenu(authContainer) {
             user.isLoggedIn = true;
             user.name = data.name;
         }
-        loadPartial('auth-menu', authContainer, { user: user, pageState: pageState });
+        loadPartial('auth-menu', authContainer,
+            {
+                user: user, pageState: pageState
+            });
+    });
+}
+
+async function closeSession() {
+    await fetchApi('api/logout', 'POST', null, (stateName, data) => {
+        localStorage.removeItem('token');
+        pageState.setPageState('auth_state_changed', {});
     });
 }
 

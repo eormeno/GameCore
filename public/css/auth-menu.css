@@ -19,8 +19,8 @@
     .menu {
         background: #1c1c1c;
         border: 1px solid #333;
-        border-radius: 6px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+        border-radius: 4px;
+        box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
         overflow: hidden;
         min-width: 150px;
         transition: transform 0.3s ease;
@@ -45,7 +45,7 @@
     }
 
     .menu-header span {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 300;
     }
 
@@ -82,11 +82,11 @@
         }
 
         .menu-header span {
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .menu-items li a {
             padding: 8px 10px;
-            font-size: 12px;
+            font-size: 10px;
         }
     }
