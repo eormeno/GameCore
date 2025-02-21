@@ -10,6 +10,7 @@ document.addEventListener("stateChanged", async function (event) {
 });
 
 async function main(state = pageState.initialState) {
+    const authMenuContainer = document.getElementById('auth-menu');
     const gamesContainer = document.getElementById('gamesContainer');
     let data = state.data;
     switch (state.name) {
@@ -17,6 +18,7 @@ async function main(state = pageState.initialState) {
             await fetchApi('api/game-app', 'GET');
             break;
         case 'displaying_games_gallery':
+            await updateAuthMenu(authMenuContainer);
             renderGamesCards(data);
             break;
         case 'fetching_game':
@@ -52,6 +54,8 @@ async function main(state = pageState.initialState) {
             renderRegisterForm();
             break;
         case 'error':
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = data.error;
             break;
         default:
             console.log('State not found:', state.name);
@@ -59,7 +63,27 @@ async function main(state = pageState.initialState) {
     }
 }
 
-async function fetchApi(endpoint, method = 'GET', body = null) {
+async function updateAuthMenu(authContainer) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        loadPartial('auth-menu', authContainer, { user: { isLoggedIn: false, username: 'Invitado' } });
+        return;
+    }
+    await fetchApi('api/user', 'GET', null, (stateName, data) => {
+        const user = {};
+        console.log(stateName, data);
+        if (stateName === 'displaying_login') {
+            user.isLoggedIn = false;
+            user.username = 'Invitado';
+        } else {
+            user.isLoggedIn = true;
+            user.username = data.name;
+        }
+        loadPartial('auth-menu', authContainer, { user: user });
+    });
+}
+
+async function fetchApi(endpoint, method = 'GET', body = null, callback = null) {
     const token = localStorage.getItem('token');
     try {
         const response = await fetch(endpoint, {
@@ -72,7 +96,9 @@ async function fetchApi(endpoint, method = 'GET', body = null) {
         });
 
         if (!response.ok) {
-            throw new Error('Error en la respuesta de la red');
+            const error = await response.text();
+            pageState.setPageState('error', { error });
+            return;
         }
 
         let data;
@@ -84,7 +110,11 @@ async function fetchApi(endpoint, method = 'GET', body = null) {
         }
 
         const stateName = Object.keys(data)[0];
-        pageState.setPageState(stateName, data[stateName]);
+        if (!callback) {
+            pageState.setPageState(stateName, data[stateName]);
+        } else {
+            callback(stateName, data[stateName]);
+        }
     } catch (error) {
         console.error('Error al cargar los juegos:', error);
         document.getElementById('gamesContainer').innerHTML = error;
@@ -93,14 +123,9 @@ async function fetchApi(endpoint, method = 'GET', body = null) {
 
 async function loadPartial(file, container, params = {}) {
     try {
-        // Carga el fragmento HTML desde la carpeta "partials"
         const response = await fetch(`partials/${file}.html`);
         const html = await response.text();
-
-        // Inserta el contenido en el contenedor predefinido
         container.innerHTML = html;
-
-        // Almacena los parámetros en el contenedor para que los scripts puedan acceder
         container._partialParams = params;
 
         // Selecciona todos los <script> insertados y reemplázalos para forzar su ejecución

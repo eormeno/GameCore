@@ -10,13 +10,17 @@
     <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="css/game.css">
     <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/auth-menu.css">
 
     <script type="module" src="js/main.js"></script>
 </head>
 
 <body>
-    <div class="games-container" id="gamesContainer"></div>
-
+    <div>
+        <div id="error-container"></div>
+        <div id="auth-menu"></div>
+        <div class="games-container" id="gamesContainer"></div>
+    </div>
     <script type="module">
         import { main } from './js/main.js';
         import pageStateManager from './js/modules/PageStateManager.js';

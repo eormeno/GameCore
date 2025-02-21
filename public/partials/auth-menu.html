@@ -1,0 +1,61 @@
+<div>
+    <div class="menu-container">
+        <div class="menu">
+            <div class="menu-header" id="menuToggle">
+                <img src="" alt="Imagen de perfil">
+                <span id="username">Usuario invitado</span>
+            </div>
+            <ul class="menu-items" id="menuItems">
+                <!-- Opciones para usuario logueado -->
+                <li class="logged"><a href="#">Modificar Perfil</a></li>
+                <li class="logged"><a href="#">Cerrar Sesión</a></li>
+                <!-- Opciones para usuario invitado -->
+                <li class="guest"><a href="#">Login</a></li>
+                <li class="guest"><a href="#">Register</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module">
+        // Simulación de datos del usuario (ajustar para probar ambos estados)
+        //const user = {
+        //    isLoggedIn: false, // Cambiar a false para simular usuario invitado
+        //    name: "Emilio",
+        //    profileImage: "https://i.pravatar.cc/48?u=Emilio"
+        //};
+
+        const container = document.getElementById('auth-menu');
+        const { user } = container._partialParams || {};
+        console.log(user);
+
+        const menuToggle = document.getElementById('menuToggle');
+        const menuItems = document.getElementById('menuItems');
+        const usernameSpan = document.getElementById('username');
+        const profileImg = menuToggle.querySelector('img');
+
+        function initMenu() {
+            if (user.isLoggedIn) {
+                usernameSpan.textContent = user.name;
+                profileImg.style.display = 'block';
+                profileImg.src = user.profileImage;
+                // Mostrar únicamente las opciones para usuario logueado
+                document.querySelectorAll('.logged').forEach(item => item.style.display = 'block');
+                document.querySelectorAll('.guest').forEach(item => item.style.display = 'none');
+            } else {
+                usernameSpan.textContent = "Usuario invitado";
+                profileImg.style.display = 'none';
+                // profileImg.src = "https://i.pravatar.cc/48?u=Guest";
+                // Mostrar únicamente las opciones para invitado
+                document.querySelectorAll('.logged').forEach(item => item.style.display = 'none');
+                document.querySelectorAll('.guest').forEach(item => item.style.display = 'block');
+            }
+        }
+
+        // Alterna la visualización del menú al hacer clic en la cabecera
+        menuToggle.addEventListener('click', () => {
+            menuItems.style.display = menuItems.style.display === 'block' ? 'none' : 'block';
+        });
+
+        initMenu();
+    </script>
+</div>

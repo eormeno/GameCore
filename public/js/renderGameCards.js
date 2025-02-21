@@ -3,7 +3,7 @@ import pageState from './modules/PageStateManager.js';
 function renderGamesCards(games) {
     const container = document.getElementById('gamesContainer');
     container.innerHTML = '';
-    renderAuthButtons(container);
+    // renderAuthButtons(container);
 
     games.forEach(game => {
         const card = document.createElement('div');

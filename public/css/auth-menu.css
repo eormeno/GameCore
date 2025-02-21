@@ -1,0 +1,95 @@
+    /* Estilo base y fondo oscuro para ambientar videojuegos */
+    /* body {
+        margin: 0;
+        padding: 0;
+        background: #0d0d0d;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #e0e0e0;
+    } */
+
+    /* Contenedor fijo en la parte superior derecha */
+    .menu-container {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    }
+
+    /* Estilo del menú */
+    .menu {
+        background: #1c1c1c;
+        border: 1px solid #333;
+        border-radius: 6px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        min-width: 150px;
+        transition: transform 0.3s ease;
+    }
+
+    /* Cabecera del menú: imagen de perfil y nombre */
+    .menu-header {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background: #262626;
+        cursor: pointer;
+    }
+
+    .menu-header img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 12px;
+        border: 2px solid #ff4500;
+    }
+
+    .menu-header span {
+        font-size: 16px;
+        font-weight: 300;
+    }
+
+    /* Lista de opciones del menú */
+    .menu-items {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: none;
+    }
+
+    .menu-items li {
+        border-top: 1px solid #333;
+    }
+
+    .menu-items li a {
+        display: block;
+        padding: 10px 12px;
+        text-decoration: none;
+        color: #e0e0e0;
+        transition: background 0.3s;
+    }
+
+    .menu-items li a:hover {
+        background: #333;
+    }
+
+    /* Responsive: ajuste para dispositivos móviles */
+    @media (max-width: 600px) {
+        .menu {
+            min-width: 180px;
+        }
+
+        .menu-header img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .menu-header span {
+            font-size: 14px;
+        }
+
+        .menu-items li a {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+    }
