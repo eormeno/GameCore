@@ -10,6 +10,7 @@ document.addEventListener("stateChanged", async function (event) {
 });
 
 async function main(state = pageState.initialState) {
+    const gamesContainer = document.getElementById('gamesContainer');
     let data = state.data;
     switch (state.name) {
         case pageState.initialState.name:
@@ -24,12 +25,17 @@ async function main(state = pageState.initialState) {
             break;
         case 'game':
             let gameRenderer = new GameRenderer();
-            renderGameContainer(data, gameRenderer);
+            await loadPartial('game-container', gamesContainer, {
+                game: data,
+                gameRenderer: gameRenderer,
+                pageState: pageState
+            });
+            // renderGameContainer(data, gameRenderer);
             gameRenderer.startGame(data);
             break;
         case 'displaying_login':
             //renderLoginForm(data);
-            loadPartial('login-form', document.getElementById('gamesContainer'));
+            loadPartial('login-form', gamesContainer);
             break;
         case 'trying_login':
             await fetchApi(data.action, data.method, data.body);
@@ -85,7 +91,7 @@ async function fetchApi(endpoint, method = 'GET', body = null) {
     }
 }
 
-async function loadPartial(file, container) {
+async function loadPartial(file, container, params = {}) {
     try {
         // Carga el fragmento HTML desde la carpeta "partials"
         const response = await fetch(`partials/${file}.html`);
@@ -93,6 +99,9 @@ async function loadPartial(file, container) {
 
         // Inserta el contenido en el contenedor predefinido
         container.innerHTML = html;
+
+        // Almacena los parámetros en el contenedor para que los scripts puedan acceder
+        container._partialParams = params;
 
         // Selecciona todos los <script> insertados y reemplázalos para forzar su ejecución
         const scripts = container.querySelectorAll('script');

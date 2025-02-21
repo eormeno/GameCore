@@ -1,0 +1,66 @@
+<!-- game-container.html -->
+<div class="stats-panel">
+    <div class="stat-row">
+        <div class="stat-label">Ping Avg:</div>
+        <div class="stat-value" id="pingAvg">0</div>
+    </div>
+    <div class="stat-row">
+        <div class="stat-label">Ping Min:</div>
+        <div class="stat-value" id="pingMin">0</div>
+    </div>
+    <div class="stat-row">
+        <div class="stat-label">Ping Max:</div>
+        <div class="stat-value" id="pingMax">0</div>
+    </div>
+    <div class="stat-row">
+        <div class="stat-label">Back Avg:</div>
+        <div class="stat-value" id="backendAvg">0</div>
+    </div>
+    <div class="stat-row">
+        <div class="stat-label">Back Max:</div>
+        <div class="stat-value" id="backendMax">0</div>
+    </div>
+    <div class="stat-row">
+        <div class="stat-label">Back Min:</div>
+        <div class="stat-value" id="backendMin">0</div>
+    </div>
+</div>
+
+<button class="close-btn" aria-label="Close">
+    <svg viewBox="0 0 24 24" width="24" height="24">
+        <path fill="currentColor"
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+    </svg>
+</button>
+
+<div id="glCanvas" style="width:800px; height:600px;"></div>
+
+<script type="module">
+    //import pageState from '../js/modules/PageStateManager.js';
+
+    const container = document.getElementById('gamesContainer');
+    const { game, gameRenderer, pageState } = container._partialParams || {};
+
+    if (game) {
+        // Utiliza los valores de game, por ejemplo, asigna width y height al canvas
+        const canvasContainer = document.getElementById('glCanvas');
+        if (canvasContainer) {
+            canvasContainer.style.width = `${game.width}px`;
+            canvasContainer.style.height = `${game.height}px`;
+        }
+    }
+
+    // Se asume que 'gameRenderer' y 'pageState' están definidos globalmente.
+    document.querySelector('.close-btn').addEventListener('click', function () {
+        // Limpia el contenedor principal de juegos
+        var gamesContainer = document.getElementById('gamesContainer');
+        if (gamesContainer) {
+            gamesContainer.innerHTML = '';
+        }
+        // Detiene el loop del juego
+        if (typeof gameRenderer !== 'undefined' && typeof gameRenderer.stopGameLoop === 'function') {
+            gameRenderer.stopGameLoop();
+        }
+        pageState.setPageState(pageState.initialState.name, pageState.initialState.data);
+    });
+</script>
