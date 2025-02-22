@@ -41,7 +41,7 @@ class GameRenderer {
         this.resourceUrl = game.resourcesUrl;
         this.eventUrl = game.eventUrl;
         this.pushEvent('reload', {});
-        this.pullWithTimeout(100);
+        this.pullWithTimeout(10);
     }
 
     stopGameLoop() {
