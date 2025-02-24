@@ -1,6 +1,4 @@
 import { renderGamesCards } from './renderGameCards.js';
-import { renderLoginForm } from './renderLoginForm.js';
-import { renderGameContainer } from './renderGameContainer.js';
 import { GameRenderer } from './GameRenderer.js';
 
 import pageState from './modules/PageStateManager.js';
@@ -15,6 +13,7 @@ async function main(state = pageState.initialState) {
     let data = state.data;
     switch (state.name) {
         case pageState.initialState.name:
+            pageState.previousState = state;
             await fetchApi('api/game-app', 'GET');
             break;
         case 'displaying_games_gallery':
@@ -32,11 +31,9 @@ async function main(state = pageState.initialState) {
                 gameRenderer: gameRenderer,
                 pageState: pageState
             });
-            // renderGameContainer(data, gameRenderer);
             gameRenderer.startGame(data);
             break;
-        case 'displaying_login':
-            //renderLoginForm(data);
+        case 'auth_required':
             loadPartial('login-form', gamesContainer);
             break;
         case 'trying_login':
@@ -44,6 +41,7 @@ async function main(state = pageState.initialState) {
             break;
         case 'successful_login':
             localStorage.setItem('token', data.token);
+            pageState.setPageState('auth_state_changed', {});
             let redirect = pageState.previousState ? pageState.previousState : pageState.initialState;
             pageState.setPageState(redirect.name, redirect.data);
             break;
@@ -83,7 +81,7 @@ async function updateAuthMenu(authContainer) {
     }
     await fetchApi('api/user', 'GET', null, (stateName, data) => {
         const user = {};
-        if (stateName === 'displaying_login') {
+        if (stateName === 'auth_required') {
             user.isLoggedIn = false;
             user.name = 'Invitado';
         } else {
@@ -105,6 +103,7 @@ async function closeSession() {
 }
 
 async function fetchApi(endpoint, method = 'GET', body = null, callback = null) {
+    // console.log(method, endpoint, body ? JSON.stringify(body) : 'no body');
     const token = localStorage.getItem('token');
     try {
         const response = await fetch(endpoint, {
@@ -142,27 +141,77 @@ async function fetchApi(endpoint, method = 'GET', body = null, callback = null) 
     }
 }
 
+// async function loadPartial(file, container, params = {}) {
+//     try {
+//         const response = await fetch(`partials/${file}.html`);
+//         const html = await response.text();
+//         container.innerHTML = html;
+//         container._partialParams = params;
+
+//         // Selecciona todos los <script> insertados y reemplázalos para forzar su ejecución
+//         const scripts = container.querySelectorAll('script');
+//         for (const oldScript of scripts) {
+//             const newScript = document.createElement('script');
+//             // Copia los atributos del script (src, type, etc.)
+//             for (const attr of oldScript.attributes) {
+//                 newScript.setAttribute(attr.name, attr.value);
+//             }
+//             // Copia el contenido del script
+//             newScript.textContent = oldScript.textContent;
+//             oldScript.parentNode.replaceChild(newScript, oldScript);
+//         }
+//     } catch (err) {
+//         console.error('Error al cargar el partial:', err);
+//     }
+// }
+
 async function loadPartial(file, container, params = {}) {
     try {
-        const response = await fetch(`partials/${file}.html`);
-        const html = await response.text();
+        // Generate a unique cache key based on file and parameters
+        const cacheKey = `partial_${file}_${JSON.stringify(params)}`;
+
+        // Check cached content
+        const cachedData = localStorage.getItem(cacheKey);
+        let html = null;
+
+        if (cachedData) {
+            const { content, timestamp } = JSON.parse(cachedData);
+            // Check if cache is younger than 1 hour (3600000 ms)
+            if (Date.now() - timestamp < 3600000) {
+                html = content;
+            }
+        }
+
+        // Fetch fresh content if no valid cache
+        if (!html) {
+            const response = await fetch(`partials/${file}.html`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            html = await response.text();
+
+            // Update cache with timestamp
+            localStorage.setItem(cacheKey, JSON.stringify({
+                content: html,
+                timestamp: Date.now()
+            }));
+        }
+
+        // Insert content and execute scripts
         container.innerHTML = html;
         container._partialParams = params;
 
-        // Selecciona todos los <script> insertados y reemplázalos para forzar su ejecución
+        // Script execution logic (existing code)
         const scripts = container.querySelectorAll('script');
         for (const oldScript of scripts) {
             const newScript = document.createElement('script');
-            // Copia los atributos del script (src, type, etc.)
             for (const attr of oldScript.attributes) {
                 newScript.setAttribute(attr.name, attr.value);
             }
-            // Copia el contenido del script
             newScript.textContent = oldScript.textContent;
             oldScript.parentNode.replaceChild(newScript, oldScript);
         }
     } catch (err) {
-        console.error('Error al cargar el partial:', err);
+        console.error('Error loading partial:', err);
+        // Optional: Add fallback to stale cache here if needed
     }
 }
 

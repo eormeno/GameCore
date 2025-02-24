@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -28,6 +27,12 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        if ($request->isMethod('get')) {
+            return response()->json([
+                'auth_required' => [],
+            ]);
+        }
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -47,34 +52,6 @@ class AuthController extends Controller
             'successful_login' => [
                 'token' => $user->createToken('auth_token')->plainTextToken,
             ]
-        ]);
-    }
-
-    public function loginUI()
-    {
-        return response()->json([
-            'displaying_login' => [
-                'action' => 'api/login',
-                'method' => 'POST',
-                'is_page' => true,
-                'is_modal' => true,
-                'email' => [
-                    'label' => 'Correo:',
-                    'type' => 'email'
-                ],
-                'password' => [
-                    'label' => 'Contraseña:',
-                    'type' => 'password'
-                ],
-                'login' => [
-                    'text' => 'Iniciar sesión',
-                    'type' => 'submit'
-                ],
-                'register' => [
-                    'text' => 'Registrarse',
-                    'type' => 'button',
-                ]
-            ],
         ]);
     }
 

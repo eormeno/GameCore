@@ -94,8 +94,8 @@ class GameRenderer {
                 document.write(data);
             } else {
                 const json = JSON.parse(data);
-                // if json has a 'displaying_login' key, it means the user is not logged in
-                if (json.displaying_login) {
+                // if json has a 'auth_required' key, it means the user is not logged in
+                if (json.auth_required) {
                     let stateName = Object.keys(json)[0];
                     pageState.setPageState(stateName, json[stateName]);
                 } else {
