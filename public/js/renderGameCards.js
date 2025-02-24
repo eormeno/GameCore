@@ -3,7 +3,6 @@ import pageState from './modules/PageStateManager.js';
 function renderGamesCards(games) {
     const container = document.getElementById('gamesContainer');
     container.innerHTML = '';
-    // renderAuthButtons(container);
 
     games.forEach(game => {
         const card = document.createElement('div');
@@ -39,42 +38,6 @@ function renderGamesCards(games) {
 
         container.appendChild(card);
     });
-}
-
-function renderAuthButtons(container) {
-    // Create auth container
-    const authContainer = document.createElement('div');
-    authContainer.id = 'authContainer';
-    authContainer.className = 'auth-container';
-    container.appendChild(authContainer);
-    authContainer.innerHTML = '';
-
-    // Display the user's name
-    const usernameDisplay = document.createElement('p');
-    usernameDisplay.className = 'username-display';
-    // If window.userName is not defined, default to 'Invitado'
-    usernameDisplay.textContent = 'Usuario: ' + (window.userName || 'Invitado');
-    authContainer.appendChild(usernameDisplay);
-
-    // Create auth buttons
-    const loginButton = document.createElement('button');
-    loginButton.className = 'auth-button';
-    loginButton.textContent = 'Login';
-    loginButton.onclick = () => alert('Login clicked');
-
-    const logoutButton = document.createElement('button');
-    logoutButton.className = 'auth-button';
-    logoutButton.textContent = 'Logout';
-    logoutButton.onclick = () => alert('Logout clicked');
-
-    const registerButton = document.createElement('button');
-    registerButton.className = 'auth-button';
-    registerButton.textContent = 'Register';
-    registerButton.onclick = () => alert('Register clicked');
-
-    authContainer.appendChild(loginButton);
-    authContainer.appendChild(logoutButton);
-    authContainer.appendChild(registerButton);
 }
 
 export { renderGamesCards };

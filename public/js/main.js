@@ -1,5 +1,6 @@
 import { renderGamesCards } from './renderGameCards.js';
 import { GameRenderer } from './GameRenderer.js';
+import { partialLoader } from './modules/PartialLoader.js';
 
 import pageState from './modules/PageStateManager.js';
 
@@ -26,7 +27,7 @@ async function main(state = pageState.initialState) {
             break;
         case 'game':
             let gameRenderer = new GameRenderer();
-            await loadPartial('game-container', gamesContainer, {
+            await partialLoader.loadPartial('game-container', gamesContainer, {
                 game: data,
                 gameRenderer: gameRenderer,
                 pageState: pageState
@@ -34,7 +35,7 @@ async function main(state = pageState.initialState) {
             gameRenderer.startGame(data);
             break;
         case 'auth_required':
-            loadPartial('login-form', gamesContainer);
+            await partialLoader.loadPartial('login-form', gamesContainer);
             break;
         case 'trying_login':
             await fetchApi(data.action, data.method, data.body);
@@ -70,7 +71,7 @@ async function main(state = pageState.initialState) {
 async function updateAuthMenu(authContainer) {
     const token = localStorage.getItem('token');
     if (!token) {
-        loadPartial('auth-menu', authContainer, {
+        await partialLoader.loadPartial('auth-menu', authContainer, {
             user: {
                 isLoggedIn: false,
                 name: 'Invitado'
@@ -88,7 +89,7 @@ async function updateAuthMenu(authContainer) {
             user.isLoggedIn = true;
             user.name = data.name;
         }
-        loadPartial('auth-menu', authContainer,
+        partialLoader.loadPartial('auth-menu', authContainer,
             {
                 user: user, pageState: pageState
             });
@@ -165,54 +166,54 @@ async function fetchApi(endpoint, method = 'GET', body = null, callback = null) 
 //     }
 // }
 
-async function loadPartial(file, container, params = {}) {
-    try {
-        // Generate a unique cache key based on file and parameters
-        const cacheKey = `partial_${file}}`;
+// async function loadPartial(file, container, params = {}) {
+//     try {
+//         // Generate a unique cache key based on file and parameters
+//         const cacheKey = `partial_${file}}`;
 
-        // Check cached content
-        const cachedData = localStorage.getItem(cacheKey);
-        let html = null;
+//         // Check cached content
+//         const cachedData = localStorage.getItem(cacheKey);
+//         let html = null;
 
-        if (cachedData) {
-            const { content, timestamp } = JSON.parse(cachedData);
-            // Check if cache is younger than 1 hour (3600000 ms)
-            if (Date.now() - timestamp < 3600000) {
-                html = content;
-            }
-        }
+//         if (cachedData) {
+//             const { content, timestamp } = JSON.parse(cachedData);
+//             // Check if cache is younger than 1 hour (3600000 ms)
+//             if (Date.now() - timestamp < 3600000) {
+//                 html = content;
+//             }
+//         }
 
-        // Fetch fresh content if no valid cache
-        if (!html) {
-            const response = await fetch(`partials/${file}.html`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            html = await response.text();
+//         // Fetch fresh content if no valid cache
+//         if (!html) {
+//             const response = await fetch(`partials/${file}.html`);
+//             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+//             html = await response.text();
 
-            // Update cache with timestamp
-            localStorage.setItem(cacheKey, JSON.stringify({
-                content: html,
-                timestamp: Date.now()
-            }));
-        }
+//             // Update cache with timestamp
+//             localStorage.setItem(cacheKey, JSON.stringify({
+//                 content: html,
+//                 timestamp: Date.now()
+//             }));
+//         }
 
-        // Insert content and execute scripts
-        container.innerHTML = html;
-        container._partialParams = params;
+//         // Insert content and execute scripts
+//         container.innerHTML = html;
+//         container._partialParams = params;
 
-        // Script execution logic (existing code)
-        const scripts = container.querySelectorAll('script');
-        for (const oldScript of scripts) {
-            const newScript = document.createElement('script');
-            for (const attr of oldScript.attributes) {
-                newScript.setAttribute(attr.name, attr.value);
-            }
-            newScript.textContent = oldScript.textContent;
-            oldScript.parentNode.replaceChild(newScript, oldScript);
-        }
-    } catch (err) {
-        console.error('Error loading partial:', err);
-        // Optional: Add fallback to stale cache here if needed
-    }
-}
+//         // Script execution logic (existing code)
+//         const scripts = container.querySelectorAll('script');
+//         for (const oldScript of scripts) {
+//             const newScript = document.createElement('script');
+//             for (const attr of oldScript.attributes) {
+//                 newScript.setAttribute(attr.name, attr.value);
+//             }
+//             newScript.textContent = oldScript.textContent;
+//             oldScript.parentNode.replaceChild(newScript, oldScript);
+//         }
+//     } catch (err) {
+//         console.error('Error loading partial:', err);
+//         // Optional: Add fallback to stale cache here if needed
+//     }
+// }
 
 export { main };
