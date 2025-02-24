@@ -168,7 +168,7 @@ async function fetchApi(endpoint, method = 'GET', body = null, callback = null) 
 async function loadPartial(file, container, params = {}) {
     try {
         // Generate a unique cache key based on file and parameters
-        const cacheKey = `partial_${file}_${JSON.stringify(params)}`;
+        const cacheKey = `partial_${file}}`;
 
         // Check cached content
         const cachedData = localStorage.getItem(cacheKey);
