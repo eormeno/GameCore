@@ -59,53 +59,101 @@ class GameAppController extends Controller
         GameApp $gameApp,
         string|null $resourceName
     ) {
-        // check if the resource exists
-        $path = app_path("GameApps/$gameApp->prefix/resources/public/$resourceName");
-        if (!file_exists($path)) {
-            // if not, check if the resource exists as a fake generated resource
-            $path = app_path("GameApps/$gameApp->prefix/resources/public/._$resourceName");
+        // check if the resource definition exists
+        $path = app_path("GameApps/$gameApp->prefix/resources/public/$resourceName.json");
+        if (file_exists($path)) {
+            $resource = json_decode(file_get_contents($path), true);
+            $ext = $resource['ext'];
+            $path = app_path("GameApps/$gameApp->prefix/resources/public/$resourceName.$ext");
+            if (file_exists($path)) {
+                return response()->file($path);
+            }
+            $path = app_path("GameApps/$gameApp->prefix/resources/public/._$resourceName.$ext");
             if (!file_exists($path)) {
-                // if not, create a fake resource
-                $this->createFakeResource($path);
+                $this->createFakeResource($path, $resource);
             }
+            return response()->file($path);
         }
-        return response()->file($path);
     }
 
-    private function createFakeResource($path)
+    private function createFakeResource($path, $resource)
     {
-        // ask if the file name has the pattern: "name.width.height.resourceType"
-        $name = pathinfo($path, PATHINFO_BASENAME);
-        $parts = explode('.', $name);
-        // last part is the resource type
-        $resourceType = array_pop($parts);
-        // if resource type is not an image, return
-        if (in_array($resourceType, ['png', 'jpg', 'jpeg', 'gif'])) {
-            $height = array_pop($parts);
-            $width = array_pop($parts);
-            $name = array_pop($parts);
-            $image = imagecreatetruecolor($width, $height);
-            imagefill($image, 0, 0, imagecolorallocate($image, rand(0, 255), rand(0, 255), rand(0, 255)));
-            // add some text
-            $textColor = imagecolorallocate($image, 255, 255, 255);
-            imagestring($image, 5, 5, 5, $name, $textColor);
+        $fileName = pathinfo($path, PATHINFO_BASENAME);
+        $width = $resource['width'];
+        $height = $resource['height'];
+        $text = $resource['text'] ?? $fileName;
+        $resourceType = $resource['ext'];
+        $image = imagecreatetruecolor($width, $height);
+        imagefill($image, 0, 0, imagecolorallocate($image, rand(0, 255), rand(0, 255), rand(0, 255)));
+        // add some text
+        $textColor = imagecolorallocate($image, 255, 255, 255);
+        imagestring($image, 5, 5, 5, $text, $textColor);
 
-            if ($resourceType === 'png') {
-                imagealphablending($image, false);
-                imagesavealpha($image, true);
-                imagepng($image, $path);
-            }
-            if ($resourceType === 'jpg' || $resourceType === 'jpeg') {
-                imagejpeg($image, $path);
-            }
-            if ($resourceType === 'gif') {
-                imagegif($image, $path);
-            }
-
-            imagedestroy($image);
-            return;
+        if ($resourceType === 'png') {
+            imagealphablending($image, false);
+            imagesavealpha($image, true);
+            imagepng($image, $path);
         }
+        if ($resourceType === 'jpg' || $resourceType === 'jpeg') {
+            imagejpeg($image, $path);
+        }
+        if ($resourceType === 'gif') {
+            imagegif($image, $path);
+        }
+
+        imagedestroy($image);
     }
 
+    // public function publicRes2(
+    //     GameApp $gameApp,
+    //     string|null $resourceName
+    // ) {
+    //     // check if the resource exists
+    //     $path = app_path("GameApps/$gameApp->prefix/resources/public/$resourceName");
+    //     if (!file_exists($path)) {
+    //         // if not, check if the resource exists as a fake generated resource
+    //         $path = app_path("GameApps/$gameApp->prefix/resources/public/._$resourceName");
+    //         if (!file_exists($path)) {
+    //             // if not, create a fake resource
+    //             $this->createFakeResource2($path);
+    //         }
+    //     }
+    //     return response()->file($path);
+    // }
+
+    // private function createFakeResource2($path)
+    // {
+    //     // ask if the file name has the pattern: "name.width.height.resourceType"
+    //     $name = pathinfo($path, PATHINFO_BASENAME);
+    //     $parts = explode('.', $name);
+    //     // last part is the resource type
+    //     $resourceType = array_pop($parts);
+    //     // if resource type is not an image, return
+    //     if (in_array($resourceType, ['png', 'jpg', 'jpeg', 'gif'])) {
+    //         $height = array_pop($parts);
+    //         $width = array_pop($parts);
+    //         $name = array_pop($parts);
+    //         $image = imagecreatetruecolor($width, $height);
+    //         imagefill($image, 0, 0, imagecolorallocate($image, rand(0, 255), rand(0, 255), rand(0, 255)));
+    //         // add some text
+    //         $textColor = imagecolorallocate($image, 255, 255, 255);
+    //         imagestring($image, 5, 5, 5, $name, $textColor);
+
+    //         if ($resourceType === 'png') {
+    //             imagealphablending($image, false);
+    //             imagesavealpha($image, true);
+    //             imagepng($image, $path);
+    //         }
+    //         if ($resourceType === 'jpg' || $resourceType === 'jpeg') {
+    //             imagejpeg($image, $path);
+    //         }
+    //         if ($resourceType === 'gif') {
+    //             imagegif($image, $path);
+    //         }
+
+    //         imagedestroy($image);
+    //         return;
+    //     }
+    // }
 
 }

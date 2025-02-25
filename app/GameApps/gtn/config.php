@@ -1,8 +1,7 @@
 <?php
 
 return [
-	'image' => 'guess-the-number.jpeg',
-    'card_image' => 'guess-the-number-card.320.200.jpeg',
+    'card_image' => 'guess-the-number-card',
 	'name' => 'Adivina el número',
 	'description' => 'Un simple juego donde adivinas un número entre 1 y 1024.',
 	'prefab_name' => 'gtn.root-prefab',		// The name of the prefab that define the root GameObject.

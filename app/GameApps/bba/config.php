@@ -1,8 +1,7 @@
 <?php
 
 return [
-    'image' => 'bouncing-ball.jpeg',
-    'card_image' => 'bouncing-ball-card.320.200.jpeg',
+    'card_image' => 'bouncing-ball-card',
     'name' => 'Bouncing Ball Arena',
     'active' => true,
     'description' => 'A game where players must bounce a ball into a goal.',
