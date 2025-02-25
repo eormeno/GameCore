@@ -41,3 +41,10 @@ Los prefabs son plantillas estáticas que definen una estructura anidada de Game
 El objetivo de los Prefabs es facilitar la instanciación de estructuras complejas de GameObjects, sus estados, sus Components y sus atributos, para una partida específica de un juego.
 ### GameService
 Los GameServices son clases de servicio asociados a una partida. Pueden ser o no persistentes. En este último caso, pueden definir sus propios atributos.
+### Event System
+El Event System es un sistema de eventos que permite la comunicación entre los distintos elementos del dominio. Los eventos son mensajes que se envían entre los elementos del dominio, y que pueden ser escuchados por otros elementos.
+Un EventListener es un objeto que escucha eventos específicos y ejecuta una acción en respuesta a ellos. Los EventListeners pueden estar asociados a GameObjects, Components o GameServices.
+Un GameAppEvent es un evento específico que se dispara en respuesta a acciones del usuario en la interfaz de la aplicación.
+Un GameEventListenerManager es un objeto que se encarga de gestionar los EventListeners de un GameApp.
+Los eventos se registran a partir de sus listeners en forma automática a partir de métodos implementados en los GameObjects, Components y GameServices. Los métodos deben tener la siguiente firma: `public function onEventNameEvent(Event $event)`. Por ejemplo, si se quiere que un componente escuche el evento `button_clicked`, éste debe implementar un método `public function onButtonClickedEvent(Event $event)`. De igual forma para los GameObjects y GameServices.
+
