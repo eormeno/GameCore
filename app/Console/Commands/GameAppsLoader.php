@@ -22,16 +22,17 @@ class GameAppsLoader
         foreach ($gameApps as $folder => $element) {
             if ($config = $element['config'] ?? null) {
                 $config['prefix'] = $folder;
-                $image_name = $config['image'];
-                $image_path = $element['resources'][$image_name];
-                unset($config['image']);
+                // $image_name = $config['image'];
+                // $image_path = $element['resources'][$image_name];
+                // unset($config['image']);
                 $config['service_registry'] = $element['Services'] ?? [];
                 $game_app = GameApp::where('prefix', $folder)->first();
                 if ($game_app) {
                     $game_app->update($config);
                     $this->result['updated']++;
                 } else {
-                    GameApp::factory()->image($image_path, $image_name)->create($config);
+                    // GameApp::factory()->image($image_path, $image_name)->create($config);
+                    GameApp::factory()->create($config);
                     $this->result['created']++;
                 }
             }

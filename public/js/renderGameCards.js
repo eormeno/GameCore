@@ -10,7 +10,8 @@ function renderGamesCards(games) {
 
         const image = document.createElement('img');
         image.className = 'game-image';
-        image.src = 'storage/' + game.image;
+        //image.src = 'storage/' + game.image;
+        image.src = 'api/game-app/' + game.id + '/public/' + game.image;
         image.alt = game.name;
 
         const content = document.createElement('div');

@@ -54,4 +54,12 @@ class GameAppController extends Controller
         $path = app_path("GameApps/$gameApp->prefix/resources/$resourceName");
         return response()->file($path);
     }
+
+    public function publicRes(
+        GameApp $gameApp,
+        string|null $resourceName
+    ) {
+        $path = app_path("GameApps/$gameApp->prefix/resources/public/$resourceName");
+        return response()->file($path);
+    }
 }

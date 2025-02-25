@@ -8,6 +8,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/game-app', [GameAppController::class, 'all'])->name('all');
+Route::get('/game-app/{gameApp}/public/{resourceName?}', [GameAppController::class, 'publicRes'])->name('public');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
