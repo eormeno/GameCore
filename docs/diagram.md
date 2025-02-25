@@ -1,3 +1,19 @@
+# GameCore Framework
+El GameCore Framework es un framework para backend de videojuegos. Está diseñado para facilitar la implementación de la lógica de un juego en el backend, y para permitir la comunicación con el frontend a través de una API REST.
+El framework está diseñado para ser utilizado en conjunto con un frontend que se comunique con el backend a través de una API REST. El frontend puede ser implementado en cualquier tecnología, siempre y cuando pueda consumir una API REST.
+## Tecnologías
+El framework está implementado en PHP, utilizando el framework Laravel. La persistencia de los datos se realiza a través de Eloquent, el ORM de Laravel.
+## Elementos del dominio
+El dominio del framework está compuesto por los siguientes elementos:
+- GameObject
+- Component
+- Prefab
+- GameService
+- Event System
+- View System
+- Render System
+- Client protocol
+## Diagrama de clases
 El siguiente diagrama de clases describe los elementos más importantes del dominio del framework:
 
 ```mermaid
@@ -17,7 +33,6 @@ classDiagram
     EventListener "1"-->"*" GameService
 ```
 
-Estoy trabajando en un framework para backend de videojuegos. Lo estoy implementando en Laravel, con Eloquent.
 > Nota: En este documento cuando se dice que un elemento es persistente, se está diciendo que sus instancias se almacenan en un registro de una base de datos.
 ### GameObject
 Los GameObjects son objetos persistentes asociados a una partida de un juego. Pueden organizarse en estructuras de árbol al definir relaciones padre-hijo entre ellos.
