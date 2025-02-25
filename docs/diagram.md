@@ -57,10 +57,11 @@ El objetivo de los Prefabs es facilitar la instanciación de estructuras complej
 ### GameService
 Los GameServices son clases de servicio asociados a una partida. Pueden ser o no persistentes. En este último caso, pueden definir sus propios atributos.
 ### Event System
-El Event System es un sistema de eventos que permite la comunicación entre los distintos elementos del dominio. Los eventos son mensajes que se envían entre los elementos del dominio, y que pueden ser escuchados por otros elementos.
-Un EventListener es un objeto que escucha eventos específicos y ejecuta una acción en respuesta a ellos. Los EventListeners pueden estar asociados a GameObjects, Components o GameServices.
+El Event System es un sistema de eventos que permite la comunicación entre los distintos elementos del dominio. Los eventos son mensajes que se envían entre los elementos del dominio, y que pueden ser escuchados por otros elementos. Los principales elementos del Event System son:
+
+- EventListener: un objeto que escucha eventos específicos y ejecuta una acción en respuesta a ellos. Los EventListeners pueden estar asociados a GameObjects, Components o GameServices.
 Un GameAppEvent es un evento específico que se dispara en respuesta a acciones del usuario en la interfaz de la aplicación.
-Un GameEventListenerManager es un objeto que se encarga de gestionar los EventListeners de un GameApp.
+- GameEventListenerManager es un objeto que se encarga de gestionar los EventListeners de un GameApp.
 Los eventos se registran a partir de sus listeners en forma automática a partir de métodos implementados en los GameObjects, Components y GameServices. Los métodos deben tener la siguiente firma: `public function onEventNameEvent(Event $event)`. Por ejemplo, si se quiere que un componente escuche el evento `button_clicked`, éste debe implementar un método `public function onButtonClickedEvent(Event $event)`. De igual forma para los GameObjects y GameServices.
 ### View System
 El View System es un sistema que permite construir vistas a partir de los documentos JSON retornados por los Components. Las vistas se construyen a partir de la combinación de los documentos JSON retornados por los Components habilitados de un GameObject.
@@ -68,4 +69,3 @@ El View System es un sistema que permite construir vistas a partir de los docume
 En el contexto de este framework, renderizar significa "enviar al cliente una vista actualizada de todos los GameObjects activos".
 El sistema de renderizado se ejecuta a partir de eventos provenientes del cliente del siguiente modo: cuando arriba un evento, se recorren todos los GameObjects activos y para cada uno de ellos, se contruye una única vista a partir de combinar las vistas definidas en cada Component habilitado. 
 Para el caso de los State Components, es el GameObject el "contexto" que habilita o deshabilita los Components en función de su estado actual.
-
