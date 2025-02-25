@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description');
             $table->integer('min_age')->default(18);
             $table->string('image')->nullable();
+            $table->string('card_image');
             $table->string('prefab_name')->nullable();
             $table->json('prefab_attributes')->nullable();
             $table->string('client')->default('blade.client');
