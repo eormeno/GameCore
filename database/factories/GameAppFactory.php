@@ -2,9 +2,6 @@
 
 namespace Database\Factories;
 
-use Storage;
-use Exception;
-use App\Utils\ImageUtils;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,11 +9,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class GameAppFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+
     public function definition(): array
     {
         return [
@@ -30,23 +23,4 @@ class GameAppFactory extends Factory
             'version' => '1.0.0',
         ];
     }
-
-    // public function image(string $path, string $image): static
-    // {
-    //     $image_full_path = "$path/$image";
-    //     if (!file_exists($image_full_path)) {
-    //         throw new Exception("Image [$image] not found in [$path] folder.");
-    //     }
-    //     $image = "images/$image";
-    //     // if the image exists in the public folder, delete it
-    //     if (!Storage::disk('public')->exists($image)) {
-    //         // copy the image to the public folder of the app
-    //         Storage::disk('public')->put($image, file_get_contents($image_full_path));
-    //     }
-    //     return $this->state(function (array $attributes) use ($image) {
-    //         return [
-    //             'image' => $image,
-    //         ];
-    //     });
-    // }
 }
