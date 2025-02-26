@@ -44,21 +44,27 @@ class GameAppController extends Controller
 
     public function res(GameApp $gameApp, string|null $resourceName)
     {
-        $path = app_path("GameApps/$gameApp->prefix/resources/$resourceName");
-        return response()->file($path);
-    }
-
-    public function publicRes(GameApp $gameApp, string|null $resourceName)
-    {
-        $basePath = $this->getResourceBasePath($gameApp, true);
-        $path = $this->findResourcePath($basePath, $resourceName);
+        // $path = app_path("GameApps/$gameApp->prefix/resources/$resourceName");
+        // return response()->file($path);
+        $basePath = $this->resourceBasePath($gameApp);
+        $path = $this->findResource($basePath, $resourceName);
         if ($path === null) {
             return response()->json(['error' => "Resource $resourceName not found"], 404);
         }
         return response()->file($path);
     }
 
-    private function findResourcePath(string $basePath, string $resourceName): string|null
+    public function publicRes(GameApp $gameApp, string|null $resourceName)
+    {
+        $basePath = $this->resourceBasePath($gameApp, true);
+        $path = $this->findResource($basePath, $resourceName);
+        if ($path === null) {
+            return response()->json(['error' => "Resource $resourceName not found"], 404);
+        }
+        return response()->file($path);
+    }
+
+    private function findResource(string $basePath, string $resourceName): string|null
     {
         $path = $this->getRawResourcePath($basePath, $resourceName);
         if ($path === null) {
@@ -82,7 +88,7 @@ class GameAppController extends Controller
 
         $resource = json_decode(file_get_contents($definitionPath), true);
         $ext = $resource['ext'];
-        $path = "$basePath.$resourceName.$ext";
+        $path = "$basePath$resourceName.$ext";
 
         if (!file_exists($path)) {
             $path = "$basePath._$resourceName.$ext";
@@ -94,7 +100,7 @@ class GameAppController extends Controller
         return $path;
     }
 
-    private function getResourceBasePath(GameApp $gameApp, bool $isPublic = false): string
+    private function resourceBasePath(GameApp $gameApp, bool $isPublic = false): string
     {
         $path = app_path("GameApps/$gameApp->prefix/resources/");
         return $isPublic ? "{$path}public/" : $path;

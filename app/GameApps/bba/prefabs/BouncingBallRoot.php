@@ -39,13 +39,13 @@ class BouncingBallRoot extends Prefab
 		return [
 			'active' => false,
 			'attributes' => [
-				'image' => 'playground.png',
+				'image' => 'playground',
 				'width' => '100%',
 				'height' => '100%'
 			],
 			'ball:sprite' => [
 				'attributes' => [
-					'texture' => 'soccer_ball.png',
+					'texture' => 'soccer_ball',
 					'width' => 32,
 					'height' => 32,
 					'scale' => 0.25,

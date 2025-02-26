@@ -216,7 +216,10 @@ class GameRenderer {
     }
 
     fetchResourceWithCacheAndBearer(url, callback) {
-        if (this.arrCachedViews[url]) callback(this.arrCachedViews[url]);
+        if (this.arrCachedViews[url]) {
+            callback(this.arrCachedViews[url]);
+            return;
+        }
         const bearer = localStorage.getItem('token');
         fetch(url, {
             headers: { Authorization: `Bearer ${bearer}` },
