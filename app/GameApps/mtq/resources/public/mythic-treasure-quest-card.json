@@ -2,5 +2,8 @@
     "ext": "png",
     "width": 320,
     "height": 200,
-    "text": "MTQ Card"
+    "text": "MTQ Card",
+    "color": "lavender",
+    "fontSize": 20,
+    "textColor": "black"
 }

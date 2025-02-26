@@ -2,5 +2,8 @@
     "ext": "png",
     "width": 320,
     "height": 200,
-    "text": "GTN Card"
+    "text": "GTN Card",
+    "color": "purple",
+    "fontSize": 20,
+    "textColor": "black"
 }

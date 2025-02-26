@@ -2,5 +2,8 @@
     "ext": "png",
     "width": 320,
     "height": 200,
-    "text": "BBA Card"
+    "text": "BBA Card",
+    "color": "orange",
+    "fontSize": 20,
+    "textColor": "black"
 }
