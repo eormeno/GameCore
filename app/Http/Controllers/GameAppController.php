@@ -51,7 +51,14 @@ class GameAppController extends Controller
         if ($path === null) {
             return response()->json(['error' => "Resource $resourceName not found"], 404);
         }
-        return response()->file($path);
+        return response()->file(
+            $path,
+            [
+                'Cache-Control' => 'public, max-age=300',
+                'Pragma' => 'public',
+                'Expires' => '60'   // 1 minute
+            ]
+        );
     }
 
     public function publicRes(GameApp $gameApp, string|null $resourceName)
@@ -61,7 +68,14 @@ class GameAppController extends Controller
         if ($path === null) {
             return response()->json(['error' => "Resource $resourceName not found"], 404);
         }
-        return response()->file($path);
+        return response()->file(
+            $path,
+            [
+                'Cache-Control' => 'public, max-age=300',
+                'Pragma' => 'public',
+                'Expires' => '15'   // 15 seconds
+            ]
+        );
     }
 
     private function findResource(string $basePath, string $resourceName): string|null

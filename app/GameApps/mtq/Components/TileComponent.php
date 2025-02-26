@@ -45,7 +45,7 @@ class TileComponent extends PersistentComponent
 		return [
 			'parent' => $this->parentGameObject()->id ?? null,
 			'type' => 'sprite',
-			'texture' => "tile_{$this->state}.png",
+			'texture' => "tile_{$this->state}",
 			'x' => $this->x,
 			'y' => $this->y,
 			'layer' => 1,
