@@ -18,10 +18,8 @@ class GameAppController extends Controller
         return response()->json(['displaying_games_gallery' => $gameApps, 'is_page' => true, 'is_modal' => false]);
     }
 
-    public function play(
-        GameApp $gameApp,
-        GameInstanceService $gamesService
-    ) {
+    public function play(GameApp $gameApp, GameInstanceService $gamesService)
+    {
         $currentUser = auth()->user();
         $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
         return response()->json([
@@ -37,42 +35,68 @@ class GameAppController extends Controller
         ]);
     }
 
-    public function event(
-        Game $game,
-        EventRequestFilter $request,
-        IRenderer $renderer,
-    ) {
+    public function event(Game $game, EventRequestFilter $request, IRenderer $renderer)
+    {
         return response()->json(
             $renderer->render($game, $request->eventInfo())
         );
     }
 
-    public function res(
-        GameApp $gameApp,
-        string|null $resourceName
-    ) {
+    public function res(GameApp $gameApp, string|null $resourceName)
+    {
         $path = app_path("GameApps/$gameApp->prefix/resources/$resourceName");
         return response()->file($path);
     }
 
-    public function publicRes(
-        GameApp $gameApp,
-        string|null $resourceName
-    ) {
-        // check if the resource definition exists
-        $path = app_path("GameApps/$gameApp->prefix/resources/public/$resourceName.json");
-        if (file_exists($path)) {
-            $resource = json_decode(file_get_contents($path), true);
-            $ext = $resource['ext'];
-            $path = app_path("GameApps/$gameApp->prefix/resources/public/$resourceName.$ext");
-            if (file_exists($path)) {
-                return response()->file($path);
-            }
-            $path = app_path("GameApps/$gameApp->prefix/resources/public/._$resourceName.$ext");
+    public function publicRes(GameApp $gameApp, string|null $resourceName)
+    {
+        $basePath = $this->getResourceBasePath($gameApp, true);
+        $path = $this->findResourcePath($basePath, $resourceName);
+        if ($path === null) {
+            return response()->json(['error' => "Resource $resourceName not found"], 404);
+        }
+        return response()->file($path);
+    }
+
+    private function findResourcePath(string $basePath, string $resourceName): string|null
+    {
+        $path = $this->getRawResourcePath($basePath, $resourceName);
+        if ($path === null) {
+            $path = $this->getDefinedResourcePath($basePath, $resourceName);
+        }
+        return $path;
+    }
+
+    private function getRawResourcePath(string $basePath, string $resourceName): string|null
+    {
+        $path = "$basePath$resourceName";
+        return file_exists($path) ? $path : null;
+    }
+
+    private function getDefinedResourcePath(string $basePath, string $resourceName): string|null
+    {
+        $definitionPath = "$basePath$resourceName.json";
+        if (!file_exists($definitionPath)) {
+            return null;
+        }
+
+        $resource = json_decode(file_get_contents($definitionPath), true);
+        $ext = $resource['ext'];
+        $path = "$basePath.$resourceName.$ext";
+
+        if (!file_exists($path)) {
+            $path = "$basePath._$resourceName.$ext";
             if (!file_exists($path)) {
                 ImageUtils::fakeImage($path, $resource);
             }
-            return response()->file($path);
         }
+
+        return $path;
+    }
+
+    private function getResourceBasePath(GameApp $gameApp, bool $isPublic = false): string
+    {
+        $path = app_path("GameApps/$gameApp->prefix/resources/");
+        return $isPublic ? "{$path}public/" : $path;
     }
 }
