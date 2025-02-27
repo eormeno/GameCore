@@ -4,10 +4,7 @@ namespace App\Utils;
 
 class ColorDef
 {
-    public const RED = '#ff0000';
-    public const GREEN = '#00ff00';
     public const BLUE = '#0000ff';
-    public const YELLOW = '#ffff00';
     public const PURPLE = '#800080';
     public const CYAN = '#00ffff';
     public const MAGENTA = '#ff00ff';
@@ -26,6 +23,18 @@ class ColorDef
     public const GREY = '#808080';
     public const WHITE = '#ffffff';
     public const BLACK = '#000000';
+    public const DARK_BLUE = '#0000aa';
+    public const DARK_GREEN = '#00aa00';
+    public const DARK_AQUA = '#00aaaa';
+    public const DARK_RED = '#aa0000';
+    public const DARK_PURPLE = '#aa00aa';
+    public const GOLD = '#ffaa00';
+    public const GRAY = '#aaaaaa';
+    public const DARK_GRAY = '#555555';
+    public const GREEN = '#55ff55';
+    public const LIGHT_PURPLE = '#ff55ff';
+    public const RED = '#ff5555';
+    public const YELLOW = '#ffff55';
 
     public static function getColor(string $color): array
     {
