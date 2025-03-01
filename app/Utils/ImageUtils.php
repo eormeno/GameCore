@@ -4,7 +4,7 @@ namespace App\Utils;
 
 class ImageUtils
 {
-    public static function fakeImage(string $path, array $resource)
+    public static function fakeImage(string $path, array $resource, int $creationTime = 0)
     {
         $shape = $resource['shape'] ?? 'rectangle';
         $backgroundColor = $resource['color'] ?? ColorDef::getRandomColorName();
@@ -45,7 +45,6 @@ class ImageUtils
             imagefilledpolygon($image, $trianglePoints, 3, $triangleColor);
         }
 
-        // imagefill($image, 0, 0, imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]));
         $textColor = imagecolorallocate($image, $textRGB[0], $textRGB[1], $textRGB[2]);
 
 
@@ -60,6 +59,9 @@ class ImageUtils
         }
         if ($resourceType === 'gif') {
             imagegif($image, $path);
+        }
+        if ($creationTime !== 0) {
+            touch($path, $creationTime);
         }
         imagedestroy($image);
     }

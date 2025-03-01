@@ -14,7 +14,14 @@ class GameAppController extends Controller
 
     public function all()
     {
-        $gameApps = GameApp::where('active', true)->get(['id', 'prefix', 'name', 'description', 'card_image']);
+        $gameApps = GameApp::where('active', true)->get([
+            'id',
+            'prefix',
+            'name',
+            'description',
+            'card_image',
+            'prefab_name'
+        ]);
         return response()->json(['displaying_games_gallery' => $gameApps, 'is_page' => true, 'is_modal' => false]);
     }
 
@@ -97,8 +104,9 @@ class GameAppController extends Controller
     {
         $definitionPath = "$basePath$resourceName.json";
         if (!file_exists($definitionPath)) {
-            return null;
+            $definitionPath = $this->createDefinedResource($basePath, $resourceName);
         }
+        $definitionFileTime = $this->getFileCreationTime($definitionPath);
 
         $resource = json_decode(file_get_contents($definitionPath), true);
         $ext = $resource['ext'];
@@ -106,12 +114,39 @@ class GameAppController extends Controller
 
         if (!file_exists($path)) {
             $path = "$basePath._$resourceName.$ext";
-            if (!file_exists($path)) {
-                ImageUtils::fakeImage($path, $resource);
+            if (!file_exists($path) || $this->getFileCreationTime($path) < $definitionFileTime) {
+                ImageUtils::fakeImage($path, $resource, $definitionFileTime);
             }
         }
 
         return $path;
+    }
+
+    private function getFileCreationTime(string $path): int
+    {
+        return filemtime($path);
+    }
+
+    private function createDefinedResource(string $basePath, string $resourceName): string
+    {
+        $ext = pathinfo($resourceName, PATHINFO_EXTENSION) ?: 'png';
+        $resource = [
+            'ext' => $ext,
+            'text' => $resourceName,
+            'color' => 'black',
+            'fontSize' => 8,
+            'width' => 160,
+            'height' => 90
+        ];
+        $definitionPath = "$basePath$resourceName.json";
+        // ensure create the file and all its parent directories
+        try {
+            file_put_contents($definitionPath, json_encode($resource));
+        } catch (\Exception $e) {
+            mkdir(dirname($definitionPath), 0755, true);
+            file_put_contents($definitionPath, json_encode($resource, JSON_PRETTY_PRINT));
+        }
+        return $definitionPath;
     }
 
     private function resourceBasePath(GameApp $gameApp, bool $isPublic = false): string

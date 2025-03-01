@@ -90,6 +90,16 @@ header {
     /* Empuja el botón hacia el fondo de la tarjeta */
 }
 
+.play-button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+/* hover when disabled */
+.play-button:disabled:hover {
+    background: #666;
+}
+
 .play-button:hover {
     background: linear-gradient(90deg, #e64a19, #d84315);
 }

@@ -27,6 +27,7 @@ function renderGamesCards(games) {
         const playButton = document.createElement('button');
         playButton.className = 'play-button';
         playButton.textContent = 'Jugar';
+        playButton.disabled = game.prefab_name === null;
         playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id });
 
         content.appendChild(title);
