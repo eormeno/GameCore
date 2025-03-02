@@ -270,6 +270,14 @@ class GameRenderer {
                 "align-items": "center",
                 "width": "100%",
             },
+            ".horizontal": {
+                "display": "flex",
+                "position": "relative",
+                "flex-direction": "row",
+                "align-items": "center",
+                "justify-content": "center",
+                "width": "100%",
+            },
             ".title": {
                 "font-size": "48px",
                 "font-weight": "bold",
@@ -282,7 +290,15 @@ class GameRenderer {
                 "font-weight": "normal",
                 "margin": "5px 0",
                 "color": "#fff",
-                "text-shadow": "2px 2px 2px rgba(0, 0, 0, 0.5)"
+                "text-shadow": "2px 2px 2px rgba(0, 0, 0, 0.5)",
+            },
+            ".label-center": {
+                "font-size": "20px",
+                "font-weight": "normal",
+                "margin": "5px 0",
+                "color": "#fff",
+                "min-width": "100px",
+                "text-align": "center"
             },
             "button": {
                 "padding": "5px 10px",
