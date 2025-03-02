@@ -19,7 +19,7 @@ class CounterRootPrefab extends Prefab
                 ],
                 'dec_button:button' => ['attributes' => ['text' => '-', 'event' => 'decrement', 'style' => 'primary']],
                 'number:label' => ['attributes' => ['text' => '0', 'style' => 'label-center']],
-                'inc_button:button' => ['attributes' => ['text' => '+', 'event' => 'decrement', 'style' => 'primary']],
+                'inc_button:button' => ['attributes' => ['text' => '+', 'event' => 'increment', 'style' => 'primary']],
             ]
         ];
     }
