@@ -8,6 +8,7 @@ abstract class ViewStateContextBase extends StateContextBase
 	{
 		$mergedViews = [];
 		$this->componentsIterator(function ($component) use (&$mergedViews) {
+            $component->onUpdate(0); //TODO This is a temporary solution, it should be improved
 			$view = $component->view();
 			if ($view !== null) {
 				if (is_array($view)) {

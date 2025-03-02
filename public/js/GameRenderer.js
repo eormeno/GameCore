@@ -101,6 +101,7 @@ class GameRenderer {
                 } else {
                     backendElapsed = json.elapsed || -1;
                     delete json.elapsed;
+                    console.log(json);
                     if (Object.keys(json).length > 0) this.renderComponents(json, 'glCanvas');
                 }
             }
@@ -136,6 +137,7 @@ class GameRenderer {
                     element.style.top = `${y}px`;
                     element.style.transform = `rotate(${component.rotation}deg)`;
                 }
+                if (component.type === 'label') element.textContent = component.text;
                 if (component.updatable) this.pushEvent('update', {}, id);
                 return;
             }
