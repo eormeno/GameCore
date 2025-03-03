@@ -2,10 +2,12 @@
 
 namespace App\GameApps\cnt\Components;
 
+use App\Traits\HasNamespacePrefix;
 use App\Models\Components\PersistentComponent;
 
 class CounterComponent extends PersistentComponent
 {
+    use HasNamespacePrefix;
 
     public static function config(): array
     {
@@ -16,11 +18,11 @@ class CounterComponent extends PersistentComponent
 
     public function onAwake(array $initParams): void
     {
-        $numberLabelGO = $this->findGameObject('number');
-        $label = $numberLabelGO->getComponent('label');
-        $label->text = $this->value;
-        $label->save();
-        $numberLabelGO->updateView();
+        // $numberLabelGO = $this->findGameObject('number');
+        // $label = $numberLabelGO->getComponent('label');
+        // $label->text = $this->value;
+        // $label->save();
+        // $numberLabelGO->updateView();
     }
 
     public function onIncrementEvent(): void
