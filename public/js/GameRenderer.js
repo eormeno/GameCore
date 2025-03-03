@@ -27,6 +27,7 @@ class GameRenderer {
         this.pingMinElement = null;
         this.pingMaxElement = null;
         this.pingBackendElement = null;
+        this.backendLastElement = null;
         this.backendMinElement = null;
         this.backendMaxElement = null;
     }
@@ -36,6 +37,7 @@ class GameRenderer {
         this.pingMinElement = document.getElementById('pingMin');
         this.pingMaxElement = document.getElementById('pingMax');
         this.pingBackendElement = document.getElementById('backendAvg');
+        this.backendLastElement = document.getElementById('backendLast');
         this.backendMinElement = document.getElementById('backendMin');
         this.backendMaxElement = document.getElementById('backendMax');
         this.resourceUrl = game.resourcesUrl;
@@ -376,6 +378,7 @@ class GameRenderer {
 
     updateBackendMetrics(backendElapsed) {
         if (backendElapsed > 0) {
+            this.backendLastElement.textContent = `${backendElapsed} ms`;
             if (backendElapsed < this.backendMin) {
                 this.backendMin = backendElapsed;
                 this.backendMinElement.textContent = `${this.backendMin} ms`;

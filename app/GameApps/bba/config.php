@@ -3,7 +3,7 @@
 return [
     'card_image' => 'bouncing-ball-card',
     'name' => 'Bouncing Ball Arena',
-    'active' => false,
+    'active' => true,
     'description' => 'A game where players must bounce a ball into a goal.',
     'client' => 'webgl',
     'width' => 800,

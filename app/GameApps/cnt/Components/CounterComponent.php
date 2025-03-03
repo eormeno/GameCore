@@ -2,7 +2,6 @@
 
 namespace App\GameApps\cnt\Components;
 
-use App\Models\GameObject\GameObject;
 use App\Models\Components\PersistentComponent;
 
 class CounterComponent extends PersistentComponent
@@ -11,55 +10,37 @@ class CounterComponent extends PersistentComponent
     public static function config(): array
     {
         return [
-            'min' => ['integer', 0],
-            'max' => ['integer', 100],
-            'step' => ['integer', 10],
-            'value' => ['integer', 0],
+            'value' => ['integer', 50],
         ];
     }
 
     public function onAwake(array $initParams): void
     {
-        $numberGO = $this->findGameObject('number');
-        $label = $numberGO->getComponent('label');
-        $label->update(['text' => $this->value]);
+        $numberLabelGO = $this->findGameObject('number');
+        $label = $numberLabelGO->getComponent('label');
+        $label->text = $this->value;
+        $label->save();
+        $numberLabelGO->updateView();
     }
 
     public function onIncrementEvent(): void
     {
-        $numberGO = cache()->remember('numberGO', 60, function () {
-            return $this->findGameObject('number');
-        });
-        $this->changeNumber($numberGO, 1);
+        $this->increment('value');
+        $this->updateLabel();
     }
 
     public function onDecrementEvent(): void
     {
-        $numberGO = cache()->remember('numberGO', 60, function () {
-            return $this->findGameObject('number');
-        });
-        $this->changeNumber($numberGO, -1);
+        $this->decrement('value');
+        $this->updateLabel();
     }
 
-    private function changeNumber(GameObject $numberGO, int $sign): void
+    private function updateLabel(): void
     {
-        $newValue = $this->value + $this->step * $sign;
-
-        if ($newValue < $this->min) {
-            $this->value = $this->min;
-        } elseif ($newValue > $this->max) {
-            $this->value = $this->max;
-        } else {
-            $this->value = $newValue;
-        }
-
-        if ($this->isDirty('value')) {
-            $numberGO->increment('version');
-            $label = cache()->remember('label', 30, function () use ($numberGO) {
-                return $numberGO->getComponent('label');
-            });
-            $label->update(['text' => $this->value]);
-            $this->save();
-        }
+        $numberLabelGO = $this->findGameObject('number');
+        $label = $numberLabelGO->getComponent('label');
+        $label->text = $this->value;
+        $label->save();
+        $numberLabelGO->updateView();
     }
 }

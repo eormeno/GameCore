@@ -69,3 +69,13 @@ El View System es un sistema que permite construir vistas a partir de los docume
 En el contexto de este framework, renderizar significa "enviar al cliente una vista actualizada de todos los GameObjects activos".
 El sistema de renderizado se ejecuta a partir de eventos provenientes del cliente del siguiente modo: cuando arriba un evento, se recorren todos los GameObjects activos y para cada uno de ellos, se contruye una única vista a partir de combinar las vistas definidas en cada Component habilitado. 
 Para el caso de los State Components, es el GameObject el "contexto" que habilita o deshabilita los Components en función de su estado actual.
+### Diagrama de componentes
+El siguiente diagrama de componentes describe los elementos más importantes del dominio del framework:
+
+```mermaid
+graph LR
+    A[cnt.counter-root-prefab] --- B[main:container]
+    B --> C[dec_button:button]
+    B --> D[number:label]
+    B --> E[inc_button:button]
+```
