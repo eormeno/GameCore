@@ -79,3 +79,14 @@ graph LR
     B --> D[number:label]
     B --> E[inc_button:button]
 ```
+
+El mismo diagrama pero con el componente agregado:
+
+```mermaid
+graph LR
+    A[cnt.counter-root-prefab] --- B[main:container]
+    B --> C[dec_button:button]
+    B --> D[number:label]
+    B --> E[inc_button:button]
+    A --> F(cnt.counter)
+```
