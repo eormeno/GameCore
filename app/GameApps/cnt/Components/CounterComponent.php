@@ -18,22 +18,18 @@ class CounterComponent extends PersistentComponent
 
     public function onAwake(array $initParams): void
     {
-        // $numberLabelGO = $this->findGameObject('number');
-        // $label = $numberLabelGO->getComponent('label');
-        // $label->text = $this->value;
-        // $label->save();
-        // $numberLabelGO->updateView();
+        $this->updateLabel();
     }
 
     public function onIncrementEvent(): void
     {
-        $this->increment('value');
+        $this->incrementQuietly('value');
         $this->updateLabel();
     }
 
     public function onDecrementEvent(): void
     {
-        $this->decrement('value');
+        $this->decrementQuietly('value');
         $this->updateLabel();
     }
 
