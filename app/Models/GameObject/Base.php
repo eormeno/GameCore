@@ -181,7 +181,7 @@ abstract class Base extends Model
 
     public function updateView()
     {
-        $this->increment('version');
+        $this->incrementQuietly('version');
     }
 
     public function __tostring(): string

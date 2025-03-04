@@ -9,101 +9,110 @@ use App\Models\Components\PersistentComponent;
 
 class PlayingStateComponent extends PersistentComponent
 {
-	use HasNamespacePrefix;
+    use HasNamespacePrefix;
 
-	public static function config(): array
-	{
-		return [
-			'vx' => ['float', 20],
-			'vy' => ['float', 20],
-		];
-	}
+    private const VX = 20;
+    private const VY = 20;
 
-	public function onEnter(): void
-	{
-		$playingView = $this->gameObject->findChild('playing_view');
-		if ($playingView) {
-			$playingView->activate();
-		}
-	}
+    public static function config(): array
+    {
+        return [
+            'vx' => ['float', self::VX],
+            'vy' => ['float', self::VY],
+        ];
+    }
 
-	public function onExit(): void
-	{
-		$playingView = $this->gameObject->findChild('playing_view');
-		if ($playingView) {
-			$playingView->deactivate();
-		}
-	}
+    public function onEnter(): void
+    {
+        $playingView = $this->gameObject->findChild('playing_view');
+        if ($playingView) {
+            $playingView->activate();
+        }
+    }
 
-	public function onUpdateEvent(): void
-	{
-		$ball = $this->findGameObject('ball');
-		$this->move($ball, 800, 450);
-	}
+    public function onExit(): void
+    {
+        $playingView = $this->gameObject->findChild('playing_view');
+        if ($playingView) {
+            $playingView->deactivate();
+        }
+    }
 
-	public function move(GameObject $ball, $screenWidth, $screenHeight)
-	{
-		$sprite = $ball->getComponent('sprite');
-		$sprite_width = $sprite->width * $sprite->scale;
-		$sprite_height = $sprite->height * $sprite->scale;
-		$x = $sprite->x;
-		$y = $sprite->y;
+    public function onUpdateEvent(): void
+    {
+        $ball = $this->findGameObject('ball');
+        $this->move($ball, 800, 450);
+    }
 
-		// Actualizar posición
-		$x += $this->vx;
-		$y += $this->vy;
+    public function move(GameObject $ball, $screenWidth, $screenHeight)
+    {
+        $curVX = $this->vx;
+        $curVY = $this->vy;
+        $newVX = $curVX;
+        $newVY = $curVY;
+        $sprite = $ball->getComponent('sprite');
+        $sprite_width = $sprite->width * $sprite->scale;
+        $sprite_height = $sprite->height * $sprite->scale;
+        $curX = $sprite->x;
+        $curY = $sprite->y;
+        $curR = $sprite->rotation;
 
-		// Detección de colisiones
-		if ($x <= $sprite_width || $x + $sprite_width >= $screenWidth) {
-			$this->vx = -$this->vx;
-			$x = max($sprite_width, min($x, $screenWidth - $sprite_width));
-		}
-		if ($y <= $sprite_height || $y + $sprite_height >= $screenHeight) {
-			$this->vy = -$this->vy;
-			$y = max($sprite_height, min($y, $screenHeight - $sprite_height));
-		}
+        // Actualizar posición
+        $newX = $curX + $this->vx;
+        $newY = $curY + $this->vy;
 
-		// Rotación
-		$newRotation = ($sprite->rotation + 5) % 360;
+        // Detección de colisiones
+        if ($newX <= $sprite_width || $newX + $sprite_width >= $screenWidth) {
+            $newVX = -$curVX;
+            $newX = max($sprite_width, min($newX, $screenWidth - $sprite_width));
+        }
+        if ($newY <= $sprite_height || $newY + $sprite_height >= $screenHeight) {
+            $newVY = -$curVY;
+            $newY = max($sprite_height, min($newY, $screenHeight - $sprite_height));
+        }
 
-		// Determinar si es necesario guardar
-		$needsSave = false;
-		if ($x !== $sprite->x || $y !== $sprite->y || $newRotation !== $sprite->rotation) {
-			$sprite->x = $x;
-			$sprite->y = $y;
-			$sprite->rotation = $newRotation;
-			$needsSave = true;
-		}
+        // Rotación
+        $newRotation = ($curR + 5) % 360;
 
-		// Guardar cambios solo si es necesario
-		if ($needsSave || $ball->isDirty() || $sprite->isDirty()) {
-			DB::transaction(function () use ($ball, $sprite) {
-				$ball->version++;
-				$ball->save();
-				$sprite->save();
-				$this->save();
-			});
-		}
-	}
+        // Actualizar valores del sprite, la bola o el componente actual si es necesario
+        DB::transaction(function () use ($ball, $sprite, $curX, $curY, $curR, $newVX, $newVY, $curVX, $curVY, $newX, $newY, $newRotation) {
+            if ($newVX !== $curVX || $newVY !== $curVY) {
+                $this->updateQuietly([
+                    'vx' => $newVX,
+                    'vy' => $newVY,
+                ]);
+            }
+            if ($newX !== $curX || $newY !== $curY || $newRotation !== $curR) {
+                $sprite->updateQuietly([
+                    'x' => $newX,
+                    'y' => $newY,
+                    'rotation' => $newRotation,
+                ]);
+            }
+            $ball->updateView();
+        });
+    }
 
-	public function onRestartEvent()
-	{
-		$ball = $this->findGameObject('ball');
-		$sprite = $ball->getComponent('sprite');
-		$sprite->x = 400;
-		$sprite->y = 225;
-		$sprite->rotation = 0;
-		$sprite->update();
-		$this->vx = 20;
-		$this->vy = 20;
-		$this->save();
-	}
+    public function onRestartEvent()
+    {
+        $ball = $this->findGameObject('ball');
+        $sprite = $ball->getComponent('sprite');
+        $sprite->updateQuietly([
+            'x' => 400,
+            'y' => 225,
+            'rotation' => 0,
+        ]);
+        $this->updateQuietly([
+            'vx' => self::VX,
+            'vy' => self::VY,
+        ]);
+    }
 
-	public function view()
-	{
-		// TODO Revisar esto! Se ve muy raro
-		return [
-			'updatable' => true,
-		];
-	}
+    public function view()
+    {
+        // TODO Revisar esto! Se ve muy raro
+        return [
+            'updatable' => true,
+        ];
+    }
 }
