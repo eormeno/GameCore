@@ -5,7 +5,6 @@ namespace App\Models\Components;
 use App\Models\Game;
 use App\Events\GameEvent;
 use App\Traits\DebugHelper;
-use App\Utils\CaseConverters;
 use App\Utils\ReflectionUtils;
 use App\Models\GameObject\Base;
 use App\Contracts\IGameEventListener;
@@ -30,14 +29,13 @@ class ComponentBase extends Model implements IGameEventListener
 		if (get_class($this) === Component::class) {
 			return $this->belongsTo(GameObject::class);
 		}
-		// if current class is subclass of Component.
-		$super = $this->super;
-		return $super->gameObject();
+        // if current class is subclass of Component.
+        return $this->super->gameObject();
 	}
 
 	public function game(): Game
 	{
-		return $this->gameObject()->first()->game()->first();
+        return $this->gameObject->game;
 	}
 
 	public function handle(GameEvent $event): void
@@ -78,13 +76,12 @@ class ComponentBase extends Model implements IGameEventListener
 		return $this->belongsTo(Component::class, 'id');
 	}
 
-	public function subclass(): Component
-	{
-		if (ReflectionUtils::isSubclassOf($this->type, PersistentComponent::class)) {
-			return $this->type::find($this->id);
-		}
-		return new $this->type($this->attributes);
-	}
+    public function subclass(): Component
+    {
+        return ReflectionUtils::isSubclassOf($this->type, PersistentComponent::class)
+            ? $this->type::find($this->id)
+            : new $this->type($this->attributes);
+    }
 
 	public function view()
 	{

@@ -166,8 +166,7 @@ abstract class Base extends Model
     public function getComponent(string $slug_type): ?Component
     {
         $type = ReflectionUtils::componentClassFromSlug($slug_type);
-        $component = $this->components()->where('type', $type)->first();
-        return $component ? $type::find($component->id) : null;
+        return $this->components()->where('type', $type)->first()?->subclass();
     }
 
     public function removeComponent(string $slug_type): bool
