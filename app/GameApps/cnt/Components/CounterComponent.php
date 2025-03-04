@@ -41,8 +41,9 @@ class CounterComponent extends PersistentComponent
     {
         $numberLabelGO = $this->findGameObject('number');
         $label = $numberLabelGO->getComponent('label');
-        $label->text = $this->value;
-        $label->save();
+        $label->updateQuietly([
+            'text' => $this->value
+        ]);
         $numberLabelGO->updateView();
     }
 }
