@@ -22,7 +22,7 @@ class GameAppController extends Controller
             'card_image',
             'prefab_name'
         ]);
-        return response()->json(['displaying_games_gallery' => $gameApps, 'is_page' => true, 'is_modal' => false]);
+        return response()->json(['displaying_games_gallery' => $gameApps]);
     }
 
     public function play(GameApp $gameApp, GameInstanceService $gamesService)
@@ -31,8 +31,6 @@ class GameAppController extends Controller
         $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
         return response()->json([
             'game' => [
-                'is_page' => true,
-                'is_modal' => false,
                 'title' => $currentGame->title,
                 'eventUrl' => route('event', $currentGame->id),
                 'resourcesUrl' => route('res', $gameApp->id),

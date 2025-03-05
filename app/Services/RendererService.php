@@ -14,8 +14,9 @@ class RendererService implements IRenderer
 	{
 		$currentTimestamp = microtime(true);
 		event(new GameEvent($game, $eventInfo));
+        $elapsed = $this->calculateElapsed($currentTimestamp);
 		$result = $this->buildViews($game, $eventInfo);
-		$result['elapsed'] = $this->calculateElapsed($currentTimestamp);
+		$result['elapsed'] = $elapsed; // $this->calculateElapsed($currentTimestamp);
 		return $result;
 	}
 
