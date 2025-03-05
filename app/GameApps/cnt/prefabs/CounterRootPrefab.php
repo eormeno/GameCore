@@ -17,7 +17,7 @@ class CounterRootPrefab extends Prefab
                 'inc_button:button' => ['attributes' => ['text' => '+', 'event' => 'increment', 'style' => 'primary']],
             ],
             'components' => [
-                'cnt.counter' => ['attributes' => ['min' => 0, 'max' => 100, 'step' => 5, 'value' => 50]],
+                'cnt.counter' => ['min' => 0, 'max' => 100, 'step' => 5, 'value' => 50],
             ],
         ];
     }

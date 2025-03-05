@@ -14,14 +14,13 @@ class CounterComponent extends PersistentComponent
         return [
             'min' => ['integer', 0],
             'max' => ['integer', 100],
-            'value' => ['integer', 50],
-            'step' => ['integer', 5],
+            'value' => ['integer', 0],
+            'step' => ['integer', 1],
         ];
     }
 
     public function onAwake(array $initParams): void
     {
-        dd(json_encode($initParams, JSON_PRETTY_PRINT));
         $this->updateLabel();
     }
 
