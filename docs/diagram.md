@@ -90,3 +90,27 @@ graph LR
     B --> E[inc_button:button]
     A --> F(cnt.counter)
 ```
+
+```mermaid
+block-beta
+    block:background
+        columns 3
+        space:3
+        space:3
+        block:group1:3
+            columns 6
+                space:1
+                i["-"]:1
+                j["0"]:1
+                k["+"]:1
+                space:1
+        end
+        space:3
+        space:3
+    end
+style background fill:#333,stroke-width:0
+style group1 fill:#333,stroke-width:0
+style j fill:#333,color:#fff,stroke-width:0
+style i fill:#00a,stroke-width:0,color:#fff
+style k fill:#00a,stroke-width:0,color:#fff
+```
