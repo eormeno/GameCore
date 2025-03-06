@@ -4,44 +4,35 @@ namespace App\GameApps\Common\Components;
 
 use App\Models\Components\PersistentComponent;
 
-
 class TilesetComponent extends PersistentComponent
 {
+    private const TILE_WIDTH = 128;
+    private const TILE_HEIGHT = 128;
+
 	public static function config(): array
 	{
 		return [
-			'tile_size' => ['integer', 32],
+			'tile_width' => ['integer', self::TILE_WIDTH],
+            'tile_height' => ['integer', self::TILE_HEIGHT],
 			'tilemap' => ['string', null],
 		];
 	}
 
 	public function onAwake(array $initParams): void
 	{
-		$this->x = $initParams['x'] ?? null;
-		$this->y = $initParams['y'] ?? null;
-		$this->layout = $initParams['layout'] ?? 'vertical';
-		$this->width = $initParams['width'] ?? '100%';
-		$this->height = $initParams['height'] ?? '100%';
-		$this->image = $initParams['image'] ?? null;
-		$this->save();
-	}
+        $this->updateQuietly([
+            'tile_width' => $initParams['tile_width'] ?? self::TILE_WIDTH,
+            'tile_height' => $initParams['tile_height'] ?? self::TILE_HEIGHT,
+            'tilemap' => $initParams['tilemap'] ?? null,
+        ]);
+    }
 
 	public function view()
 	{
-		$ret = [
-			'parent' => $this->parentGameObject()->id ?? null,
-			'type' => 'container',
-			'layout' => $this->layout,
-			'width' => $this->width,
-			'height' => $this->height,
-			'image' => $this->image,
-		];
-		if ($this->x !== null) {
-			$ret['x'] = $this->x;
-		}
-		if ($this->y !== null) {
-			$ret['y'] = $this->y;
-		}
-		return $ret;
-	}
+        return view('tileset', [
+            'tile_width' => $this->tile_width,
+            'tile_height' => $this->tile_height,
+            'tilemap' => $this->tilemap,
+        ]);
+    }
 }
