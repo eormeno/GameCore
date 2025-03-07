@@ -308,7 +308,6 @@ function setStyles() {
 	addStyles({
 		"#glCanvas": {
 			"width": "100%",
-			"max-width": "800px",
 		},
 		".vertical": {
 			"display": "flex",
