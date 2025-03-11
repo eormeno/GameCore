@@ -11,22 +11,34 @@ class RpgRootPrefab extends Prefab
     {
         return [
             'land:tileset' => [
-                'attributes' => ['number' => 0, 'tile_width' => 128, 'tile_height' => 128, 'image' => 'land.png'],
+                'attributes' => ['number' => 0, 'image' => 'land.png'],
             ],
-            'water:tileset' => [
-                'attributes' => ['number' => 1,'tile_width' => 128, 'tile_height' => 128, 'image' => 'water.png'],
+            'forest:tileset' => [
+                'attributes' => ['number' => 1, 'image' => 'forest.png'],
             ],
-            'building:tileset' => [
-                'attributes' => ['number' => 2,'tile_width' => 128, 'tile_height' => 128, 'image' => 'building.png'],
+            'decorations:tileset' => [
+                'attributes' => ['number' => 2, 'image' => 'decorations.png'],
             ],
-            'main:container' => [
-                'attributes' => ['layout' => 'horizontal', 'width' => '100%', 'height' => '100%'],
-                'dec_button:button' => ['attributes' => ['text' => '-', 'event' => 'decrement', 'style' => 'primary']],
-                'number:label' => ['attributes' => ['text' => '0', 'style' => 'label-center']],
-                'inc_button:button' => ['attributes' => ['text' => '+', 'event' => 'increment', 'style' => 'primary']],
+            'player:tileset' => [
+                'attributes' => ['number' => 3, 'image' => 'player.png'],
             ],
-            'components' => [
-                'cnt.counter' => ['min' => 0, 'max' => 100, 'step' => 5, 'value' => 50],
+            'npc:tileset' => [
+                'attributes' => ['number' => 4, 'image' => 'npc.png'],
+            ],
+            'level_01:tilemap' => [
+                'attributes' => ['width' => 1024, 'height' => 1024],
+                'layer_00:tilemap-layer' => [
+                    'attributes' => ['data' => 'land_layer.map'],
+                ],
+                'layer_01:tilemap-layer' => [
+                    'attributes' => ['data' => 'forest_layer.map'],
+                ],
+                'layer_02:tilemap-layer' => [
+                    'attributes' => ['data' => 'decorations_layer.map'],
+                ],
+                'collision:tilemap-layer' => [
+                    'attributes' => ['data' => 'collision_layer.map'],
+                ],
             ],
         ];
     }
