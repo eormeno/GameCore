@@ -39,6 +39,9 @@ class RpgRootPrefab extends Prefab
                 'collision:tilemap-layer' => [
                     'attributes' => ['data' => 'collision_layer.map'],
                 ],
+                'camera:camera-2d' => [
+                    'attributes' => ['x' => 160, 'y' => 90, 'width' => 320, 'height' => 180],
+                ],
             ],
         ];
     }

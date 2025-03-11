@@ -6,7 +6,6 @@ use App\Models\Components\PersistentComponent;
 
 class TilemapComponent extends PersistentComponent
 {
-    private const DEFAULT_MAP_NAME = "Map";
     private const MAP_WIDTH = 1024;
     private const MAP_HEIGHT = 1024;
 
