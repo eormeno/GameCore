@@ -26,7 +26,11 @@ class RpgRootPrefab extends Prefab
                 'attributes' => ['number' => 4, 'image' => 'npc.png'],
             ],
             'level_01:tilemap' => [
-                'attributes' => ['width' => 1024, 'height' => 1024],
+                'attributes' => [
+                    'width' => 1024,
+                    'height' => 1024,
+                    'view_port' => ['x' => 160, 'y' => 90, 'width' => 320, 'height' => 180, 'zoom' => 2],
+                ],
                 'layer_00:tilemap-layer' => [
                     'attributes' => ['data' => 'land_layer.map'],
                 ],
@@ -38,10 +42,7 @@ class RpgRootPrefab extends Prefab
                 ],
                 'collision:tilemap-layer' => [
                     'attributes' => ['data' => 'collision_layer.map'],
-                ],
-                'camera:camera-2d' => [
-                    'attributes' => ['x' => 160, 'y' => 90, 'width' => 320, 'height' => 180],
-                ],
+                ]
             ],
         ];
     }
