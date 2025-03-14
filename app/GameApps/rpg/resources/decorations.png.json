@@ -1,0 +1,13 @@
+{
+    "ext": "png",
+    "type": "tileset",
+    "text": "rpg-card",
+    "color": "orange",
+    "fontSize": 14,
+    "width": 320,
+    "height": 192,
+    "tileWidth": 64,
+    "tileHeight": 64,
+    "tilesetCols": 8,
+    "tilesetRows": 4
+}

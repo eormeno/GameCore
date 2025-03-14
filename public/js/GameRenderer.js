@@ -202,6 +202,15 @@ class GameRenderer {
                         this.playAudio(element);
                     });
                     break;
+                case 'tileset':
+                    // store the tileset image in the cache
+                    console.log('Tileset:', component.image);
+                    this.fetchResourceWithCacheAndBearer(`${this.resourceUrl}/${component.image}`, (url) => {
+                        const img = new Image();
+                        img.src = url;
+                        this.arrCachedViews[component.image] = img;
+                    });
+                    break;
             }
 
             if (component.updatable) this.pushEvent('update', {}, id);
