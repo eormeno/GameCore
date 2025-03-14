@@ -14,6 +14,7 @@ class TilemapComponent extends PersistentComponent
         return [
             'width' => ['integer', self::MAP_WIDTH],
             'height' => ['integer', self::MAP_HEIGHT],
+            'view_port' => ['json', null],
         ];
     }
 
@@ -22,6 +23,7 @@ class TilemapComponent extends PersistentComponent
         $this->updateQuietly([
             'width' => $initParams['width'] ?? self::MAP_WIDTH,
             'height' => $initParams['height'] ?? self::MAP_HEIGHT,
+            'view_port' => $initParams['view_port'] ?? null,
         ]);
     }
 
@@ -31,6 +33,7 @@ class TilemapComponent extends PersistentComponent
             'type' => 'tilemap',
             'width' => $this->width,
             'height' => $this->height,
+            'view_port' => $this->view_port,
         ];
     }
 }
