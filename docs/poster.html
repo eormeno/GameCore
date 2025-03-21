@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameCore: Framework para Videojuegos Autoritativos</title>
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --light-primary: #e8eaf6;
+            --accent-color: #bbdefb;
+            --accent-light: #e3f2fd;
+            --component-color: #90caf9;
+            --text-dark: #333;
+            --text-light: white;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .poster {
+            width: 841px;
+            /* A2 width in pixels at 72dpi */
+            height: 1189px;
+            /* A2 height in pixels at 72dpi */
+            background-color: #f5f5f5;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            padding: 8px 15px;
+            text-align: center;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0 20px 8px 20px;
+            line-height: 1.2;
+            padding: 0 10px;
+            width: calc(100% - 40px);
+            text-align: center;
+        }
+
+        .authors {
+            font-size: 18px;
+            margin: 0 30px;
+            padding: 0 15px;
+            width: calc(100% - 60px);
+            text-align: center;
+        }
+
+        .section {
+            margin: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid var(--primary-color);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .summary {
+            background-color: var(--light-primary);
+            padding: 20px;
+            text-align: center;
+            line-height: 1.6;
+            font-size: 18px;
+        }
+
+        .architecture-diagram,
+        .sync-diagram {
+            background-color: var(--accent-light);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            height: 300px;
+        }
+
+        .box {
+            background-color: var(--accent-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            position: absolute;
+        }
+
+        .component {
+            background-color: var(--component-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            padding: 10px 15px;
+            text-align: center;
+            color: var(--primary-color);
+            position: absolute;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Architecture diagram boxes */
+        .game-object {
+            width: 140px;
+            height: 50px;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .component-1 {
+            width: 110px;
+            height: 50px;
+            left: 25%;
+            top: 130px;
+            transform: translateX(-50%);
+        }
+
+        .component-2 {
+            width: 110px;
+            height: 50px;
+            left: 75%;
+            top: 130px;
+            transform: translateX(-50%);
+        }
+
+        .component-n {
+            width: 110px;
+            height: 50px;
+            left: 50%;
+            top: 220px;
+            transform: translateX(-50%);
+        }
+
+        /* Synchronization diagram boxes */
+        .client {
+            width: 100px;
+            height: 50px;
+            left: 25%;
+            top: 30px;
+            transform: translateX(-50%);
+        }
+
+        .server {
+            width: 100px;
+            height: 50px;
+            left: 75%;
+            top: 30px;
+            transform: translateX(-50%);
+        }
+
+        .local-state {
+            width: 100px;
+            height: 60px;
+            left: 25%;
+            top: 150px;
+            transform: translateX(-50%);
+        }
+
+        .auth-validation {
+            width: 100px;
+            height: 60px;
+            left: 75%;
+            top: 150px;
+            transform: translateX(-50%);
+        }
+
+        /* Lines */
+        .line {
+            position: absolute;
+            background-color: var(--primary-color);
+        }
+
+        .vertical-line {
+            width: 2px;
+        }
+
+        .horizontal-line {
+            height: 2px;
+        }
+
+        /* Architecture lines */
+        .line-go-down {
+            left: 50%;
+            top: 80px;
+            height: 25px;
+        }
+
+        .line-comp1 {
+            left: 25%;
+            top: 105px;
+            height: 25px;
+        }
+
+        .line-comp2 {
+            left: 75%;
+            top: 105px;
+            height: 25px;
+        }
+
+        .line-middle {
+            left: 25%;
+            top: 105px;
+            width: 50%;
+        }
+
+        .line-compn {
+            left: 50%;
+            top: 105px;
+            height: 115px;
+        }
+
+        /* Synchronization lines & arrows */
+        .arrow-right {
+            left: 25%;
+            top: 94px;
+            width: 50%;
+            height: 2px;
+        }
+
+        .arrow-left {
+            left: 25%;
+            top: 120px;
+            width: 50%;
+            height: 2px;
+        }
+
+        .arrow-client-down {
+            left: 25%;
+            top: 80px;
+            height: 70px;
+        }
+
+        .arrow-server-down {
+            left: 75%;
+            top: 80px;
+            height: 70px;
+        }
+
+        .arrow-head-right {
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 10px solid var(--primary-color);
+            position: absolute;
+            right: 25%;
+            top: 91px;
+        }
+
+        .arrow-head-left {
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-right: 10px solid var(--primary-color);
+            position: absolute;
+            left: 25%;
+            top: 116px;
+        }
+
+        .features-list {
+            margin-top: 20px;
+            padding-left: 20px;
+        }
+
+        .features-list li {
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 16px;
+        }
+
+        .two-columns {
+            display: flex;
+            gap: 20px;
+        }
+
+        .column {
+            flex: 1;
+        }
+
+        .tech-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 5px 0;
+            flex-wrap: wrap;
+        }
+
+        .tech-icon {
+            background-color: var(--accent-light);
+            border-radius: 10px;
+            width: 100px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            padding: 15px;
+            margin: 0 5px 10px 5px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .results-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 0;
+        }
+
+        .result-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .metric-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            text-align: center;
+            color: var(--text-dark);
+        }
+
+        .footer {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            text-align: center;
+            padding: 10px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        @media print {
+            @page {
+                size: A2;
+                margin: 0;
+            }
+
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                display: block;
+                background: none;
+            }
+
+            .poster {
+                width: 100%;
+                height: 100%;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                overflow: visible;
+                page-break-inside: avoid;
+            }
+
+            /* Ensure proper color printing */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        .corner-triangle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 50px 50px 0;
+            border-color: transparent #ffeb3b transparent transparent;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="poster">
+        <div class="corner-triangle"></div>
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">GameCore: Framework para Videojuegos Autoritativos</h1>
+            <div class="authors">Emilio Ormeño, Cintia Ferrarini Oliver - UNSJ</div>
+        </div>
+
+        <!-- Summary -->
+        <div class="section summary">
+            <h2 class="section-title">RESUMEN</h2>
+            <p>Framework backend que ofrece una plataforma robusta y escalable para implementar videojuegos
+                autoritativos, integrando mecanismos avanzados de sincronización, autenticación, gestión de
+                estados y eventos para garantizar la integridad y seguridad en entornos multijugador.</p>
+        </div>
+
+        <!-- Two column layout -->
+        <div class="two-columns">
+            <!-- Architecture -->
+            <div class="column">
+                <div class="section">
+                    <h2 class="section-title">ARQUITECTURA</h2>
+                    <div class="architecture-diagram">
+                        <div class="box game-object">GameObject</div>
+                        <div class="component component-1">Component 1</div>
+                        <div class="component component-2">Component 2</div>
+                        <div class="component component-n">Component N</div>
+
+                        <!-- Lines connecting components -->
+                        <div class="line vertical-line line-go-down"></div>
+                        <div class="line horizontal-line line-middle"></div>
+                        <div class="line vertical-line line-comp1"></div>
+                        <div class="line vertical-line line-comp2"></div>
+                        <div class="line vertical-line line-compn"></div>
+                    </div>
+                    <ul class="features-list">
+                        <li>Patrón de Componentes</li>
+                        <li>Patrón State para máquinas de estados</li>
+                        <li>Servicios persistentes</li>
+                        <li>Gestión de eventos</li>
+                        <li>Prefabs y GameApps</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Synchronization -->
+            <div class="column">
+                <div class="section">
+                    <h2 class="section-title">SINCRONIZACIÓN</h2>
+                    <div class="sync-diagram">
+                        <div class="box client">Cliente</div>
+                        <div class="box server">Servidor</div>
+                        <div class="component local-state">Estado<br>Local</div>
+                        <div class="component auth-validation">Validación<br>Autoritativa</div>
+
+                        <!-- Lines and arrows -->
+                        <div class="line horizontal-line arrow-right"></div>
+                        <div class="arrow-head-right"></div>
+                        <div class="line horizontal-line arrow-left"></div>
+                        <div class="arrow-head-left"></div>
+                        <div class="line vertical-line arrow-client-down"></div>
+                        <div class="line vertical-line arrow-server-down"></div>
+                    </div>
+                    <ul class="features-list">
+                        <li>Arquitectura bidireccional</li>
+                        <li>Validación en tiempo real</li>
+                        <li>Minimización de latencia</li>
+                        <li>Control autoritativo centralizado</li>
+                        <li>Sincronización inmediata</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation -->
+        <div class="section">
+            <h2 class="section-title">IMPLEMENTACIÓN TECNOLÓGICA</h2>
+            <div class="tech-container">
+                <div class="tech-icon">Laravel</div>
+                <div class="tech-icon">Eloquent</div>
+                <div class="tech-icon">WebSockets</div>
+                <div class="tech-icon">Micro-<br>servicios</div>
+                <div class="tech-icon">API<br>RESTful</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            WICC 2025 - Instituto de Informática - UNSJ
+        </div>
+    </div>
+</body>
+
+</html>
