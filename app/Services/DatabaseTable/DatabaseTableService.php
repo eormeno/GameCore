@@ -37,13 +37,13 @@ class DatabaseTableService implements DatabaseTableServiceInterface
     /**
      * @inheritdoc
      */
-    public function getTablesJson(bool $showIgnored = false, bool $withData = false, ?string $pattern = null): string
+    public function getTablesJson(bool $showIgnored = false, bool $withData = false, ?string $pattern = null, bool $pretty_print = false): string
     {
         $tables = $this->getTables($showIgnored, $withData, $pattern);
 
         return json_encode([
             'tables' => $tables,
             'count' => count($tables)
-        ]);
+        ], $pretty_print ? JSON_PRETTY_PRINT : 0);
     }
 }

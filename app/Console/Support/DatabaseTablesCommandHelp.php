@@ -56,6 +56,7 @@ class DatabaseTablesCommandHelp
         $this->command->line('  php artisan db:tables --show-ignored Show all tables including ignored ones');
         $this->command->line('  php artisan db:tables --with-data    Show only tables containing data (rows > 0)');
         $this->command->line('  php artisan db:tables --json         Output results in JSON format');
+        $this->command->line('  php artisan db:tables --pretty       Pretty print JSON output');
         $this->command->line('');
     }
 

@@ -20,7 +20,8 @@ interface DatabaseTableServiceInterface
      * @param bool $showIgnored Whether to include ignored tables
      * @param bool $withData Show only tables containing data
      * @param string|null $pattern Optional pattern to filter tables
+     * @param bool $pretty_print Whether to pretty print the JSON
      * @return string JSON representation of tables
      */
-    public function getTablesJson(bool $showIgnored = false, bool $withData = false, ?string $pattern = null): string;
+    public function getTablesJson(bool $showIgnored = false, bool $withData = false, ?string $pattern = null, bool $pretty_print = false): string;
 }
