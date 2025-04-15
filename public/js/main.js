@@ -19,7 +19,7 @@ async function main(state = pageState.initialState) {
             break;
         case 'displaying_games_gallery':
             await updateAuthMenu(authMenuContainer);
-            renderGamesCards(data);
+            await renderGamesCards(data);
             break;
         case 'fetching_game':
             pageState.previousState = state;
@@ -35,7 +35,9 @@ async function main(state = pageState.initialState) {
             gameRenderer.startGame(data);
             break;
         case 'auth_required':
-            await partialLoader.loadPartial('login-form', gamesContainer);
+            await partialLoader.loadPartial('login-form', gamesContainer, {
+                pageState: pageState
+            });
             break;
         case 'trying_login':
             await fetchApi(data.action, data.method, data.body);

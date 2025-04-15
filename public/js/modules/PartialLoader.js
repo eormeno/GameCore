@@ -57,7 +57,23 @@ class PartialLoader {
     _replaceScripts(container) {
         container.querySelectorAll('script').forEach(oldScript => {
             const newScript = this._createScriptClone(oldScript);
-            oldScript.parentNode.replaceChild(newScript, oldScript);
+            const isModule = newScript.type === 'module';
+
+            if (isModule) {
+                // Cargar el script como módulo dinámico y ejecutar función
+                const blob = new Blob([newScript.textContent], { type: 'text/javascript' });
+                const url = URL.createObjectURL(blob);
+
+                import(url).then(mod => {
+                    if (typeof mod.render === 'function') {
+                        mod.render(container);
+                    }
+                    URL.revokeObjectURL(url);
+                });
+            } else {
+                // Script clásico
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            }
         });
     }
 

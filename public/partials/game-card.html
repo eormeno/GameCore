@@ -6,16 +6,21 @@
         <button class="play-button">Play</button>
     </div>
     <script type="module">
-        const container = document.querySelector('.game-card');
-        const { game } = container._partialParams || {};
+        export function render(container) {
+            const { game, pageState } = container._partialParams || {};
 
-        const image = container.querySelector('.game-image');
-        const title = container.querySelector('.game-title');
-        const description = container.querySelector('.game-description');
-        const playButton = container.querySelector('.play-button');
+            const image = container.querySelector('.game-image');
+            const title = container.querySelector('.game-title');
+            const description = container.querySelector('.game-description');
+            const playButton = container.querySelector('.play-button');
 
-        image.src = 'api/game-app/' + game.id + '/public/' + game.card_image;
-        image.alt = game.name;
-        //console.log(game);
+            image.src = 'api/game-app/' + game.id + '/public/' + game.card_image;
+            image.alt = game.name;
+            title.textContent = game.name;
+            description.textContent = game.description;
+
+            playButton.disabled = game.prefab_name === null;
+            playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id });
+        }
     </script>
 </div>
