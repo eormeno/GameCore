@@ -1,4 +1,5 @@
 import pageState from './modules/PageStateManager.js';
+import { partialLoader } from './modules/PartialLoader.js';
 
 function renderGamesCards(games) {
     const container = document.getElementById('gamesContainer');
@@ -38,6 +39,14 @@ function renderGamesCards(games) {
         card.appendChild(content);
 
         container.appendChild(card);
+        console.log('game', game);
+
+        partialLoader.loadPartial('game-card', card, {
+            game: game,
+            pageState: pageState
+        });
+
+
     });
 }
 
