@@ -135,6 +135,13 @@ header {
     background: #666;
 }
 
+/* button container display: flex; gap: 10px; margin: 15px 10px 10px;*/
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin: 5px 10px 10px;
+}
+
 /* Diseño responsive para pantallas medianas y pequeñas */
 @media (max-width: 768px) {
     header {
