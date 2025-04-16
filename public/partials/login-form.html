@@ -14,17 +14,17 @@
         </div>
     </form>
     <script type="module">
-        import pageState from '../js/modules/PageStateManager.js';
-
-        // Se añade el listener al submit del formulario
-        document.getElementById("loginForm").addEventListener("submit", async function (event) {
-            event.preventDefault();
-            const formValues = Object.fromEntries(new FormData(event.target));
-            pageState.setPageState("trying_login", {
-                action: event.target.action,
-                method: event.target.method,
-                body: JSON.stringify(formValues)
+        export function render(container) {
+            const { pageState } = container._partialParams || {};
+            document.getElementById("loginForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const formValues = Object.fromEntries(new FormData(event.target));
+                pageState.setPageState("trying_login", {
+                    action: event.target.action,
+                    method: event.target.method,
+                    body: JSON.stringify(formValues)
+                });
             });
-        });
+        }
     </script>
 </div>
