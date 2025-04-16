@@ -104,6 +104,37 @@ header {
     background: linear-gradient(90deg, #e64a19, #d84315);
 }
 
+/* Edit button similar  a play button pero con un color diferente */
+.edit-button {
+    display: block;
+    width: 50%;
+    padding: 10px;
+    background: linear-gradient(90deg, #42678e, #33506e);
+    /* Toque vibrante propio de videojuegos */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    margin-top: auto;
+}
+
+.edit-button:hover {
+    background: linear-gradient(90deg, #42678ec9, #33506ec9);
+}
+
+.edit-button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+/* hover when disabled */
+.edit-button:disabled:hover {
+    background: #666;
+}
+
 /* Diseño responsive para pantallas medianas y pequeñas */
 @media (max-width: 768px) {
     header {
