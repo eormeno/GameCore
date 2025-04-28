@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Contracts\IRenderer;
 use App\Services\RendererService;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Prefab\Managers\ComponentManager;
 use App\Models\Prefab\Parsers\GameObjectNameParser;
@@ -30,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Model::automaticallyEagerLoadRelations();
+        // Model::automaticallyEagerLoadRelationships();
         // Configura las rutas API
         Route::prefix('api')
             ->middleware('api')
