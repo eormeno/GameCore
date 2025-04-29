@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Model::automaticallyEagerLoadRelations();
-        Model::automaticallyEagerLoadRelationships();
+        // Model::automaticallyEagerLoadRelationships();
         // Configura las rutas API
         Route::prefix('api')
             ->middleware('api')
