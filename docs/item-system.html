@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ítems para Plataformas de Videojuegos en Laravel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <!-- Cargar Mermaid con la versión más reciente (11.x) -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+        // Inicializar Mermaid con la nueva API de la versión 11 y colores mejorados para legibilidad
+        document.addEventListener('DOMContentLoaded', function() {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'default',
+                securityLevel: 'loose',
+                htmlLabels: true,
+                flowchart: { curve: 'basis' },
+                themeVariables: {
+                    // Colores de fondo para mejorar la legibilidad
+                    primaryColor: '#4a86e8',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#2c3e50',
+                    secondaryColor: '#6aa84f',
+                    tertiaryColor: '#f1f1f1',
+
+                    // Colores de texto y líneas para mejor contraste
+                    mainBkg: '#f8f9fa',
+                    nodeBorder: '#2c3e50',
+                    clusterBkg: '#fcfcfc',
+                    clusterBorder: '#2c3e50',
+                    lineColor: '#333333',
+
+                    // Elementos de texto
+                    textColor: '#333333',
+                    fontSize: '16px',
+
+                    // Relaciones y conexiones
+                    labelBackground: '#ffffff',
+                    edgeLabelBackground: '#ffffff'
+                },
+                class: {
+                    // Ajustes específicos para diagramas de clase
+                    titleTopMargin: 25,
+                    classAttributes: {"fontSize": "14px"},
+                    classText: {"fill": "#333333"}
+                }
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/php.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Contenido</h2>
+                <button id="toggleSidebar" class="toggle-button">≡</button>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#introduccion">Introducción</a></li>
+                    <li><a href="#descripcion-elementos">Descripción de Elementos</a></li>
+                    <li><a href="#arquitectura">Arquitectura del Sistema</a></li>
+                    <li>
+                        <a href="#implementacion">Implementación en Laravel</a>
+                        <ul>
+                            <li><a href="#migraciones">Migraciones</a></li>
+                            <li><a href="#modelos-base">Modelos Base</a></li>
+                            <li><a href="#modelos-especificos">Modelos Específicos</a></li>
+                            <li><a href="#modelos-consumibles-temporales">Consumibles y Temporales</a></li>
+                            <li><a href="#eventos">Eventos</a></li>
+                            <li><a href="#servicios">Servicios</a></li>
+                            <li><a href="#controladores">Controladores</a></li>
+                            <li><a href="#comandos">Comandos</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#reglas">Sistema de Reglas</a></li>
+                    <li><a href="#ejemplos">Ejemplos de Uso</a></li>
+                    <li><a href="#consideraciones">Consideraciones</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header>
+                <div class="header-content">
+                    <h1>Sistema de Ítems para Plataformas de Videojuegos en Laravel</h1>
+                    <p class="date">Fecha: 2025-04-30</p>
+                    <p class="author">Autor: eormeno-idei</p>
+                </div>
+            </header>
+
+            <section id="introduccion" class="section">
+                <h2>Introducción</h2>
+                <p>Este documento presenta una arquitectura completa para un sistema de ítems para plataformas de videojuegos implementado en Laravel. El sistema está diseñado para manejar una gran variedad de tipos de ítems incluyendo cuantificables, físicos, contenedores, interactuables, compartidos, consumibles y temporales.</p>
+            </section>
+
+            <section id="descripcion-elementos" class="section">
+                <h2>Descripción de Elementos</h2>
+
+                <h3>1. Ítem Base</h3>
+                <p>El concepto fundamental en este sistema. Un ítem es cualquier entidad que puede ser poseída, transferida, y puede tener comportamientos definidos. Todos los ítems compartirán ciertas propiedades como identificador único, nombre, descripción y estado.</p>
+
+                <h3>2. Tipos de Ítems</h3>
+                <ul>
+                    <li><strong>Ítems Cuantificables</strong>: Representan recursos como puntos, vida, monedas, etc.</li>
+                    <li><strong>Ítems Físicos</strong>: Representan objetos concretos como cartas, fichas, armas, etc.</li>
+                    <li><strong>Ítems Contenedores</strong>: Pueden contener otros ítems (mazo, inventario, slot).</li>
+                    <li><strong>Ítems Interactuables</strong>: Tienen funcionalidades con las que el jugador puede interactuar.</li>
+                    <li><strong>Ítems Compartidos</strong>: Pueden ser accedidos o utilizados por múltiples jugadores.</li>
+                    <li><strong>Ítems de Estado</strong>: Representan estados del juego como rondas, turnos, etc.</li>
+                    <li><strong>Ítems Consumibles</strong>: Pueden agotarse después de un número determinado de usos.</li>
+                    <li><strong>Ítems Temporales</strong>: Expiran después de un período de tiempo determinado.</li>
+                </ul>
+
+                <h3>3. Propiedad</h3>
+                <p>Define quién posee un ítem, pudiendo ser:</p>
+                <ul>
+                    <li><strong>Jugador específico</strong></li>
+                    <li><strong>Grupo de jugadores</strong></li>
+                    <li><strong>Sistema</strong> (ítems no poseídos por ningún jugador específico)</li>
+                    <li><strong>Compartido</strong> (accesible por ciertos jugadores o todos)</li>
+                </ul>
+
+                <h3>4. Reglas</h3>
+                <p>Sistema basado en eventos que define el comportamiento de los ítems mediante un lenguaje de script simple.</p>
+            </section>
+
+            <section id="arquitectura" class="section">
+                <h2>Arquitectura del Sistema</h2>
+
+                <!-- Diagrama de clases con sintaxis actualizada para Mermaid v11 -->
+                <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'darkMode': true, 'primaryColor': '#000bff', 'primaryTextColor': '#ffffff', 'primaryBorderColor': '#007bff', 'lineColor': '#ffffff', 'textColor': '#ffffff', 'fontSize': '14px'}}}%%
+classDiagram
+    direction TB
+
+    Item --|> ConsumableItem : hasOne
+    Item --|> TemporalItem : hasOne
+    Item --|> ItemProperty : hasMany
+    Item --|> ItemRule : hasMany
+    Item --|> Owner : belongsTo
+
+    Player ..|> Owner
+    Player --|> Item : hasMany
+
+    Event --|> ItemRule : triggers
+    ItemRule --|> RuleEngine : uses
+
+    class Item {
+        +uuid id
+        +string name
+        +string description
+        +enum state
+        +string item_type
+        +timestamps
+        +owner()
+        +properties()
+        +rules()
+        +consumable()
+        +temporal()
+        +isConsumable()
+        +isTemporal()
+        +isExpired()
+        +acquire(Owner newOwner)
+        +release()
+        +transfer(Owner newOwner)
+        +consume(int amount)
+        +checkExpiration()
+        +interact(Item other, string action)
+        +modify(string property, mixed value)
+    }
+
+    class ConsumableItem {
+        +uuid id
+        +uuid item_id
+        +int uses_remaining
+        +int max_uses
+        +boolean is_stackable
+        +int stack_size
+        +timestamps
+        +item()
+        +addUses(int amount)
+        +increaseStack(int amount)
+        +splitStack(int amount)
+    }
+
+    class TemporalItem {
+        +uuid id
+        +uuid item_id
+        +timestamp expires_at
+        +timestamps
+        +item()
+        +expiresIn(duration)
+        +extend(duration)
+        +isExpired()
+        +remainingTime()
+    }
+
+    class ItemProperty {
+        +uuid id
+        +uuid item_id
+        +string key
+        +json value
+        +timestamps
+    }
+
+    class ItemRule {
+        +uuid id
+        +uuid item_id
+        +string name
+        +text condition_script
+        +text action_script
+        +json parameters
+        +timestamps
+    }
+
+    class Owner {
+        +uuid id
+        +string name
+        +string owner_type
+        +timestamps
+    }
+
+    class Player {
+        +uuid id
+        +string username
+        +string email
+        +timestamps
+        +items()
+        +inventory()
+    }
+
+    class Event {
+        +uuid id
+        +string type
+        +json data
+        +timestamps
+    }
+
+    class RuleEngine {
+        +evaluateCondition(string script, Context context)
+        +executeAction(string script, Context context)
+    }
+                </pre>
+            </section>
+
+            <section id="implementacion" class="section">
+                <h2>Implementación en Laravel</h2>
+
+                <section id="migraciones" class="subsection">
+                    <h3>Migraciones</h3>
+                    <pre><code class="language-php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('items', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->enum('state', ['active', 'inactive', 'locked', 'consumed', 'hidden'])->default('active');
+            $table->string('item_type'); // Para polimorfismo
+            $table->nullableUuidMorphs('owner'); // Para relación polimórfica con diferentes tipos de propietarios
+            $table->timestamps();
+        });
+
+        Schema::create('item_properties', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('item_id')->constrained()->cascadeOnDelete();
+            $table->string('key');
+            $table->json('value');
+            $table->timestamps();
+
+            $table->unique(['item_id', 'key']);
+        });
+
+        Schema::create('item_rules', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('item_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->text('condition_script');
+            $table->text('action_script');
+            $table->json('parameters')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('containers', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('container_item_id')->constrained('items')->cascadeOnDelete();
+            $table->integer('capacity')->default(-1); // -1 significa capacidad ilimitada
+            $table->timestamps();
+        });
+
+        Schema::create('container_item', function (Blueprint $table) {
+            $table->foreignUuid('container_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('item_id')->constrained()->cascadeOnDelete();
+            $table->integer('position')->nullable();
+            $table->timestamps();
+
+            $table->primary(['container_id', 'item_id']);
+        });
+
+        Schema::create('shared_ownerships', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('item_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('player_id')->constrained()->cascadeOnDelete();
+            $table->json('access_rules')->nullable();
+            $table->timestamps();
+
+            $table->unique(['item_id', 'player_id']);
+        });
+
+        Schema::create('events', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->json('data');
+            $table->timestamps();
+        });
+
+        // Migración para ítems consumibles
+        Schema::create('consumable_items', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('item_id')->constrained()->onDelete('cascade');
+            $table->integer('uses_remaining')->default(1);
+            $table->integer('max_uses')->default(1);
+            $table->boolean('is_stackable')->default(false);
+            $table->integer('stack_size')->default(1);
+            $table->timestamps();
+        });
+
+        // Migración para ítems temporales
+        Schema::create('temporal_items', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('item_id')->constrained()->onDelete('cascade');
+            $table->timestamp('expires_at')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('temporal_items');
+        Schema::dropIfExists('consumable_items');
+        Schema::dropIfExists('shared_ownerships');
+        Schema::dropIfExists('container_item');
+        Schema::dropIfExists('containers');
+        Schema::dropIfExists('item_rules');
+        Schema::dropIfExists('item_properties');
+        Schema::dropIfExists('events');
+        Schema::dropIfExists('items');
+    }
+};
+                    </code></pre>
+                </section>
+
+                <section id="modelos-base" class="subsection">
+                    <h3>Modelo Base - Item</h3>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Services\RuleEngine;
+use App\Events\ItemAcquired;
+use App\Events\ItemTransferred;
+use App\Events\ItemReleased;
+use App\Events\ItemConsumed;
+use App\Events\ItemExpired;
+use Carbon\Carbon;
+
+class Item extends Model
+{
+    use HasUuids;
+
+    protected $fillable = [
+        'name',
+        'description',
+        'state',
+    ];
+
+    // Relación polimórfica con el propietario
+    public function owner()
+    {
+        return $this->morphTo();
+    }
+
+    public function properties()
+    {
+        return $this->hasMany(ItemProperty::class);
+    }
+
+    public function rules()
+    {
+        return $this->hasMany(ItemRule::class);
+    }
+
+    public function sharedOwners()
+    {
+        return $this->belongsToMany(Player::class, 'shared_ownerships')
+                    ->withPivot('access_rules')
+                    ->withTimestamps();
+    }
+
+    // Relaciones para los nuevos tipos de ítems
+    public function consumable()
+    {
+        return $this->hasOne(ConsumableItem::class);
+    }
+
+    public function temporal()
+    {
+        return $this->hasOne(TemporalItem::class);
+    }
+
+    // Métodos para verificar el tipo de ítem
+    public function isConsumable()
+    {
+        return $this->consumable()->exists();
+    }
+
+    public function isTemporal()
+    {
+        return $this->temporal()->exists();
+    }
+
+    public function isExpired()
+    {
+        return $this->isTemporal() && $this->temporal->expires_at && $this->temporal->expires_at->isPast();
+    }
+
+    // Métodos para gestionar propiedades
+    public function getProperty($key, $default = null)
+    {
+        $property = $this->properties()->where('key', $key)->first();
+        return $property ? $property->value : $default;
+    }
+
+    public function setProperty($key, $value)
+    {
+        $this->properties()->updateOrCreate(
+            ['key' => $key],
+            ['value' => $value]
+        );
+
+        return $this;
+    }
+
+    // Métodos para la transferencia de propiedad
+    public function acquire($owner)
+    {
+        $oldOwner = $this->owner;
+        $this->owner()->associate($owner);
+        $this->save();
+
+        event(new ItemAcquired($this, $owner, $oldOwner));
+        $this->executeRules('ACQUIRE', [
+            'new_owner' => $owner,
+            'old_owner' => $oldOwner
+        ]);
+
+        return $this;
+    }
+
+    public function release()
+    {
+        $oldOwner = $this->owner;
+        $this->owner()->dissociate();
+        $this->save();
+
+        event(new ItemReleased($this, $oldOwner));
+        $this->executeRules('RELEASE', [
+            'old_owner' => $oldOwner
+        ]);
+
+        return $this;
+    }
+
+    public function transfer($newOwner)
+    {
+        $oldOwner = $this->owner;
+        $this->owner()->associate($newOwner);
+        $this->save();
+
+        event(new ItemTransferred($this, $newOwner, $oldOwner));
+        $this->executeRules('TRANSFER', [
+            'new_owner' => $newOwner,
+            'old_owner' => $oldOwner
+        ]);
+
+        return $this;
+    }
+
+    // Método para utilizar un ítem consumible
+    public function consume($amount = 1)
+    {
+        if (!$this->isConsumable()) {
+            throw new \Exception("This item cannot be consumed");
+        }
+
+        if ($this->state === 'consumed') {
+            throw new \Exception("Item already fully consumed");
+        }
+
+        $consumable = $this->consumable;
+
+        if ($consumable->uses_remaining <= 0) {
+            throw new \Exception("No uses remaining for this item");
+        }
+
+        // Si es stackable, reducimos el stack_size primero
+        if ($consumable->is_stackable && $consumable->stack_size > 1) {
+            $consumable->stack_size -= $amount;
+            $consumable->save();
+
+            $this->executeRules('CONSUME', [
+                'amount' => $amount,
+                'uses_remaining' => $consumable->uses_remaining,
+                'stack_size' => $consumable->stack_size
+            ]);
+
+            return $this;
+        }
+
+        // Si no es stackable o el stack es de tamaño 1, reducimos los usos
+        $consumable->uses_remaining -= $amount;
+        $consumable->save();
+
+        // Si se agotaron los usos, marcar como consumido
+        if ($consumable->uses_remaining <= 0) {
+            $this->state = 'consumed';
+            $this->save();
+
+            event(new ItemConsumed($this));
+        }
+
+        $this->executeRules('CONSUME', [
+            'amount' => $amount,
+            'uses_remaining' => $consumable->uses_remaining
+        ]);
+
+        return $this;
+    }
+
+    // Método para verificar y manejar la expiración
+    public function checkExpiration()
+    {
+        if ($this->isExpired() && $this->state !== 'consumed') {
+            $this->state = 'consumed';
+            $this->save();
+
+            event(new ItemExpired($this));
+            $this->executeRules('EXPIRE');
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // Ejecución de reglas
+    public function executeRules($eventType, $data = [])
+    {
+        $context = [
+            'item' => $this,
+            'event' => [
+                'type' => $eventType,
+                'data' => $data
+            ]
+        ];
+
+        foreach ($this->rules as $rule) {
+            $ruleEngine = app(RuleEngine::class);
+
+            if ($ruleEngine->evaluateCondition($rule->condition_script, $context)) {
+                $ruleEngine->executeAction($rule->action_script, $context);
+            }
+        }
+    }
+
+    // Interacción entre ítems
+    public function interact(Item $other, $action)
+    {
+        $this->executeRules('INTERACT', [
+            'target' => $other,
+            'action' => $action
+        ]);
+
+        return $this;
+    }
+}
+                    </code></pre>
+                </section>
+
+                <section id="modelos-especificos" class="subsection">
+                    <h3>Modelos Específicos</h3>
+                    <h4>QuantifiableItem</h4>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Models;
+
+use App\Events\ItemValueChanged;
+
+class QuantifiableItem extends Item
+{
+    protected static function booted()
+    {
+        parent::booted();
+
+        static::creating(function ($item) {
+            $item->item_type = 'quantifiable';
+        });
+    }
+
+    public function getValue()
+    {
+        return (float) $this->getProperty('value', 0);
+    }
+
+    public function setValue($value)
+    {
+        $oldValue = $this->getValue();
+        $this->setProperty('value', $value);
+
+        event(new ItemValueChanged($this, $oldValue, $value));
+        $this->executeRules('VALUE_CHANGE', [
+            'old_value' => $oldValue,
+            'new_value' => $value
+        ]);
+
+        return $this;
+    }
+
+    public function increment($amount)
+    {
+        return $this->setValue($this->getValue() + $amount);
+    }
+
+    public function decrement($amount)
+    {
+        return $this->setValue($this->getValue() - $amount);
+    }
+}
+                    </code></pre>
+
+                    <h4>ContainerItem</h4>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Models;
+
+class ContainerItem extends Item
+{
+    protected static function booted()
+    {
+        parent::booted();
+
+        static::creating(function ($item) {
+            $item->item_type = 'container';
+        });
+
+        static::created(function ($item) {
+            $item->container()->create(['capacity' => -1]);
+        });
+    }
+
+    public function container()
+    {
+        return $this->hasOne(Container::class, 'container_item_id');
+    }
+
+    public function items()
+    {
+        return $this->container->items();
+    }
+
+    public function addItem(Item $item, $position = null)
+    {
+        return $this->container->add($item, $position);
+    }
+
+    public function removeItem(Item $item)
+    {
+        return $this->container->remove($item);
+    }
+
+    public function isEmpty()
+    {
+        return $this->container->items()->count() === 0;
+    }
+}
+                    </code></pre>
+                </section>
+
+                <section id="modelos-consumibles-temporales" class="subsection">
+                    <h3>Modelos para Ítems Consumibles y Temporales</h3>
+                    <h4>ConsumableItem</h4>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class ConsumableItem extends Model
+{
+    use HasUuids;
+
+    protected $fillable = [
+        'item_id',
+        'uses_remaining',
+        'max_uses',
+        'is_stackable',
+        'stack_size'
+    ];
+
+    /**
+     * Relación con el ítem base
+     */
+    public function item()
+    {
+        return $this->belongsTo(Item::class);
+    }
+
+    /**
+     * Método para añadir usos al ítem
+     */
+    public function addUses(int $amount)
+    {
+        $this->uses_remaining = min($this->uses_remaining + $amount, $this->max_uses);
+        $this->save();
+
+        // Si el ítem estaba consumido y ahora tiene usos, lo activamos de nuevo
+        if ($this->item->state === 'consumed' && $this->uses_remaining > 0) {
+            $this->item->state = 'active';
+            $this->item->save();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Método para aumentar el tamaño del stack
+     */
+    public function increaseStack(int $amount = 1)
+    {
+        if (!$this->is_stackable) {
+            throw new \Exception("This item is not stackable");
+        }
+
+        $this->stack_size += $amount;
+        $this->save();
+
+        return $this;
+    }
+
+    /**
+     * Método para dividir un stack en dos
+     */
+    public function splitStack(int $amount)
+    {
+        if (!$this->is_stackable) {
+            throw new \Exception("This item is not stackable");
+        }
+
+        if ($amount >= $this->stack_size) {
+            throw new \Exception("Cannot split: requested amount exceeds stack size");
+        }
+
+        // Crear un nuevo ítem con las propiedades del original
+        $newItem = $this->item->replicate();
+        $newItem->push();
+
+        // Crear un nuevo consumible para el nuevo ítem
+        $newConsumable = $this->replicate();
+        $newConsumable->item_id = $newItem->id;
+        $newConsumable->stack_size = $amount;
+        $newConsumable->save();
+
+        // Reducir el stack original
+        $this->stack_size -= $amount;
+        $this->save();
+
+        // Transferir al mismo dueño
+        if ($this->item->owner) {
+            $newItem->acquire($this->item->owner);
+        }
+
+        return $newItem;
+    }
+}
+                    </code></pre>
+
+                    <h4>TemporalItem</h4>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Carbon\Carbon;
+
+class TemporalItem extends Model
+{
+    use HasUuids;
+
+    protected $fillable = [
+        'item_id',
+        'expires_at'
+    ];
+
+    protected $dates = [
+        'expires_at',
+        'created_at',
+        'updated_at'
+    ];
+
+    /**
+     * Relación con el ítem base
+     */
+    public function item()
+    {
+        return $this->belongsTo(Item::class);
+    }
+
+    /**
+     * Configurar la fecha de expiración
+     */
+    public function expiresIn($duration)
+    {
+        // $duration puede ser un int (segundos) o una cadena como '2 hours', '1 day', etc.
+        if (is_numeric($duration)) {
+            $this->expires_at = Carbon::now()->addSeconds($duration);
+        } else {
+            $this->expires_at = Carbon::now()->add($duration);
+        }
+        $this->save();
+
+        return $this;
+    }
+
+    /**
+     * Extiende la duración del ítem
+     */
+    public function extend($duration)
+    {
+        if (is_numeric($duration)) {
+            $this->expires_at = $this->expires_at->addSeconds($duration);
+        } else {
+            $this->expires_at = $this->expires_at->add($duration);
+        }
+        $this->save();
+
+        return $this;
+    }
+
+    /**
+     * Verifica si el ítem está expirado
+     */
+    public function isExpired()
+    {
+        return $this->expires_at && $this->expires_at->isPast();
+    }
+
+    /**
+     * Obtiene el tiempo restante hasta la expiración
+     */
+    public function remainingTime()
+    {
+        if (!$this->expires_at) {
+            return null;
+        }
+
+        if ($this->isExpired()) {
+            return 0;
+        }
+
+        return Carbon::now()->diffInSeconds($this->expires_at);
+    }
+}
+                    </code></pre>
+                </section>
+
+                <section id="eventos" class="subsection">
+                    <h3>Eventos</h3>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Events;
+
+use App\Models\Item;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+abstract class ItemEvent
+{
+    use Dispatchable, SerializesModels;
+
+    public $item;
+
+    public function __construct(Item $item)
+    {
+        $this->item = $item;
+    }
+}
+
+class ItemAcquired extends ItemEvent
+{
+    public $newOwner;
+    public $oldOwner;
+
+    public function __construct(Item $item, $newOwner, $oldOwner = null)
+    {
+        parent::__construct($item);
+        $this->newOwner = $newOwner;
+        $this->oldOwner = $oldOwner;
+    }
+}
+
+class ItemTransferred extends ItemEvent
+{
+    public $newOwner;
+    public $oldOwner;
+
+    public function __construct(Item $item, $newOwner, $oldOwner)
+    {
+        parent::__construct($item);
+        $this->newOwner = $newOwner;
+        $this->oldOwner = $oldOwner;
+    }
+}
+
+class ItemReleased extends ItemEvent
+{
+    public $oldOwner;
+
+    public function __construct(Item $item, $oldOwner)
+    {
+        parent::__construct($item);
+        $this->oldOwner = $oldOwner;
+    }
+}
+
+class ItemValueChanged extends ItemEvent
+{
+    public $oldValue;
+    public $newValue;
+
+    public function __construct(Item $item, $oldValue, $newValue)
+    {
+        parent::__construct($item);
+        $this->oldValue = $oldValue;
+        $this->newValue = $newValue;
+    }
+}
+
+class ItemConsumed extends ItemEvent
+{
+    public function __construct(Item $item)
+    {
+        parent::__construct($item);
+    }
+}
+
+class ItemExpired extends ItemEvent
+{
+    public function __construct(Item $item)
+    {
+        parent::__construct($item);
+    }
+}
+                    </code></pre>
+                </section>
+
+                <section id="servicios" class="subsection">
+                    <h3>Servicios</h3>
+                    <h4>RuleEngine</h4>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Services;
+
+use App\Models\Item;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+
+class RuleEngine
+{
+    protected $expressionLanguage;
+
+    public function __construct()
+    {
+        $this->expressionLanguage = new ExpressionLanguage();
+        $this->registerFunctions();
+    }
+
+    // Registra funciones personalizadas para el motor de expresiones
+    protected function registerFunctions()
+    {
+        // Añadir funciones útiles para la lógica del juego
+    }
+
+    // Evalúa una condición dentro de un contexto
+    public function evaluateCondition($script, $context)
+    {
+        try {
+            // Sanitizar y preparar script
+            $safeScript = $this->prepareScript($script);
+
+            // Evaluar en un contexto seguro
+            return $this->expressionLanguage->evaluate($safeScript, $context);
+        } catch (\Exception $e) {
+            \Log::error('Error evaluating rule condition: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Ejecuta una acción dentro de un contexto
+    public function executeAction($script, $context)
+    {
+        try {
+            // Para acciones más complejas, podríamos usar una sandbox PHP segura
+            // o un motor de JavaScript como V8Js en un entorno controlado
+
+            // Por ahora, implementaremos un enfoque simplificado
+            $this->executeActionSafely($script, $context);
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('Error executing rule action: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    protected function prepareScript($script)
+    {
+        // Sanitización y preparación del script
+        return $script;
+    }
+
+    protected function executeActionSafely($script, $context)
+    {
+        // Implementación segura para ejecutar acciones
+        // Aquí se interpretaría el script o se ejecutarían comandos predefinidos
+        // basados en su contenido
+    }
+}
+                    </code></pre>
+
+                    <h4>ItemService</h4>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Services;
+
+use App\Models\Item;
+use App\Models\ConsumableItem;
+use App\Models\TemporalItem;
+use Carbon\Carbon;
+
+class ItemService
+{
+    /**
+     * Crear un nuevo ítem consumible
+     */
+    public function createConsumableItem(array $data)
+    {
+        // Crear el ítem base
+        $item = Item::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'state' => 'active',
+            'item_type' => 'consumable'
+        ]);
+
+        // Crear la parte consumible
+        $consumable = ConsumableItem::create([
+            'item_id' => $item->id,
+            'uses_remaining' => $data['uses'] ?? 1,
+            'max_uses' => $data['max_uses'] ?? $data['uses'] ?? 1,
+            'is_stackable' => $data['is_stackable'] ?? false,
+            'stack_size' => $data['stack_size'] ?? 1
+        ]);
+
+        // Asociar propiedades adicionales
+        if (isset($data['properties']) && is_array($data['properties'])) {
+            foreach ($data['properties'] as $key => $value) {
+                $item->setProperty($key, $value);
+            }
+        }
+
+        // Asociar reglas
+        if (isset($data['rules']) && is_array($data['rules'])) {
+            foreach ($data['rules'] as $rule) {
+                $item->rules()->create($rule);
+            }
+        }
+
+        return $item;
+    }
+
+    /**
+     * Crear un nuevo ítem temporal
+     */
+    public function createTemporalItem(array $data)
+    {
+        // Crear el ítem base
+        $item = Item::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'state' => 'active',
+            'item_type' => 'temporal'
+        ]);
+
+        // Determinar la fecha de expiración
+        $expiresAt = null;
+        if (isset($data['duration'])) {
+            if (is_numeric($data['duration'])) {
+                $expiresAt = Carbon::now()->addSeconds($data['duration']);
+            } else {
+                $expiresAt = Carbon::now()->add($data['duration']);
+            }
+        } elseif (isset($data['expires_at'])) {
+            $expiresAt = Carbon::parse($data['expires_at']);
+        }
+
+        // Crear la parte temporal
+        $temporal = TemporalItem::create([
+            'item_id' => $item->id,
+            'expires_at' => $expiresAt
+        ]);
+
+        // Asociar propiedades adicionales
+        if (isset($data['properties']) && is_array($data['properties'])) {
+            foreach ($data['properties'] as $key => $value) {
+                $item->setProperty($key, $value);
+            }
+        }
+
+        // Asociar reglas
+        if (isset($data['rules']) && is_array($data['rules'])) {
+            foreach ($data['rules'] as $rule) {
+                $item->rules()->create($rule);
+            }
+        }
+
+        return $item;
+    }
+
+    /**
+     * Crear un ítem que es temporal y consumible
+     */
+    public function createTemporalConsumableItem(array $data)
+    {
+        // Crear el ítem base
+        $item = Item::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'state' => 'active',
+            'item_type' => 'temporal_consumable'
+        ]);
+
+        // Crear la parte consumible
+        $consumable = ConsumableItem::create([
+            'item_id' => $item->id,
+            'uses_remaining' => $data['uses'] ?? 1,
+            'max_uses' => $data['max_uses'] ?? $data['uses'] ?? 1,
+            'is_stackable' => $data['is_stackable'] ?? false,
+            'stack_size' => $data['stack_size'] ?? 1
+        ]);
+
+        // Determinar la fecha de expiración
+        $expiresAt = null;
+        if (isset($data['duration'])) {
+            if (is_numeric($data['duration'])) {
+                $expiresAt = Carbon::now()->addSeconds($data['duration']);
+            } else {
+                $expiresAt = Carbon::now()->add($data['duration']);
+            }
+        } elseif (isset($data['expires_at'])) {
+            $expiresAt = Carbon::parse($data['expires_at']);
+        }
+
+        // Crear la parte temporal
+        $temporal = TemporalItem::create([
+            'item_id' => $item->id,
+            'expires_at' => $expiresAt
+        ]);
+
+        // Asociar propiedades adicionales
+        if (isset($data['properties']) && is_array($data['properties'])) {
+            foreach ($data['properties'] as $key => $value) {
+                $item->setProperty($key, $value);
+            }
+        }
+
+        return $item;
+    }
+
+    /**
+     * Verificar todos los ítems temporales para expiración
+     */
+    public function checkExpiredItems()
+    {
+        $expiredItems = Item::whereHas('temporal', function ($query) {
+            $query->where('expires_at', '<=', Carbon::now());
+        })
+        ->where('state', '!=', 'consumed')
+        ->get();
+
+        foreach ($expiredItems as $item) {
+            $item->checkExpiration();
+        }
+
+        return $expiredItems;
+    }
+}
+                    </code></pre>
+                </section>
+
+                <section id="controladores" class="subsection">
+                    <h3>Controladores</h3>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Item;
+use App\Models\Player;
+use Illuminate\Http\Request;
+use App\Services\ItemService;
+
+class ItemController extends Controller
+{
+    protected $itemService;
+
+    public function __construct(ItemService $itemService)
+    {
+        $this->itemService = $itemService;
+    }
+
+    public function index(Request $request)
+    {
+        $player = $request->user()->player;
+        $items = $player->items()->paginate(20);
+
+        return response()->json($items);
+    }
+
+    public function show(Item $item)
+    {
+        $this->authorize('view', $item);
+
+        return response()->json([
+            'item' => $item,
+            'properties' => $item->properties,
+            'owner' => $item->owner
+        ]);
+    }
+
+    public function transfer(Request $request, Item $item)
+    {
+        $this->authorize('transfer', $item);
+
+        $validated = $request->validate([
+            'target_player_id' => 'required|exists:players,id'
+        ]);
+
+        $targetPlayer = Player::findOrFail($validated['target_player_id']);
+        $item->transfer($targetPlayer);
+
+        return response()->json([
+            'message' => 'Item transferred successfully',
+            'item' => $item,
+            'new_owner' => $targetPlayer
+        ]);
+    }
+
+    public function interact(Request $request, Item $item)
+    {
+        $this->authorize('interact', $item);
+
+        $validated = $request->validate([
+            'target_item_id' => 'required|exists:items,id',
+            'action' => 'required|string'
+        ]);
+
+        $targetItem = Item::findOrFail($validated['target_item_id']);
+        $result = $this->itemService->handleInteraction($item, $targetItem, $validated['action']);
+
+        return response()->json($result);
+    }
+
+    public function createConsumableItem(Request $request)
+    {
+        $this->authorize('create', Item::class);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'uses' => 'nullable|integer|min:1',
+            'max_uses' => 'nullable|integer|min:1',
+            'is_stackable' => 'nullable|boolean',
+            'stack_size' => 'nullable|integer|min:1',
+            'properties' => 'nullable|array',
+        ]);
+
+        $item = $this->itemService->createConsumableItem($validated);
+        $item->acquire($request->user()->player);
+
+        return response()->json($item, 201);
+    }
+
+    public function createTemporalItem(Request $request)
+    {
+        $this->authorize('create', Item::class);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'duration' => 'nullable|string',
+            'expires_at' => 'nullable|date',
+            'properties' => 'nullable|array',
+        ]);
+
+        $item = $this->itemService->createTemporalItem($validated);
+        $item->acquire($request->user()->player);
+
+        return response()->json($item, 201);
+    }
+
+    public function consume(Item $item, Request $request)
+    {
+        $this->authorize('use', $item);
+
+        $validated = $request->validate([
+            'amount' => 'nullable|integer|min:1'
+        ]);
+
+        $amount = $validated['amount'] ?? 1;
+
+        try {
+            $item->consume($amount);
+
+            return response()->json([
+                'message' => 'Item consumed successfully',
+                'item' => $item->load('consumable'),
+                'uses_remaining' => $item->consumable->uses_remaining
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+}
+                    </code></pre>
+                </section>
+
+                <section id="comandos" class="subsection">
+                    <h3>Comandos</h3>
+                    <pre><code class="language-php">
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use App\Services\ItemService;
+
+class CheckExpiredItemsCommand extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'items:check-expired';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Checks for expired items and marks them as consumed';
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle(ItemService $itemService)
+    {
+        $expiredItems = $itemService->checkExpiredItems();
+
+        $this->info("{$expiredItems->count()} expired items processed.");
+
+        return Command::SUCCESS;
+    }
+}
+                    </code></pre>
+                </section>
+            </section>
+
+            <section id="reglas" class="section">
+                <h2>Sistema de Reglas</h2>
+                <p>El sistema de reglas permite definir comportamientos dinámicos para los ítems en respuesta a eventos del juego. Estas reglas se definen como condiciones y acciones escritas en un lenguaje de script simple.</p>
+                <h3>Ejemplos de Reglas</h3>
+                <pre><code class="language-php">
+<?php
+
+// Ejemplos de reglas en formato JSON para ítems consumibles y temporales
+
+$consumableRules = [
+    // Regla para aplicar efectos cuando se consume una poción de salud
+    [
+        'name' => 'HealthPotionEffect',
+        'condition_script' => "event.type == 'CONSUME'",
+        'action_script' => "
+            if (item.owner) {
+                $health = item.owner.items()->where('item_type', 'quantifiable')
+                    ->whereHas('properties', function ($query) {
+                        $query->where('key', 'type')->where('value', 'health');
+                    })->first();
+
+                if ($health) {
+                    $healAmount = item.getProperty('heal_amount', 10);
+                    $health->increment($healAmount);
+                }
+            }
+        ",
+        'parameters' => ['heal_amount' => 20]
+    ],
+
+    // Regla para notificar cuando a un ítem consumible le queda un uso
+    [
+        'name' => 'LastUseNotification',
+        'condition_script' => "
+            event.type == 'CONSUME' &&
+            item.isConsumable() &&
+            item.consumable.uses_remaining == 1
+        ",
+        'action_script' => "
+            if (item.owner && item.owner->id) {
+                App\\Models\\Notification::create([
+                    'user_id' => item.owner->id,
+                    'message' => 'Your ' + item.name + ' has only 1 use remaining!',
+                    'type' => 'warning'
+                ]);
+            }
+        ",
+        'parameters' => []
+    ]
+];
+
+$temporalRules = [
+    // Regla para notificar con una hora de anticipación sobre expiración
+    [
+        'name' => 'ExpirationWarning',
+        'condition_script' => "
+            item.isTemporal() &&
+            item.temporal.remainingTime() <= 3600 &&
+            item.temporal.remainingTime() > 3500
+        ",
+        'action_script' => "
+            if (item.owner && item.owner->id) {
+                App\\Models\\Notification::create([
+                    'user_id' => item.owner->id,
+                    'message' => 'Your ' + item.name + ' will expire in about an hour!',
+                    'type' => 'warning'
+                ]);
+            }
+        ",
+        'parameters' => []
+    ],
+
+    // Regla para renovar automáticamente un ítem si el jugador tiene cierto recurso
+    [
+        'name' => 'AutoRenewWithCoins',
+        'condition_script' => "
+            event.type == 'EXPIRE' &&
+            item.getProperty('auto_renew', false)
+        ",
+        'action_script' => "
+            if (item.owner) {
+                $coins = item.owner.items()->where('item_type', 'quantifiable')
+                    ->whereHas('properties', function ($query) {
+                        $query->where('key', 'type')->where('value', 'coins');
+                    })->first();
+
+                $renewCost = item.getProperty('renew_cost', 10);
+
+                if ($coins && $coins.getValue() >= $renewCost) {
+                    $coins.decrement($renewCost);
+
+                    // Renovar por el período original
+                    $duration = item.getProperty('original_duration', '1 day');
+                    item.temporal.extend($duration);
+
+                    // Reactivar si fue consumido
+                    item.state = 'active';
+                    item.save();
+
+                    // Notificar
+                    App\\Models\\Notification::create([
+                        'user_id' => item.owner->id,
+                        'message' => 'Your ' + item.name + ' has been automatically renewed for ' + $duration,
+                        'type' => 'info'
+                    ]);
+                }
+            }
+        ",
+        'parameters' => ['renew_cost' => 10, 'original_duration' => '1 day']
+    ]
+];
+                </code></pre>
+            </section>
+
+            <section id="ejemplos" class="section">
+                <h2>Ejemplos de Uso</h2>
+                <pre><code class="language-php">
+<?php
+
+use App\Services\ItemService;
+use App\Models\Player;
+use Carbon\Carbon;
+
+/**
+ * Este script muestra algunos ejemplos de creación y uso de ítems consumibles y temporales
+ */
+
+// Crear un Ítem Consumible Simple: Poción de Salud
+$healthPotion = app(ItemService::class)->createConsumableItem([
+    'name' => 'Health Potion',
+    'description' => 'Restores 20 health points when consumed',
+    'uses' => 1,
+    'properties' => [
+        'type' => 'potion',
+        'heal_amount' => 20,
+        'icon' => 'potion_red.png'
+    ],
+    'rules' => [
+        [
+            'name' => 'RestoreHealthOnConsume',
+            'condition_script' => "event.type == 'CONSUME'",
+            'action_script' => "
+                if (item.owner) {
+                    $health = item.owner.items()->where('item_type', 'quantifiable')
+                        ->whereHas('properties', function ($query) {
+                            $query->where('key', 'type')->where('value', 'health');
+                        })->first();
+
+                    if ($health) {
+                        $healAmount = item.getProperty('heal_amount', 10);
+                        $health->increment($healAmount);
+                    }
+                }
+            "
+        ]
+    ]
+]);
+
+// Crear un Ítem Consumible Stackable: Flechas
+$arrows = app(ItemService::class)->createConsumableItem([
+    'name' => 'Arrows',
+    'description' => 'Standard arrows for bow',
+    'uses' => 1,
+    'is_stackable' => true,
+    'stack_size' => 20,
+    'properties' => [
+        'type' => 'ammo',
+        'damage' => 5,
+        'icon' => 'arrow.png'
+    ]
+]);
+
+// Crear un Ítem Temporal: Boost de Experiencia
+$expBoost = app(ItemService::class)->createTemporalItem([
+    'name' => 'XP Boost',
+    'description' => 'Increases experience gain by 50% for 24 hours',
+    'duration' => '24 hours',
+    'properties' => [
+        'type' => 'buff',
+        'buff_type' => 'experience',
+        'buff_amount' => 0.5, // 50% boost
+        'icon' => 'xp_boost.png'
+    ],
+    'rules' => [
+        [
+            'name' => 'ApplyXPBoost',
+            'condition_script' => "item.state == 'active' && !item.isExpired()",
+            'action_script' => "
+                if (item.owner && event.type == 'GAIN_XP') {
+                    $xpAmount = event.data['amount'];
+                    $bonusXP = Math.floor($xpAmount * item.getProperty('buff_amount', 0.5));
+                    event.data['amount'] += $bonusXP;
+                }
+            "
+        ]
+    ]
+]);
+
+// Crear un Ítem que es tanto Consumible como Temporal: Comida
+$food = app(ItemService::class)->createTemporalConsumableItem([
+    'name' => 'Grilled Chicken',
+    'description' => 'Restores health over time and can be consumed 3 times',
+    'uses' => 3,
+    'duration' => '30 minutes',
+    'properties' => [
+        'type' => 'food',
+        'heal_per_tick' => 5,
+        'tick_interval' => 10, // seconds
+        'icon' => 'chicken.png'
+    ]
+]);
+
+// Ejemplo de asignar los ítems a un jugador
+$player = Player::first();
+
+$healthPotion->acquire($player);
+$arrows->acquire($player);
+$expBoost->acquire($player);
+$food->acquire($player);
+
+// Ejemplo de uso de los ítems
+$healthPotion->consume();
+$arrows->consume(5); // Usar 5 flechas del stack
+$expBoost->checkExpiration(); // Verificar si ha expirado
+
+// Consumir una porción de comida pero aún obtener sus efectos hasta que expire
+$food->consume();
+                </code></pre>
+            </section>
+
+            <section id="consideraciones" class="section">
+                <h2>Consideraciones Adicionales</h2>
+                <h3>1. Rendimiento</h3>
+                <ul>
+                    <li>Implementar índices en las columnas temporales como <code>expires_at</code> para mejorar las consultas de expiración.</li>
+                    <li>Considerar almacenar en caché los ítems frecuentemente accedidos o sus propiedades.</li>
+                </ul>
+
+                <h3>2. Escalabilidad</h3>
+                <ul>
+                    <li>Para grandes volúmenes de ítems temporales, considerar una tabla separada para rastrear solo los próximos a expirar.</li>
+                    <li>Implementar una cola de trabajos para procesar la expiración de ítems de manera asíncrona.</li>
+                </ul>
+
+                <h3>3. UX (Experiencia de Usuario)</h3>
+                <ul>
+                    <li>Implementar notificaciones para alertar a los jugadores sobre ítems próximos a expirar.</li>
+                    <li>Mostrar contadores visuales para los usos restantes y el tiempo de expiración.</li>
+                </ul>
+
+                <h3>4. Seguridad</h3>
+                <ul>
+                    <li>Validar todas las entradas de usuario relacionadas con el consumo y manipulación de ítems.</li>
+                    <li>Implementar políticas de autorización para prevenir la manipulación no autorizada.</li>
+                </ul>
+
+                <h3>5. Mantenimiento</h3>
+                <ul>
+                    <li>Implementar un sistema de limpieza periódica para eliminar o archivar ítems consumidos/expirados antiguos.</li>
+                    <li>Registrar estadísticas sobre el uso y expiración de ítems para análisis.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <button id="printButton" class="print-button">
+        <span class="print-icon">🖨️</span> Imprimir Documentación
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html>
