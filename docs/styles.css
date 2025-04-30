@@ -7,9 +7,11 @@
     --dark-color: #34495e;
     --code-bg: #282c34;
     --sidebar-width: 280px;
+    --sidebar-collapsed-width: 50px;
     --header-height: 120px;
     --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-code: 'Consolas', 'Monaco', 'Andale Mono', monospace;
+    --transition-speed: 0.3s;
 }
 
 /* Reset y estilos generales */
@@ -92,8 +94,28 @@ code {
     top: 0;
     height: 100vh;
     overflow-y: auto;
-    transition: transform 0.3s ease;
+    transition: all var(--transition-speed) ease;
     z-index: 100;
+}
+
+.sidebar-collapsed {
+    width: var(--sidebar-collapsed-width);
+    padding: 1rem 0;
+}
+
+.sidebar-collapsed nav ul li a {
+    padding: 0.5rem 0;
+    text-align: center;
+    font-size: 0;
+}
+
+.sidebar-collapsed nav ul li a::before {
+    content: '•';
+    font-size: 1.2rem;
+}
+
+.sidebar-collapsed .sidebar-header h2 {
+    display: none;
 }
 
 .sidebar-header {
@@ -105,13 +127,25 @@ code {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.sidebar-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
 .toggle-button {
     background: transparent;
     border: none;
     color: white;
     font-size: 1.5rem;
     cursor: pointer;
-    display: none;
+    display: block;
+    transition: transform var(--transition-speed);
+}
+
+.sidebar-collapsed .toggle-button {
+    transform: rotate(180deg);
+    margin: 0 auto;
 }
 
 nav ul {
@@ -131,6 +165,9 @@ nav ul li a {
     padding: 0.5rem;
     border-radius: 4px;
     transition: background-color 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 nav ul li a:hover {
@@ -140,6 +177,11 @@ nav ul li a:hover {
 nav ul ul {
     margin-left: 1.5rem;
     margin-top: 0.5rem;
+    transition: opacity var(--transition-speed);
+}
+
+.sidebar-collapsed nav ul ul {
+    display: none;
 }
 
 nav ul ul li {
@@ -152,6 +194,12 @@ nav ul ul li {
     padding: 1.5rem;
     margin-left: var(--sidebar-width);
     max-width: calc(100% - var(--sidebar-width));
+    transition: margin-left var(--transition-speed), max-width var(--transition-speed);
+}
+
+.sidebar-collapsed ~ .content {
+    margin-left: var(--sidebar-collapsed-width);
+    max-width: calc(100% - var(--sidebar-collapsed-width));
 }
 
 header {
@@ -269,10 +317,43 @@ pre code {
         transform: translateX(0);
     }
 
+    .sidebar-collapsed {
+        transform: translateX(-100%);
+    }
+
+    .sidebar-collapsed.open {
+        width: 280px;
+        padding: 1rem;
+        transform: translateX(0);
+    }
+
+    .sidebar-collapsed.open .sidebar-header h2 {
+        display: block;
+    }
+
+    .sidebar-collapsed.open nav ul li a {
+        font-size: inherit;
+        text-align: left;
+        padding: 0.5rem;
+    }
+
+    .sidebar-collapsed.open nav ul li a::before {
+        content: '';
+    }
+
+    .sidebar-collapsed.open nav ul ul {
+        display: block;
+    }
+
     .content {
         margin-left: 0;
         max-width: 100%;
         padding: 1rem;
+    }
+
+    .sidebar-collapsed ~ .content {
+        margin-left: 0;
+        max-width: 100%;
     }
 
     .toggle-button {
@@ -280,7 +361,7 @@ pre code {
     }
 
     body::before {
-        content: '';
+        content: '≡';
         position: fixed;
         top: 20px;
         left: 20px;
@@ -297,8 +378,8 @@ pre code {
         cursor: pointer;
     }
 
-    body::before {
-        content: '≡';
+    body.sidebar-visible::before {
+        content: '×';
     }
 }
 

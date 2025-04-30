@@ -35,11 +35,51 @@ document.addEventListener('DOMContentLoaded', function() {
     // Funcionalidad para el sidebar
     const sidebar = document.getElementById('sidebar');
     const toggleSidebarBtn = document.getElementById('toggleSidebar');
+    const content = document.querySelector('.content');
 
-    // Toggle sidebar en móviles
+    // Comprobar si existe una preferencia guardada para el sidebar
+    const sidebarState = localStorage.getItem('sidebarState');
+
+    // Aplicar el estado guardado o establecer por defecto
+    if (sidebarState === 'collapsed') {
+        sidebar.classList.add('sidebar-collapsed');
+    }
+
+    // Toggle sidebar en todas las resoluciones
     toggleSidebarBtn.addEventListener('click', function() {
-        sidebar.classList.toggle('open');
+        sidebar.classList.toggle('sidebar-collapsed');
+
+        // En móvil también manejamos la clase open
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('open');
+        }
+
+        // Guardar preferencia del usuario
+        if (sidebar.classList.contains('sidebar-collapsed')) {
+            localStorage.setItem('sidebarState', 'collapsed');
+        } else {
+            localStorage.setItem('sidebarState', 'expanded');
+        }
     });
+
+    // En móvil, el body click para abrir/cerrar
+    if (window.innerWidth <= 768) {
+        document.body.addEventListener('click', function(e) {
+            if (e.target === document.body || e.target === document.documentElement) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // El botón flotante del móvil
+        document.body.addEventListener('click', function(e) {
+            // Verificar si el clic fue en el botón flotante
+            if (e.clientX < 60 && e.clientY < 60) {
+                sidebar.classList.toggle('open');
+                document.body.classList.toggle('sidebar-visible');
+                e.preventDefault();
+            }
+        });
+    }
 
     // Cerrar sidebar al hacer clic en un link (en móviles)
     const sidebarLinks = sidebar.querySelectorAll('a');
@@ -47,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', function() {
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('open');
+                document.body.classList.remove('sidebar-visible');
             }
         });
     });
@@ -58,6 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
             event.target !== toggleSidebarBtn &&
             sidebar.classList.contains('open')) {
             sidebar.classList.remove('open');
+            document.body.classList.remove('sidebar-visible');
         }
     });
 
