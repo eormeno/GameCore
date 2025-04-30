@@ -7,4 +7,5 @@ return [
     'width' => 1280,
     'height' => 720,
     'prefab_name' => 'rpg.rpg-root-prefab',
+    'active' => false
 ];
