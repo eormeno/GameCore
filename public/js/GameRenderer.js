@@ -357,12 +357,12 @@ class GameRenderer {
                 const { event, data, destination } = this.dequeueEvent();
                 if (event) {
                     const backendElapsed = await this.sendEvent(event, data, destination);
-                    this.updateBackendMetrics(backendElapsed);
+                    // this.updateBackendMetrics(backendElapsed);
                 }
             } catch (error) {
                 console.error('Error:', error);
             } finally {
-                this.updatePingMetrics(startTime);
+                // this.updatePingMetrics(startTime);
                 if (this.stopGame) return;
                 setTimeout(fetchData, interval);
             }

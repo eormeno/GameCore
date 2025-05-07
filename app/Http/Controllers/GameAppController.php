@@ -35,9 +35,26 @@ class GameAppController extends Controller
                 'eventUrl' => route('event', $currentGame->id),
                 'resourcesUrl' => route('res', $gameApp->id),
                 'width' => $gameApp->width,
-                'height' => $gameApp->height
+                'height' => $gameApp->height,
+                'invitationCode' => $currentGame->invitation_code,
             ]
         ]);
+    }
+
+    public function playGame(Game $game, GameInstanceService $gamesService)
+    {
+        $currentUser = auth()->user();
+        dd($game);
+        // $currentGame = $gamesService->getOrCreateUserGame($currentUser, $game);
+        // return response()->json([
+        //     'game' => [
+        //         'title' => $currentGame->title,
+        //         'eventUrl' => route('event', $currentGame->id),
+        //         'resourcesUrl' => route('res', $game->id),
+        //         'width' => $game->width,
+        //         'height' => $game->height
+        //     ]
+        // ]);
     }
 
     public function event(Game $game, EventRequestFilter $request, IRenderer $renderer)
