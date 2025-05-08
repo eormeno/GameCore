@@ -6,8 +6,8 @@ use App\Http\Controllers\GameAppController;
 Route::get('/', fn() => response()->file(public_path('index.html')));
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/play/{invitationCode}', [GameAppController::class, 'playGame'])
-        ->name('playGame');
+    Route::get('/game/{prefix}/play', [GameAppController::class, 'playGame'])
+        ->where('prefix', '[a-z]{3}');
 });
 
 Route::get('/storage/images/{filename}', function ($filename) {

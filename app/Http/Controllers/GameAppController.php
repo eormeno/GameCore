@@ -44,7 +44,7 @@ class GameAppController extends Controller
         ]);
     }
 
-    public function playGame(Game $game, GameInstanceService $gamesService)
+    public function playGame(GameApp $game, GameInstanceService $gamesService)
     {
         $currentUser = auth()->user();
         dd($game);
