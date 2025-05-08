@@ -20,7 +20,10 @@ class GameAppController extends Controller
             'name',
             'description',
             'card_image',
-            'prefab_name'
+            'prefab_name',
+            'max_instances_per_user',
+            'min_users_per_instance',
+            'max_users_per_instance',
         ]);
         return response()->json(['displaying_games_gallery' => $gameApps]);
     }

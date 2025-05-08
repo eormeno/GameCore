@@ -23,7 +23,7 @@
             description.textContent = game.description;
 
             playButton.disabled = game.prefab_name === null;
-            playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id });
+            playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id, game: game });
         }
     </script>
 </div>
