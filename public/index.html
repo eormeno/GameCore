@@ -18,41 +18,165 @@
 </head>
 
 <body>
-    <div>
+    <div class="main-wrapper">
         <div id="error-container"></div>
         <div id="auth-menu"></div>
-        <div>
-            <a href="/about" data-navigo>About</a>
-            <a href="/products?a=b#something-here" data-navigo>Products 1</a>
-            <a href="/products?c=d" data-navigo>Products 2</a>
-            <a href="/login" data-navigo>Login</a>
-            <a href="/login" data-navig="false">Reload to login</a>
-            <a href="/login" data-navig target="_blank">New tab to login</a>
+        <!-- Icons can be implemented using an icon library like Font Awesome or custom SVGs -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <div class="nav-container">
+            <nav class="nav-menu">
+                <!-- Simple menu item with icon -->
+                <a href="/" data-navigo><span class="menu-icon"><i class="fas fa-home"></i></span>Home</a>
+
+            <!-- Menu item with access key (underlined G) -->
+            <a href="/games" data-navigo><span class="menu-icon"><i class="fas fa-gamepad"></i></span><span class="access-key">G</span>ames</a>
+
+            <!-- Submenu example -->
+            <div class="menu-item has-submenu">
+                <span class="menu-icon"><i class="fas fa-box-open"></i></span>Products
+                <div class="submenu">
+                    <a href="/products?a=b#something-here" data-navigo>Products 1</a>
+                    <a href="/products?c=d" data-navigo>Products 2</a>
+                    <div class="separator"></div>
+                    <a href="/new-products" data-navigo><span class="menu-icon"><i class="fas fa-star"></i></span>New Releases</a>
+                    <a href="/special-offers" data-navigo>Special Offers <span class="keyboard-shortcut">Alt+S</span></a>
+                </div>
+            </div>
+
+            <!-- Another submenu example -->
+            <div class="menu-item has-submenu">
+                <span class="menu-icon"><i class="fas fa-info-circle"></i></span>About
+                <div class="submenu">
+                    <a href="/about" data-navigo>About Us</a>
+                    <a href="/team" data-navigo><span class="menu-icon"><i class="fas fa-users"></i></span>Our Team</a>
+                    <div class="separator"></div>
+                    <a href="/contact" data-navigo>Contact</a>
+                </div>
+            </div>
+
+            <!-- Menu item with keyboard shortcut -->
+            <a href="/login" data-navigo><span class="menu-icon"><i class="fas fa-user"></i></span>Login <span class="keyboard-shortcut">Alt+L</span></a>
+        </nav>
         </div>
         <div class="games-container" id="gamesContainer"></div>
     </div>
+    <style>
+        /* Asegurarse que el contenedor de juegos ocupe todo el ancho disponible */
+        #gamesContainer {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+        }
+    </style>
     <script type="module">
         window.addEventListener("load", () => {
             const router = new Navigo("/");
-            const render = (content) =>
-                (document.querySelector("#gamesContainer").innerHTML = content);
+            const render = (content) => {
+                const container = document.querySelector("#gamesContainer");
+                container.innerHTML = content;
+                container.style.width = "100%";
+                container.style.display = "block";
+            };
+
+            // Function to update active navigation link
+            const updateActiveNav = (url) => {
+                // Reset all active states
+                document.querySelectorAll('.nav-menu a, .nav-menu .menu-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Set active state for direct links
+                document.querySelectorAll('.nav-menu a').forEach(link => {
+                    if (link.getAttribute('href') === url) {
+                        link.classList.add('active');
+
+                        // If link is in submenu, also highlight parent
+                        const parentMenuItem = link.closest('.submenu')?.parentElement;
+                        if (parentMenuItem) {
+                            parentMenuItem.classList.add('active');
+                        }
+                    }
+                });
+            };
+
+            // Setup keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.altKey) {
+                    switch (e.key.toLowerCase()) {
+                        case 'l':
+                            router.navigate('/login');
+                            break;
+                        case 'g':
+                            router.navigate('/games');
+                            break;
+                        case 's':
+                            router.navigate('/special-offers');
+                            break;
+                    }
+                }
+            });
+
+            // Handle submenu toggle on mobile (since hover doesn't work well)
+            document.querySelectorAll('.menu-item.has-submenu').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    // Only toggle if clicked directly on the menu item, not its children
+                    if (e.currentTarget === e.target || e.target.closest('.menu-item') === e.currentTarget && !e.target.closest('.submenu')) {
+                        // Toggle submenu visibility
+                        const submenu = item.querySelector('.submenu');
+                        if (window.innerWidth < 768) {  // Only for mobile view
+                            submenu.style.display = submenu.style.display === 'flex' ? 'none' : 'flex';
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    }
+                });
+            });
 
             router
+                .on("/", (match) => {
+                    console.log(match);
+                    render("Home");
+                    updateActiveNav("/");
+                })
+                .on("/games", (match) => {
+                    console.log(match);
+                    render("Games");
+                    updateActiveNav("/games");
+                })
                 .on("/about", (match) => {
                     console.log(match);
-                    render("About");
+                    render("About Us");
+                    updateActiveNav("/about");
+                })
+                .on("/team", (match) => {
+                    console.log(match);
+                    render("Our Team");
+                    updateActiveNav("/team");
+                })
+                .on("/contact", (match) => {
+                    console.log(match);
+                    render("Contact Us");
+                    updateActiveNav("/contact");
                 })
                 .on("/products", (match) => {
                     console.log(match);
                     render("Products " + JSON.stringify(match.params));
+                    updateActiveNav(match.url.split('?')[0]); // Remove query params for active state
+                })
+                .on("/new-products", (match) => {
+                    console.log(match);
+                    render("New Products");
+                    updateActiveNav("/new-products");
+                })
+                .on("/special-offers", (match) => {
+                    console.log(match);
+                    render("Special Offers");
+                    updateActiveNav("/special-offers");
                 })
                 .on("/login", (match) => {
                     console.log(match);
                     render("Login");
-                })
-                .on((match) => {
-                    console.log(match);
-                    render("home");
+                    updateActiveNav("/login");
                 })
                 .resolve();
         });

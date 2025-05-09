@@ -1,9 +1,25 @@
+/* Regla global para asegurar que todos los elementos incluyan padding y borde en su ancho */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 /* Estilo general de la pantalla principal */
 body {
     background-color: #1a1a1a;
     color: #f0f0f0;
     margin: 0;
+    padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden; /* Previene scroll horizontal */
+}
+
+/* Contenedor principal que envuelve toda la aplicación */
+.main-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 /* Encabezado con estilo vibrante y profesional */
@@ -16,11 +32,159 @@ header {
     color: #ffffff;
 }
 
+/* Contenedor para el menú de navegación */
+.nav-container {
+    width: 100%;
+    background-color: #2b2b2b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1000; /* Ensure the container has proper z-index */
+    margin-bottom: 20px;
+}
+
+/* Estilos para el menú de navegación */
+.nav-menu {
+    background-color: #2b2b2b;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: flex-start; /* Align items to the left */
+    flex-wrap: wrap;
+    gap: 20px;
+    position: relative;
+    max-width: 1200px; /* Match the main-content max-width */
+    margin: 0 auto; /* Center the menu within its container */
+}
+
+.nav-menu a, .nav-menu .menu-item {
+    color: #f0f0f0;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    margin-right: 5px; /* Add spacing between menu items */
+    text-align: left; /* Garantiza que el texto esté alineado a la izquierda */
+}
+
+.nav-menu a:hover, .nav-menu .menu-item:hover {
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.nav-menu a.active, .nav-menu .menu-item.active {
+    background: linear-gradient(90deg, #e64a19, #d84315);
+    color: white;
+}
+
+/* Estilos para submenús */
+.submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 220px; /* Aumentado para acomodar atajos de teclado */
+    background-color: #2b2b2b;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    padding: 0; /* Quitamos el padding para que los bordes encajen perfectamente */
+    z-index: 9999; /* Highest z-index to appear above all other elements */
+    display: none;
+    flex-direction: column;
+    overflow: hidden; /* Asegura que el contenido no se desborde */
+    width: auto; /* Permite que se ajuste al contenido */
+}
+
+.menu-item:hover .submenu {
+    display: flex;
+}
+
+.submenu a {
+    padding: 8px 16px;
+    border-radius: 0;
+    width: 100%; /* Ocupa todo el ancho del submenú */
+    margin: 0; /* Elimina cualquier margen */
+    white-space: nowrap;
+    transition: background 0.3s ease; /* Suaviza la transición */
+    display: flex;
+    justify-content: flex-start; /* Alinea el contenido al inicio (izquierda) */
+    align-items: center; /* Centra verticalmente */
+    box-sizing: border-box; /* Incluye padding en el cálculo del ancho */
+    text-align: left; /* Alinea el texto a la izquierda */
+}
+
+.submenu a:hover {
+    transform: none;
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    width: 100%; /* Asegura que el efecto hover cubra todo el ancho */
+    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.05); /* Efecto sutil para resaltar toda el área */
+}
+
+/* Estilos para el primer y último elemento del submenú */
+.submenu a:first-child {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.submenu a:last-child {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+/* Estilos para el separador */
+.separator {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #ff5722, transparent);
+    margin: 6px 0;
+    width: 100%; /* Ocupa todo el ancho */
+    box-sizing: border-box; /* Incluye cualquier padding en el ancho */
+}
+
+/* Estilos para iconos */
+.menu-icon {
+    margin-right: 8px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0; /* Evita que el icono se reduzca */
+    display: inline-flex; /* Asegura que el icono tenga el mismo comportamiento de línea */
+}
+
+/* Indicador de submenú */
+.has-submenu::after {
+    content: '▼';
+    font-size: 10px;
+    margin-left: 6px;
+}
+
+/* Estilo para teclas de acceso rápido */
+.access-key {
+    text-decoration: underline;
+}
+
+/* Estilo para atajo de teclado */
+.keyboard-shortcut {
+    margin-left: auto; /* Empuja el atajo al extremo derecho */
+    padding: 2px 6px;
+    font-size: 0.75em;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    display: inline-block; /* Asegura que se muestre como bloque en línea */
+    white-space: nowrap; /* Evita que se corte */
+    min-width: fit-content; /* Asegura que tenga el ancho mínimo necesario */
+    text-align: center;
+    flex-shrink: 0; /* Evita que el atajo se comprima */
+}
+
 /* Contenedor principal centrado y con márgenes adecuados */
 .main-content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
 }
 
 /* Estilo para la galería de videojuegos */
@@ -30,7 +194,17 @@ header {
     gap: 20px;
     padding: 20px;
     justify-content: center;
-    /* Distribución horizontal por defecto */
+    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+    width: 100%;
+    max-width: none; /* Elimina cualquier restricción de ancho máximo */
+    overflow: hidden; /* Previene desbordamiento */
+    margin: 0; /* Elimina márgenes */
+}
+
+/* Estilo para contenido directo dentro del contenedor de juegos */
+.games-container > * {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .game-card {
@@ -42,6 +216,7 @@ header {
     background-color: #2b2b2b;
     /* Fondo oscuro y elegante */
     border: 1px solid #444;
+    box-sizing: border-box; /* Asegura que el padding y borde no afecten el tamaño */
     /* Borde sutil */
     border-radius: 8px;
     overflow: hidden;
@@ -151,6 +326,64 @@ header {
 
     .main-content {
         padding: 15px;
+    }
+
+    /* Estilos responsive para el menú de navegación */
+    .nav-container {
+        padding: 0;
+    }
+
+    .nav-menu {
+        flex-direction: column;
+        padding: 5px 15px;
+        gap: 5px;
+        align-items: flex-start; /* Ensure left alignment on mobile */
+        width: 100%; /* Full width on mobile */
+    }
+
+    .nav-menu a, .nav-menu .menu-item {
+        width: 100%;
+        justify-content: space-between;
+        margin-right: 0; /* Remove right margin on mobile */
+    }    .menu-item.has-submenu {
+        position: relative;
+    }
+
+    .submenu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        padding: 0;
+        background-color: #252525;
+        border-left: 3px solid #ff5722;
+        border-radius: 0; /* Sin bordes redondeados en móvil */
+        overflow: hidden;
+    }
+
+    .menu-item:hover .submenu {
+        display: none; /* Override the hover behavior for mobile */
+    }
+
+    .has-submenu::after {
+        content: '▶';
+    }
+
+    .menu-item.active .has-submenu::after {
+        content: '▼';
+    }
+
+    /* Adjust keyboard shortcuts to be more visible */
+    .keyboard-shortcut {
+        padding: 2px 4px;
+        background-color: rgba(255, 87, 34, 0.2);
+        margin-left: 8px;
+        font-size: 0.7em;
+    }
+
+    .submenu a {
+        padding: 12px 16px; /* Más padding vertical para facilitar el toque */
+        width: 100%; /* Asegurar que ocupa todo el ancho en móviles */
+        box-sizing: border-box;
     }
 
     .games-container {
