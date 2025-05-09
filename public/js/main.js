@@ -24,8 +24,8 @@ async function main(state = pageState.initialState) {
         case 'fetching_game':
             pageState.previousState = state;
             // create a url for the game and redirect to it
-            // window.location.href = `game/${data.game.prefix}/play`;
-            await fetchApi(`api/game-app/${data.id}/play`, 'GET');
+            window.location.href = `game/${data.game.prefix}/play`;
+            // await fetchApi(`api/game-app/${data.id}/play`, 'GET');
             break;
         case 'game':
             let gameRenderer = new GameRenderer();

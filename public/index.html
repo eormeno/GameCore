@@ -6,28 +6,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juegos Disponibles</title>
 
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/login.css">
-    <link rel="stylesheet" href="css/game.css">
-    <link rel="stylesheet" href="css/auth.css">
-    <link rel="stylesheet" href="css/auth-menu.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="/css/game.css">
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="/css/auth-menu.css">
 
-    <script type="module" src="js/main.js"></script>
+    <script src="/libs/navigo.min.js"></script>
+
+    <script type="module" src="/js/main.js"></script>
 </head>
 
 <body>
     <div>
         <div id="error-container"></div>
         <div id="auth-menu"></div>
+        <div>
+            <a href="/about" data-navigo>About</a>
+            <a href="/products?a=b#something-here" data-navigo>Products 1</a>
+            <a href="/products?c=d" data-navigo>Products 2</a>
+            <a href="/login" data-navigo>Login</a>
+            <a href="/login" data-navig="false">Reload to login</a>
+            <a href="/login" data-navig target="_blank">New tab to login</a>
+        </div>
         <div class="games-container" id="gamesContainer"></div>
     </div>
     <script type="module">
-        import { main } from './js/main.js';
-        import pageStateManager from './js/modules/PageStateManager.js';
+        window.addEventListener("load", () => {
+            const router = new Navigo("/");
+            const render = (content) =>
+                (document.querySelector("#gamesContainer").innerHTML = content);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            main(pageStateManager.getPageState());
+            router
+                .on("/about", (match) => {
+                    console.log(match);
+                    render("About");
+                })
+                .on("/products", (match) => {
+                    console.log(match);
+                    render("Products " + JSON.stringify(match.params));
+                })
+                .on("/login", (match) => {
+                    console.log(match);
+                    render("Login");
+                })
+                .on((match) => {
+                    console.log(match);
+                    render("home");
+                })
+                .resolve();
         });
+
+        //import { main } from '/js/main.js';
+        //import pageStateManager from '/js/modules/PageStateManager.js';
+
+        //document.addEventListener('DOMContentLoaded', () => {
+        //    main(pageStateManager.getPageState());
+        //});
     </script>
 </body>
 
