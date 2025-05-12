@@ -25,52 +25,46 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <div class="nav-container">
             <nav class="nav-menu">
-                <!-- Simple menu item with icon -->
                 <a href="/" data-navigo><span class="menu-icon"><i class="fas fa-home"></i></span>Home</a>
 
-            <!-- Menu item with access key (underlined G) -->
-            <a href="/games" data-navigo><span class="menu-icon"><i class="fas fa-gamepad"></i></span><span class="access-key">G</span>ames</a>
+                <a href="/games" data-navigo><span class="menu-icon"><i class="fas fa-gamepad"></i></span><span
+                        class="access-key">G</span>ames</a>
 
-            <!-- Submenu example -->
-            <div class="menu-item has-submenu">
-                <span class="menu-icon"><i class="fas fa-box-open"></i></span>Products
-                <div class="submenu">
-                    <a href="/products?a=b#something-here" data-navigo>Products 1</a>
-                    <a href="/products?c=d" data-navigo>Products 2</a>
-                    <div class="separator"></div>
-                    <a href="/new-products" data-navigo><span class="menu-icon"><i class="fas fa-star"></i></span>New Releases</a>
-                    <a href="/special-offers" data-navigo>Special Offers <span class="keyboard-shortcut">Alt+S</span></a>
+                <div class="menu-item has-submenu">
+                    <span class="menu-icon"><i class="fas fa-box-open"></i></span>Products
+                    <div class="submenu">
+                        <a href="/products?a=b#something-here" data-navigo>Products 1</a>
+                        <a href="/products?c=d" data-navigo>Products 2</a>
+                        <div class="separator"></div>
+                        <a href="/new-products" data-navigo><span class="menu-icon"><i
+                                    class="fas fa-star"></i></span>New Releases</a>
+
+                    </div>
                 </div>
-            </div>
 
-            <!-- Another submenu example -->
-            <div class="menu-item has-submenu">
-                <span class="menu-icon"><i class="fas fa-info-circle"></i></span>About
-                <div class="submenu">
-                    <a href="/about" data-navigo>About Us</a>
-                    <a href="/team" data-navigo><span class="menu-icon"><i class="fas fa-users"></i></span>Our Team</a>
-                    <div class="separator"></div>
-                    <a href="/contact" data-navigo>Contact</a>
+                <div class="menu-item has-submenu">
+                    <span class="menu-icon"><i class="fas fa-info-circle"></i></span>About
+                    <div class="submenu">
+                        <a href="/about" data-navigo>About Us</a>
+                        <a href="/team" data-navigo><span class="menu-icon"><i class="fas fa-users"></i></span>Our
+                            Team</a>
+                        <div class="separator"></div>
+                        <a href="/contact" data-navigo>Contact</a>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Menu item with keyboard shortcut -->
-            <a href="/login" data-navigo><span class="menu-icon"><i class="fas fa-user"></i></span>Login <span class="keyboard-shortcut">Alt+L</span></a>
-        </nav>
+                <a href="/login" data-navigo><span class="menu-icon"><i class="fas fa-user"></i></span>Login</a>
+            </nav>
         </div>
         <div class="games-container" id="gamesContainer"></div>
     </div>
-    <style>
-        /* Asegurarse que el contenedor de juegos ocupe todo el ancho disponible */
-        #gamesContainer {
-            width: 100% !important;
-            min-width: 100% !important;
-            max-width: 100% !important;
-        }
-    </style>
+
     <script type="module">
+        import { partialLoader } from '/js/modules/PartialLoader.js';
+
         window.addEventListener("load", () => {
             const router = new Navigo("/");
+            const gamesContainer = document.querySelector("#gamesContainer");
             const render = (content) => {
                 const container = document.querySelector("#gamesContainer");
                 container.innerHTML = content;
@@ -98,23 +92,6 @@
                     }
                 });
             };
-
-            // Setup keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.altKey) {
-                    switch (e.key.toLowerCase()) {
-                        case 'l':
-                            router.navigate('/login');
-                            break;
-                        case 'g':
-                            router.navigate('/games');
-                            break;
-                        case 's':
-                            router.navigate('/special-offers');
-                            break;
-                    }
-                }
-            });
 
             // Handle submenu toggle on mobile (since hover doesn't work well)
             document.querySelectorAll('.menu-item.has-submenu').forEach(item => {
@@ -173,13 +150,13 @@
                     render("Special Offers");
                     updateActiveNav("/special-offers");
                 })
-                .on("/login", (match) => {
-                    console.log(match);
-                    render("Login");
+                .on("/login", async (match) => {
                     updateActiveNav("/login");
+                    await partialLoader.loadPartial('login-form', gamesContainer);
                 })
                 .resolve();
         });
+
 
         //import { main } from '/js/main.js';
         //import pageStateManager from '/js/modules/PageStateManager.js';
