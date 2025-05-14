@@ -1,0 +1,204 @@
+/* GameCore Home Page Styles */
+
+.home-container {
+    width: 100%; /* Occupy full width */
+    max-width: 100%; /* Ensure it doesn't exceed container width */
+    margin: 0 auto;
+    padding: 2rem;
+    color: var(--text-color);
+    overflow-y: auto; /* Enable vertical scrolling */
+    height: 100%; /* Take full height of parent */
+    flex: 1; /* Allow it to grow and fill available space */
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #ff5722 #2b2b2b; /* Scrollbar color for Firefox */
+}
+
+/* WebKit scrollbar styling (Chrome, Safari, etc.) */
+.home-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.home-container::-webkit-scrollbar-track {
+    background: #2b2b2b;
+    border-radius: 4px;
+}
+
+.home-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff5722, #e64a19);
+    border-radius: 4px;
+}
+
+.home-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #e64a19, #d84315);
+}
+
+.welcome-banner {
+    text-align: center;
+    margin: 1rem auto 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #e64a19 0%, #ff5722 100%);
+    border-radius: 8px;
+    color: white;
+    width: 90%;
+    max-width: 1000px; /* Make it wide but not too wide */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-banner h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+}
+
+.welcome-banner h1 .highlight {
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+}
+
+.welcome-banner h1 .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 2px;
+}
+
+.welcome-banner p {
+    font-size: 1.1rem;
+    margin: 0;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.framework-overview {
+    margin-bottom: 2rem;
+}
+
+.key-concepts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.concept-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.concept-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.concept-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+}
+
+.code-example {
+    margin-top: 1rem;
+    background-color: var(--code-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.code-example pre {
+    padding: 1rem;
+    margin: 0;
+    overflow-x: auto;
+}
+
+.code-example code {
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+}
+
+.getting-started {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+}
+
+.getting-started ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+}
+
+.getting-started li {
+    padding: 1rem;
+    border-radius: 4px;
+    background-color: var(--button-bg);
+    transition: background-color 0.3s ease;
+}
+
+.getting-started li:hover {
+    background-color: var(--button-hover);
+}
+
+.getting-started a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--button-text);
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .key-concepts {
+        grid-template-columns: 1fr;
+    }
+
+    .getting-started ul {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Responsive adjustments for home page */
+@media (max-width: 768px) {
+    .home-container {
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .welcome-banner {
+        width: 95%;
+        padding: 1rem;
+        margin: 0.5rem auto 1.5rem;
+    }
+
+    .welcome-banner h1 {
+        font-size: 1.8rem;
+    }
+
+    .key-concepts {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-banner {
+        width: 100%;
+        border-radius: 4px;
+        padding: 0.8rem;
+    }
+
+    .welcome-banner h1 {
+        font-size: 1.6rem;
+    }
+}

@@ -1,0 +1,156 @@
+<div class="home-container">
+    <div class="welcome-banner">
+        <h1>Welcome to <span class="highlight">GameCore</span></h1>
+        <p>A modern web-based game development framework</p>
+    </div>
+
+    <div class="framework-overview">
+        <h2>GameCore Framework</h2>
+        <p>GameCore is a lightweight, modular framework for building browser-based games with modern JavaScript.
+            Whether you're creating simple 2D games or complex interactive experiences, GameCore provides the
+            tools and structure you need to build scalable, maintainable game applications.</p>
+    </div>
+
+    <div class="key-concepts">
+        <h2>Key Framework Concepts</h2>
+
+        <div class="concept-card">
+            <div class="concept-icon"><i class="fas fa-cube"></i></div>
+            <h3>GameObject</h3>
+            <p>The fundamental building block in GameCore. GameObjects are containers that hold components
+                and can be positioned within the game world. Every entity in your game - from players to
+                enemies to UI elements - is represented as a GameObject.</p>
+            <div class="code-example">
+                <pre><code>// Creating a simple GameObject
+const player = new GameObject({
+  id: 'player',
+  position: { x: 100, y: 100 },
+  components: [new SpriteComponent('player-sprite')]
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-icon"><i class="fas fa-puzzle-piece"></i></div>
+            <h3>Components</h3>
+            <p>Components add behavior and functionality to GameObjects. Each component handles a specific
+                aspect like rendering, physics, input handling, or game logic. This component-based architecture
+                promotes code reuse and separation of concerns.</p>
+            <div class="code-example">
+                <pre><code>// Component example
+class MovementComponent extends Component {
+  update(deltaTime) {
+    // Update position based on velocity and time
+    this.gameObject.position.x += this.velocity.x * deltaTime;
+    this.gameObject.position.y += this.velocity.y * deltaTime;
+  }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-icon"><i class="fas fa-copy"></i></div>
+            <h3>Prefabs</h3>
+            <p>Templates for creating GameObjects with predefined components and properties. Prefabs allow you
+                to define a complex GameObject once and instantiate it multiple times, which is perfect for
+                common game elements like enemies, projectiles, or collectibles.</p>
+            <div class="code-example">
+                <pre><code>// Defining a prefab
+const enemyPrefab = {
+  components: [
+    { type: 'sprite', properties: { spriteSheet: 'enemies', frame: 0 } },
+    { type: 'physics', properties: { mass: 1, friction: 0.1 } },
+    { type: 'ai', properties: { behavior: 'patrol' } }
+  ]
+};
+
+// Creating an instance from prefab
+const enemy = GameObjectFactory.createFromPrefab(enemyPrefab);</code></pre>
+            </div>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-icon"><i class="fas fa-cogs"></i></div>
+            <h3>Services</h3>
+            <p>Global systems that provide functionality across your game. Services handle cross-cutting concerns
+                like asset loading, input management, physics simulation, rendering, and audio. They're singleton
+                objects accessible throughout your game code.</p>
+            <div class="code-example">
+                <pre><code>// Using the input service
+InputService.onKeyDown('Space', () => {
+  player.jump();
+});
+
+// Using the audio service
+AudioService.playSound('explosion', { volume: 0.8, pitch: 1.2 });</code></pre>
+            </div>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-icon"><i class="fas fa-bolt"></i></div>
+            <h3>Events</h3>
+            <p>GameCore uses an event system for communication between decoupled parts of your game. Components,
+                services, and game logic can publish and subscribe to events, enabling loose coupling and
+                modular design.</p>
+            <div class="code-example">
+                <pre><code>// Publishing an event
+EventBus.publish('player:hit', { damage: 10 });
+
+// Subscribing to an event
+EventBus.subscribe('player:hit', (data) => {
+  updateHealthUI(data.damage);
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-icon"><i class="fas fa-play-circle"></i></div>
+            <h3>GameApp</h3>
+            <p>The main application container that coordinates the game loop, manages scenes, and initializes
+                core services. Your game starts by creating a GameApp instance and configuring its settings.</p>
+            <div class="code-example">
+                <pre><code>// Creating and starting a game
+const myGame = new GameApp({
+  canvas: document.getElementById('gameCanvas'),
+  width: 800,
+  height: 600,
+  scenes: [LoadingScene, MainMenuScene, GameplayScene]
+});
+
+myGame.start();</code></pre>
+            </div>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-icon"><i class="fas fa-film"></i></div>
+            <h3>Scenes</h3>
+            <p>Containers for game states like menus, levels, or screens. Each scene has its own collection
+                of GameObjects and logic. The GameApp manages transitions between scenes.</p>
+            <div class="code-example">
+                <pre><code>class LevelOneScene extends Scene {
+  init() {
+    // Create level objects
+    this.addGameObject(new Terrain('level1-map'));
+    this.addGameObject(new Player({ x: 50, y: 50 }));
+    // Add enemies, collectibles, etc.
+  }
+
+  update(deltaTime) {
+    // Scene-specific update logic
+    this.checkWinCondition();
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="getting-started">
+        <h2>Getting Started</h2>
+        <p>Ready to build your first game with GameCore? Check out these resources:</p>
+        <ul>
+            <li><a href="/docs/tutorials" data-navigo><i class="fas fa-book-open"></i> Tutorials</a></li>
+            <li><a href="/docs/api" data-navigo><i class="fas fa-code"></i> API Reference</a></li>
+            <li><a href="/examples" data-navigo><i class="fas fa-th"></i> Example Games</a></li>
+        </ul>
+    </div>
+</div>

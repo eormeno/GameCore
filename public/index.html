@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/css/game.css">
     <link rel="stylesheet" href="/css/auth.css">
     <link rel="stylesheet" href="/css/auth-menu.css">
+    <link rel="stylesheet" href="/css/home.css">
 
     <script src="/libs/navigo.min.js"></script>
 
@@ -30,29 +31,6 @@
                 <a href="/games" data-navigo><span class="menu-icon"><i class="fas fa-gamepad"></i></span><span
                         class="access-key">G</span>ames</a>
 
-                <div class="menu-item has-submenu">
-                    <span class="menu-icon"><i class="fas fa-box-open"></i></span>Products
-                    <div class="submenu">
-                        <a href="/products?a=b#something-here" data-navigo>Products 1</a>
-                        <a href="/products?c=d" data-navigo>Products 2</a>
-                        <div class="separator"></div>
-                        <a href="/new-products" data-navigo><span class="menu-icon"><i
-                                    class="fas fa-star"></i></span>New Releases</a>
-
-                    </div>
-                </div>
-
-                <div class="menu-item has-submenu">
-                    <span class="menu-icon"><i class="fas fa-info-circle"></i></span>About
-                    <div class="submenu">
-                        <a href="/about" data-navigo>About Us</a>
-                        <a href="/team" data-navigo><span class="menu-icon"><i class="fas fa-users"></i></span>Our
-                            Team</a>
-                        <div class="separator"></div>
-                        <a href="/contact" data-navigo>Contact</a>
-                    </div>
-                </div>
-
                 <a href="/login" data-navigo><span class="menu-icon"><i class="fas fa-user"></i></span>Login</a>
             </nav>
         </div>
@@ -68,8 +46,6 @@
             const render = (content) => {
                 const container = document.querySelector("#gamesContainer");
                 container.innerHTML = content;
-                container.style.width = "100%";
-                container.style.display = "block";
             };
 
             // Function to update active navigation link
@@ -110,45 +86,14 @@
             });
 
             router
-                .on("/", (match) => {
-                    console.log(match);
-                    render("Home");
+                .on("/", async (match) => {
                     updateActiveNav("/");
+                    await partialLoader.loadPartial('home', gamesContainer);
                 })
                 .on("/games", (match) => {
                     console.log(match);
                     render("Games");
                     updateActiveNav("/games");
-                })
-                .on("/about", (match) => {
-                    console.log(match);
-                    render("About Us");
-                    updateActiveNav("/about");
-                })
-                .on("/team", (match) => {
-                    console.log(match);
-                    render("Our Team");
-                    updateActiveNav("/team");
-                })
-                .on("/contact", (match) => {
-                    console.log(match);
-                    render("Contact Us");
-                    updateActiveNav("/contact");
-                })
-                .on("/products", (match) => {
-                    console.log(match);
-                    render("Products " + JSON.stringify(match.params));
-                    updateActiveNav(match.url.split('?')[0]); // Remove query params for active state
-                })
-                .on("/new-products", (match) => {
-                    console.log(match);
-                    render("New Products");
-                    updateActiveNav("/new-products");
-                })
-                .on("/special-offers", (match) => {
-                    console.log(match);
-                    render("Special Offers");
-                    updateActiveNav("/special-offers");
                 })
                 .on("/login", async (match) => {
                     updateActiveNav("/login");
