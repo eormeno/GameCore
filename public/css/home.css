@@ -34,20 +34,14 @@
 
 .welcome-banner {
     text-align: center;
-    margin: 1rem auto 2rem;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #e64a19 0%, #ff5722 100%);
-    border-radius: 8px;
-    color: white;
-    width: 90%;
-    max-width: 1000px; /* Make it wide but not too wide */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 0.25rem auto 1rem;
+    padding: 1.0rem;
+    color: #e64b1c;
 }
 
 .welcome-banner h1 {
     font-size: 2.2rem;
     margin-bottom: 0.8rem;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
 }
 
@@ -64,8 +58,6 @@
     left: 0;
     width: 100%;
     height: 3px;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 2px;
 }
 
 .welcome-banner p {

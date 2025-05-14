@@ -1,14 +1,18 @@
 /* Regla global para asegurar que todos los elementos incluyan padding y borde en su ancho */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
 /* Estilos para HTML y Body */
-html, body {
+html,
+body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Elimina el scroll del body */
+    overflow: hidden;
+    /* Elimina el scroll del body */
 }
 
 /* Estilo general de la pantalla principal */
@@ -18,27 +22,33 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Asegura que el body tome al menos toda la altura de la ventana */
+    min-height: 100vh;
+    /* Asegura que el body tome al menos toda la altura de la ventana */
 }
 
 /* Contenedor principal que envuelve toda la aplicación */
 .main-wrapper {
-    width: 100vw; /* Utiliza todo el ancho de la ventana */
-    height: 100vh; /* Utiliza toda la altura de la ventana */
+    width: 100vw;
+    /* Utiliza todo el ancho de la ventana */
+    height: 100vh;
+    /* Utiliza toda la altura de la ventana */
     box-sizing: border-box;
     overflow-x: hidden;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-direction: column; /* Organiza los elementos en columna */
+    flex-direction: column;   /* Organiza los elementos en columna */
     flex: 1; /* Permite que crezca y ocupe todo el espacio disponible */
-    align-items: stretch; /* Hace que los hijos ocupen todo el ancho disponible */
+    align-items: stretch;    /* Hace que los hijos ocupen todo el ancho disponible */
 }
 
 /* Contenedor de errores y menú de autenticación */
-#error-container, #auth-menu {
-    flex-shrink: 0; /* Evita que se compriman */
-    min-height: 0; /* Permite que puedan tener altura cero cuando están vacíos */
+#error-container,
+#auth-menu {
+    flex-shrink: 0;
+    /* Evita que se compriman */
+    min-height: 0;
+    /* Permite que puedan tener altura cero cuando están vacíos */
 }
 
 /* Encabezado con estilo vibrante y profesional */
@@ -53,13 +63,14 @@ header {
 
 /* Contenedor para el menú de navegación */
 .nav-container {
-    width: 100vw; /* Utiliza todo el ancho de la ventana */
+    width: 100vw;
+    /* Utiliza todo el ancho de la ventana */
     background-color: #2b2b2b;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1000; /* Ensure the container has proper z-index */
-    flex-shrink: 0; /* Evita que el menú se comprima cuando el espacio es limitado */
-    align-self: stretch; /* Asegura que ocupe todo el ancho disponible */
+    flex-shrink: 0;  /* Evita que el menú se comprima cuando el espacio es limitado */
+    align-self: stretch;  /* Asegura que ocupe todo el ancho disponible */
 }
 
 /* Estilos para el menú de navegación */
@@ -71,11 +82,11 @@ header {
     flex-wrap: wrap;
     gap: 20px;
     position: relative;
-    max-width: 1200px; /* Match the main-content max-width */
-    margin: 0 auto; /* Center the menu within its container */
+    margin: 0 auto;   /* Center the menu within its container */
 }
 
-.nav-menu a, .nav-menu .menu-item {
+.nav-menu a,
+.nav-menu .menu-item {
     color: #f0f0f0;
     text-decoration: none;
     font-weight: 500;
@@ -86,17 +97,21 @@ header {
     align-items: center;
     cursor: pointer;
     position: relative;
-    margin-right: 5px; /* Add spacing between menu items */
-    text-align: left; /* Garantiza que el texto esté alineado a la izquierda */
+    margin-right: 5px;
+    /* Add spacing between menu items */
+    text-align: left;
+    /* Garantiza que el texto esté alineado a la izquierda */
 }
 
-.nav-menu a:hover, .nav-menu .menu-item:hover {
+.nav-menu a:hover,
+.nav-menu .menu-item:hover {
     background: linear-gradient(90deg, #ff5722, #e64a19);
     color: white;
     transform: translateY(-2px);
 }
 
-.nav-menu a.active, .nav-menu .menu-item.active {
+.nav-menu a.active,
+.nav-menu .menu-item.active {
     background: linear-gradient(90deg, #e64a19, #d84315);
     color: white;
 }
@@ -106,16 +121,21 @@ header {
     position: absolute;
     top: 100%;
     left: 0;
-    min-width: 220px; /* Aumentado para acomodar atajos de teclado */
+    min-width: 220px;
+    /* Aumentado para acomodar atajos de teclado */
     background-color: #2b2b2b;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     border-radius: 4px;
-    padding: 0; /* Quitamos el padding para que los bordes encajen perfectamente */
-    z-index: 9999; /* Highest z-index to appear above all other elements */
+    padding: 0;
+    /* Quitamos el padding para que los bordes encajen perfectamente */
+    z-index: 9999;
+    /* Highest z-index to appear above all other elements */
     display: none;
     flex-direction: column;
-    overflow: hidden; /* Asegura que el contenido no se desborde */
-    width: auto; /* Permite que se ajuste al contenido */
+    overflow: hidden;
+    /* Asegura que el contenido no se desborde */
+    width: auto;
+    /* Permite que se ajuste al contenido */
 }
 
 .menu-item:hover .submenu {
@@ -125,22 +145,31 @@ header {
 .submenu a {
     padding: 8px 16px;
     border-radius: 0;
-    width: 100%; /* Ocupa todo el ancho del submenú */
-    margin: 0; /* Elimina cualquier margen */
+    width: 100%;
+    /* Ocupa todo el ancho del submenú */
+    margin: 0;
+    /* Elimina cualquier margen */
     white-space: nowrap;
-    transition: background 0.3s ease; /* Suaviza la transición */
+    transition: background 0.3s ease;
+    /* Suaviza la transición */
     display: flex;
-    justify-content: flex-start; /* Alinea el contenido al inicio (izquierda) */
-    align-items: center; /* Centra verticalmente */
-    box-sizing: border-box; /* Incluye padding en el cálculo del ancho */
-    text-align: left; /* Alinea el texto a la izquierda */
+    justify-content: flex-start;
+    /* Alinea el contenido al inicio (izquierda) */
+    align-items: center;
+    /* Centra verticalmente */
+    box-sizing: border-box;
+    /* Incluye padding en el cálculo del ancho */
+    text-align: left;
+    /* Alinea el texto a la izquierda */
 }
 
 .submenu a:hover {
     transform: none;
     background: linear-gradient(90deg, #ff5722, #e64a19);
-    width: 100%; /* Asegura que el efecto hover cubra todo el ancho */
-    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.05); /* Efecto sutil para resaltar toda el área */
+    width: 100%;
+    /* Asegura que el efecto hover cubra todo el ancho */
+    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.05);
+    /* Efecto sutil para resaltar toda el área */
 }
 
 /* Estilos para el primer y último elemento del submenú */
@@ -159,8 +188,10 @@ header {
     height: 1px;
     background: linear-gradient(90deg, transparent, #ff5722, transparent);
     margin: 6px 0;
-    width: 100%; /* Ocupa todo el ancho */
-    box-sizing: border-box; /* Incluye cualquier padding en el ancho */
+    width: 100%;
+    /* Ocupa todo el ancho */
+    box-sizing: border-box;
+    /* Incluye cualquier padding en el ancho */
 }
 
 /* Estilos para iconos */
@@ -169,8 +200,10 @@ header {
     font-size: 16px;
     width: 20px;
     text-align: center;
-    flex-shrink: 0; /* Evita que el icono se reduzca */
-    display: inline-flex; /* Asegura que el icono tenga el mismo comportamiento de línea */
+    flex-shrink: 0;
+    /* Evita que el icono se reduzca */
+    display: inline-flex;
+    /* Asegura que el icono tenga el mismo comportamiento de línea */
 }
 
 /* Indicador de submenú */
@@ -187,16 +220,21 @@ header {
 
 /* Estilo para atajo de teclado */
 .keyboard-shortcut {
-    margin-left: auto; /* Empuja el atajo al extremo derecho */
+    margin-left: auto;
+    /* Empuja el atajo al extremo derecho */
     padding: 2px 6px;
     font-size: 0.75em;
     background-color: rgba(255, 255, 255, 0.15);
     border-radius: 3px;
-    display: inline-block; /* Asegura que se muestre como bloque en línea */
-    white-space: nowrap; /* Evita que se corte */
-    min-width: fit-content; /* Asegura que tenga el ancho mínimo necesario */
+    display: inline-block;
+    /* Asegura que se muestre como bloque en línea */
+    white-space: nowrap;
+    /* Evita que se corte */
+    min-width: fit-content;
+    /* Asegura que tenga el ancho mínimo necesario */
     text-align: center;
-    flex-shrink: 0; /* Evita que el atajo se comprima */
+    flex-shrink: 0;
+    /* Evita que el atajo se comprima */
 }
 
 /* Contenedor principal centrado y con márgenes adecuados */
@@ -204,12 +242,19 @@ header {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+    box-sizing: border-box;
+    /* Incluye padding y borde en el ancho total */
 }
 
 /* Estilo para la galería de videojuegos */
 .games-container {
-    justify-content: center;
+    display: flex;
+    justify-content: flex-start; /* Align items to the left */
+    flex-wrap: wrap;
+    position: relative;
+    margin: 0 auto;   /* Center the menu within its container */
+    flex-shrink: 0;  /* Evita que el menú se comprima cuando el espacio es limitado */
+    align-self: stretch;  /* Asegura que ocupe todo el ancho disponible */
 }
 
 .game-card {
@@ -221,7 +266,8 @@ header {
     background-color: #2b2b2b;
     /* Fondo oscuro y elegante */
     border: 1px solid #444;
-    box-sizing: border-box; /* Asegura que el padding y borde no afecten el tamaño */
+    box-sizing: border-box;
+    /* Asegura que el padding y borde no afecten el tamaño */
     /* Borde sutil */
     border-radius: 8px;
     overflow: hidden;
@@ -342,15 +388,21 @@ header {
         flex-direction: column;
         padding: 5px 15px;
         gap: 5px;
-        align-items: flex-start; /* Ensure left alignment on mobile */
-        width: 100%; /* Full width on mobile */
+        align-items: flex-start;
+        /* Ensure left alignment on mobile */
+        width: 100%;
+        /* Full width on mobile */
     }
 
-    .nav-menu a, .nav-menu .menu-item {
+    .nav-menu a,
+    .nav-menu .menu-item {
         width: 100%;
         justify-content: space-between;
-        margin-right: 0; /* Remove right margin on mobile */
-    }    .menu-item.has-submenu {
+        margin-right: 0;
+        /* Remove right margin on mobile */
+    }
+
+    .menu-item.has-submenu {
         position: relative;
     }
 
@@ -361,12 +413,14 @@ header {
         padding: 0;
         background-color: #252525;
         border-left: 3px solid #ff5722;
-        border-radius: 0; /* Sin bordes redondeados en móvil */
+        border-radius: 0;
+        /* Sin bordes redondeados en móvil */
         overflow: hidden;
     }
 
     .menu-item:hover .submenu {
-        display: none; /* Override the hover behavior for mobile */
+        display: none;
+        /* Override the hover behavior for mobile */
     }
 
     .has-submenu::after {
@@ -386,8 +440,10 @@ header {
     }
 
     .submenu a {
-        padding: 12px 16px; /* Más padding vertical para facilitar el toque */
-        width: 100%; /* Asegurar que ocupa todo el ancho en móviles */
+        padding: 12px 16px;
+        /* Más padding vertical para facilitar el toque */
+        width: 100%;
+        /* Asegurar que ocupa todo el ancho en móviles */
         box-sizing: border-box;
     }
 
