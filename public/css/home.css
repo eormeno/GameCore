@@ -1,16 +1,23 @@
 /* GameCore Home Page Styles */
 
 .home-container {
-    width: 100%; /* Occupy full width */
-    max-width: 100%; /* Ensure it doesn't exceed container width */
+    width: 100%;
+    /* Occupy full width */
+    max-width: 100%;
+    /* Ensure it doesn't exceed container width */
     margin: 0 auto;
     padding: 2rem;
     color: var(--text-color);
-    overflow-y: auto; /* Enable vertical scrolling */
-    height: 100%; /* Take full height of parent */
-    flex: 1; /* Allow it to grow and fill available space */
-    scrollbar-width: thin; /* For Firefox */
-    scrollbar-color: #ff5722 #2b2b2b; /* Scrollbar color for Firefox */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    height: 100%;
+    /* Take full height of parent */
+    flex: 1;
+    /* Allow it to grow and fill available space */
+    scrollbar-width: thin;
+    /* For Firefox */
+    scrollbar-color: #ff5722 #2b2b2b;
+    /* Scrollbar color for Firefox */
 }
 
 /* WebKit scrollbar styling (Chrome, Safari, etc.) */
@@ -40,6 +47,7 @@
 }
 
 .welcome-banner h1 {
+    text-transform:capitalize;
     font-size: 2.2rem;
     margin-bottom: 0.8rem;
     letter-spacing: 0.5px;
@@ -73,7 +81,7 @@
 
 .key-concepts {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
 }

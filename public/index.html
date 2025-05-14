@@ -28,10 +28,20 @@
             <nav class="nav-menu">
                 <a href="/" data-navigo><span class="menu-icon"><i class="fas fa-home"></i></span>Home</a>
 
-                <a href="/games" data-navigo><span class="menu-icon"><i class="fas fa-gamepad"></i></span><span
-                        class="access-key">G</span>ames</a>
+                <a href="/games" data-navigo><span class="menu-icon"><i
+                            class="fas fa-gamepad"></i></span></span>Games</a>
 
-                <a href="/login" data-navigo><span class="menu-icon"><i class="fas fa-user"></i></span>Login</a>
+                <div class="menu-item has-submenu">
+                    <span class="menu-icon"><i class="fas fa-user"></i></span>Authentication
+                    <div class="submenu">
+                        <a href="/login" data-navigo>Login</a>
+                        <a href="/register" data-navigo>Register</a>
+                        <div class="separator"></div>
+                        <a href="/profile" data-navigo>Profile</a>
+                        <a href="/logout" data-navigo>Logout</a>
+                    </div>
+                </div>
+                <!-- <a href="/login" data-navigo><span class="menu-icon"><i class="fas fa-user"></i></span>Login</a> -->
             </nav>
         </div>
         <div class="games-container" id="gamesContainer"></div>
@@ -91,7 +101,6 @@
                     await partialLoader.loadPartial('home', gamesContainer);
                 })
                 .on("/games", (match) => {
-                    console.log(match);
                     render("Games");
                     updateActiveNav("/games");
                 })
