@@ -1,5 +1,6 @@
 // Router configuration for GameCore application
 import { partialLoader } from '/js/modules/PartialLoader.js';
+import { fetchApi } from '/js/services/api.js';
 
 // Initialize router and setup routes when DOM is loaded
 window.addEventListener("load", async () => {
@@ -64,42 +65,6 @@ window.addEventListener("load", async () => {
     await updateAuthState();
 
 });
-
-async function fetchApi(endpoint, method = 'GET', body = null, callback = null) {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(endpoint, {
-            method,
-            body,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            pageState.setPageState('error', { error });
-            return;
-        }
-
-        let data;
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            data = { error: await response.text() };
-        } else {
-            data = await response.json();
-        }
-
-        const stateName = Object.keys(data)[0];
-        if (callback) {
-            callback(stateName, data[stateName]);
-        }
-    } catch (error) {
-        console.error('Error al cargar los juegos:', error);
-        document.getElementById('gamesContainer').innerHTML = error;
-    }
-}
 
 // Actualizar el estado de autenticación en toda la aplicación
 async function updateAuthState() {
