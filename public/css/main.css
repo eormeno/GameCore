@@ -237,6 +237,16 @@ header {
     /* Evita que el atajo se comprima */
 }
 
+/* Reglas para elementos que solo se muestran cuando el usuario está autenticado */
+[data-auth-state="guest"] .auth-user-only {
+    display: none !important;
+}
+
+/* Reglas para elementos que solo se muestran cuando el usuario NO está autenticado */
+[data-auth-state="authenticated"] .auth-guest-only {
+    display: none !important;
+}
+
 /* Contenedor principal centrado y con márgenes adecuados */
 .main-content {
     max-width: 1200px;

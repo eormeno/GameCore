@@ -15,9 +15,7 @@
 
     <script src="/libs/navigo.min.js"></script>
 
-    <!-- Main scripts -->
     <script type="module" src="/js/router.js"></script>
-    <!-- <script type="module" src="/js/main.js"></script> -->
 </head>
 
 <body>
@@ -34,16 +32,19 @@
                             class="fas fa-gamepad"></i></span></span>Games</a>
 
                 <div class="menu-item has-submenu">
-                    <span class="menu-icon"><i class="fas fa-user"></i></span>Authentication
+                    <span class="menu-icon"><i class="fas fa-user"></i></span><span id="auth-user-name">Authentication</span>
                     <div class="submenu">
-                        <a href="/login" data-navigo>Login</a>
-                        <a href="/register" data-navigo>Register</a>
-                        <div class="separator"></div>
-                        <a href="/profile" data-navigo>Profile</a>
-                        <a href="/logout" data-navigo>Logout</a>
+                        <!-- Elementos que solo se muestran a usuarios no autenticados -->
+                        <a href="/login" data-navigo class="auth-guest-only">Login</a>
+                        <a href="/register" data-navigo class="auth-guest-only">Register</a>
+
+                        <!-- Elementos que solo se muestran a usuarios autenticados -->
+                        <a href="/profile" data-navigo class="auth-user-only">Profile</a>
+                        <div class="separator auth-user-only"></div>
+                        <a href="/logout" data-navigo class="auth-user-only">Logout</a>
                     </div>
                 </div>
-                <!-- <a href="/login" data-navigo><span class="menu-icon"><i class="fas fa-user"></i></span>Login</a> -->
+
             </nav>
         </div>
         <div class="games-container" id="gamesContainer"></div>

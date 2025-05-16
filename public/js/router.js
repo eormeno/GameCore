@@ -2,13 +2,9 @@
 import { partialLoader } from '/js/modules/PartialLoader.js';
 
 // Initialize router and setup routes when DOM is loaded
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
     const router = new Navigo("/");
     const gamesContainer = document.querySelector("#gamesContainer");
-    const render = (content) => {
-        const container = document.querySelector("#gamesContainer");
-        container.innerHTML = content;
-    };
 
     // Function to update active navigation link
     const updateActiveNav = (url) => {
@@ -53,20 +49,82 @@ window.addEventListener("load", () => {
             await partialLoader.loadPartial('home', gamesContainer);
         })
         .on("/games", (match) => {
-            render("Games");
             updateActiveNav("/games");
         })
         .on("/login", async (match) => {
             updateActiveNav("/login");
             await partialLoader.loadPartial('login-form', gamesContainer);
         })
+        .on("/logout", async (match) => {
+            updateActiveNav("/logout");
+            await closeSession();
+        })
         .resolve();
+
+    await updateAuthState();
+
 });
 
-// Commented code preserved for reference
-//import { main } from '/js/main.js';
-//import pageStateManager from '/js/modules/PageStateManager.js';
+async function fetchApi(endpoint, method = 'GET', body = null, callback = null) {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch(endpoint, {
+            method,
+            body,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-//document.addEventListener('DOMContentLoaded', () => {
-//    main(pageStateManager.getPageState());
-//});
+        if (!response.ok) {
+            const error = await response.text();
+            pageState.setPageState('error', { error });
+            return;
+        }
+
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            data = { error: await response.text() };
+        } else {
+            data = await response.json();
+        }
+
+        const stateName = Object.keys(data)[0];
+        if (callback) {
+            callback(stateName, data[stateName]);
+        }
+    } catch (error) {
+        console.error('Error al cargar los juegos:', error);
+        document.getElementById('gamesContainer').innerHTML = error;
+    }
+}
+
+// Actualizar el estado de autenticación en toda la aplicación
+async function updateAuthState() {
+    const token = localStorage.getItem('token');
+    const authUserName = document.getElementById('auth-user-name');
+
+    // Establecemos el estado por defecto (no autenticado)
+    document.body.setAttribute('data-auth-state', 'guest');
+    authUserName.innerText = 'Authentication';
+
+    if (token) {
+        // Verificar el token con el servidor
+        await fetchApi('api/user', 'GET', null, (stateName, data) => {
+            if (stateName !== 'auth_required') {
+                // Usuario autenticado - cambiar el estado
+                document.body.setAttribute('data-auth-state', 'authenticated');
+                authUserName.innerText = data.name;
+            }
+        });
+    }
+}
+
+async function closeSession() {
+    await fetchApi('api/logout', 'POST', null, async (stateName, data) => {
+        localStorage.removeItem('token');
+        await updateAuthState();
+    });
+}
