@@ -32,7 +32,7 @@ export async function fetchApi(endpoint, method = 'GET', body = null, callback =
             callback(stateName, data[stateName]);
         }
 
-        return data; // Devolvemos los datos para uso directo
+        return data; // Return the data for further processing if needed
     } catch (error) {
         console.error('Error en la llamada API:', error);
         document.getElementById('gamesContainer').innerHTML = error;

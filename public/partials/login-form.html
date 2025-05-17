@@ -14,29 +14,21 @@
         </div>
     </form>
     <script type="module">
+        const baseUrl = window.location.origin;
+        const apiModule = await import(`${baseUrl}/js/services/api.js`);
+        const { fetchApi } = apiModule;
+
         export function render(container) {
-            // const { pageState } = container._partialParams || {};
             document.getElementById("loginForm").addEventListener("submit", async function (event) {
                 event.preventDefault();
                 const formValues = Object.fromEntries(new FormData(event.target));
-                let state = {
-                    name: "trying_login",
-                    data: {
-                        action: event.target.action,
-                        method: event.target.method,
-                        body: JSON.stringify(formValues)
-                    }
-                };
 
-                document.dispatchEvent(new CustomEvent('stateChanged', { detail: state }));
+                await fetchApi(event.target.action, event.target.method, JSON.stringify(formValues),
+                    (stateName, data) => {
+                        if (stateName === "successful_login")
+                            localStorage.setItem('token', data.token);
+                    });
 
-                /*
-                pageState.setPageState("trying_login", {
-                    action: event.target.action,
-                    method: event.target.method,
-                    body: JSON.stringify(formValues)
-                });
-                */
             });
         }
     </script>
