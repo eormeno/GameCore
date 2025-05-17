@@ -47,14 +47,14 @@ window.addEventListener("load", async () => {
     router
         .on("/", async (match) => {
             updateActiveNav("/");
-            await partialLoader.loadPartial('home', gamesContainer);
+            await partialLoader.loadPartial('home', gamesContainer, router);
         })
         .on("/games", (match) => {
             updateActiveNav("/games");
         })
         .on("/login", async (match) => {
             updateActiveNav("/login");
-            await partialLoader.loadPartial('login-form', gamesContainer);
+            await partialLoader.loadPartial('login-form', gamesContainer, router);
         })
         .on("/logout", async (match) => {
             updateActiveNav("/logout");

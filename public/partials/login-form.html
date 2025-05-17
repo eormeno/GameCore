@@ -17,6 +17,8 @@
         const baseUrl = window.location.origin;
         const apiModule = await import(`${baseUrl}/js/services/api.js`);
         const { fetchApi } = apiModule;
+        // the router is set in the login-container element class name
+        const router = document.querySelector('.login-container').router;
 
         export function render(container) {
             document.getElementById("loginForm").addEventListener("submit", async function (event) {
@@ -25,8 +27,10 @@
 
                 await fetchApi(event.target.action, event.target.method, JSON.stringify(formValues),
                     (stateName, data) => {
-                        if (stateName === "successful_login")
+                        if (stateName === "successful_login") {
                             localStorage.setItem('token', data.token);
+                            router.navigate("/");
+                        }
                     });
 
             });

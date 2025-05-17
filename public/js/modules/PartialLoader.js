@@ -2,6 +2,7 @@ class PartialLoader {
     static #instance = null;
     static #DEFAULT_TTL = 5 * 60 * 1000; // 5 minutos en milisegundos
     static #cache = new Map();
+    static #useCache = true;
 
     constructor() {
         if (PartialLoader.#instance) {
@@ -10,10 +11,10 @@ class PartialLoader {
         PartialLoader.#instance = this;
     }
 
-    async loadPartial(file, container, params = {}, useCache = true) {
+    async loadPartial(file, container, router, params = {}) {
         try {
-            const html = await this._getCachedContent(file, useCache);
-            this._injectContent(html, container, params);
+            const html = await this._getCachedContent(file);
+            this._injectContent(html, container, router, params);
             this._replaceScripts(container);
         } catch (error) {
             this._handleError(error, file);
@@ -21,8 +22,8 @@ class PartialLoader {
         }
     }
 
-    async _getCachedContent(file, useCache) {
-        if (useCache && PartialLoader.#cache.has(file)) {
+    async _getCachedContent(file) {
+        if (PartialLoader.#useCache && PartialLoader.#cache.has(file)) {
             const entry = PartialLoader.#cache.get(file);
             if (entry.expiration > Date.now()) return entry.html;
             PartialLoader.#cache.delete(file);
@@ -49,8 +50,11 @@ class PartialLoader {
         return response.text();
     }
 
-    _injectContent(html, container, params) {
+    _injectContent(html, container, router, params) {
         container.innerHTML = html;
+        // put the router in the first child of the container
+        const firstChild = container.firstChild;
+        firstChild.router = router;
         container._partialParams = params;
     }
 
