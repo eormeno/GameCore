@@ -12,13 +12,15 @@
             <button type="submit" class="primary-btn">Sign in</button>
             <button type="button" class="secondary-btn">Sign up</button>
         </div>
+        <div id="loginError" class="error-message"></div>
     </form>
+
     <script type="module">
         const baseUrl = window.location.origin;
         const apiModule = await import(`${baseUrl}/js/services/api.js`);
+        const getRouter = await import(`${baseUrl}/js/router.js`);
         const { fetchApi } = apiModule;
-        // the router is set in the login-container element class name
-        const router = document.querySelector('.login-container').router;
+        const router = getRouter.getRouter();
 
         export function render(container) {
             document.getElementById("loginForm").addEventListener("submit", async function (event) {
@@ -30,9 +32,14 @@
                         if (stateName === "successful_login") {
                             localStorage.setItem('token', data.token);
                             router.navigate("/");
+                            return;
+                        }
+                        if (stateName === "failed_login") {
+                            const errorMessage = document.getElementById("loginError");
+                            errorMessage.textContent = data.message;
+                            errorMessage.style.display = "block";
                         }
                     });
-
             });
         }
     </script>

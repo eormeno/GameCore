@@ -11,10 +11,10 @@ class PartialLoader {
         PartialLoader.#instance = this;
     }
 
-    async loadPartial(file, container, router, params = {}) {
+    async loadPartial(file, container, params = {}) {
         try {
             const html = await this._getCachedContent(file);
-            this._injectContent(html, container, router, params);
+            this._injectContent(html, container, params);
             this._replaceScripts(container);
         } catch (error) {
             this._handleError(error, file);
@@ -50,11 +50,8 @@ class PartialLoader {
         return response.text();
     }
 
-    _injectContent(html, container, router, params) {
+    _injectContent(html, container, params) {
         container.innerHTML = html;
-        // put the router in the first child of the container
-        const firstChild = container.firstChild;
-        firstChild.router = router;
         container._partialParams = params;
     }
 

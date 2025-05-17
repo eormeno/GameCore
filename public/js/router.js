@@ -1,32 +1,68 @@
-// Router configuration for GameCore application
+/**
+ * Router module for handling navigation and partial loading in the application.
+ * This module uses Navigo for routing and PartialLoader for loading HTML partials.
+ * It also manages authentication state and updates the navigation menu accordingly.
+ */
+
 import { partialLoader } from '/js/modules/PartialLoader.js';
 import { fetchApi } from '/js/services/api.js';
 
+let routerInstance = null;
+
+function updateActiveNav(url) {
+    // if url does not start with /, add /
+    if (!url.startsWith('/')) {
+        url = '/' + url;
+    }
+
+    // Reset all active states
+    document.querySelectorAll('.nav-menu a, .nav-menu .menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Set active state for direct links
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        if (link.getAttribute('href') === url) {
+            link.classList.add('active');
+
+            // If link is in submenu, also highlight parent
+            const parentMenuItem = link.closest('.submenu')?.parentElement;
+            if (parentMenuItem) {
+                parentMenuItem.classList.add('active');
+            }
+        }
+    });
+}
+
+export function getRouter() {
+    if (!routerInstance) {
+        routerInstance = new Navigo("/");
+    }
+    return routerInstance;
+}
+
+export function initializeRouter() {
+    const router = getRouter();
+    router.hooks({
+        before: (done, match) => {
+
+            updateActiveNav(match.url);
+
+            done();
+        },
+        after: async (match) => {
+            await updateAuthState();
+            window.scrollTo(0, 0);
+        }
+    });
+
+    return router;
+}
+
 // Initialize router and setup routes when DOM is loaded
 window.addEventListener("load", async () => {
-    const router = new Navigo("/");
+    const router = initializeRouter();
     const gamesContainer = document.querySelector("#gamesContainer");
-
-    // Function to update active navigation link
-    const updateActiveNav = (url) => {
-        // Reset all active states
-        document.querySelectorAll('.nav-menu a, .nav-menu .menu-item').forEach(item => {
-            item.classList.remove('active');
-        });
-
-        // Set active state for direct links
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            if (link.getAttribute('href') === url) {
-                link.classList.add('active');
-
-                // If link is in submenu, also highlight parent
-                const parentMenuItem = link.closest('.submenu')?.parentElement;
-                if (parentMenuItem) {
-                    parentMenuItem.classList.add('active');
-                }
-            }
-        });
-    };
 
     // Handle submenu toggle on mobile (since hover doesn't work well)
     document.querySelectorAll('.menu-item.has-submenu').forEach(item => {
@@ -46,23 +82,17 @@ window.addEventListener("load", async () => {
 
     router
         .on("/", async (match) => {
-            updateActiveNav("/");
-            await partialLoader.loadPartial('home', gamesContainer, router);
+            await partialLoader.loadPartial('home', gamesContainer);
         })
         .on("/games", (match) => {
-            updateActiveNav("/games");
         })
         .on("/login", async (match) => {
-            updateActiveNav("/login");
-            await partialLoader.loadPartial('login-form', gamesContainer, router);
+            await partialLoader.loadPartial('login-form', gamesContainer);
         })
         .on("/logout", async (match) => {
-            updateActiveNav("/logout");
             await closeSession();
         })
         .resolve();
-
-    await updateAuthState();
 
 });
 
