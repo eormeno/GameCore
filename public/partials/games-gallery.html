@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="/css/games-gallery.css">
+
+<div class="games-gallery-container">
+    <h1 class="gallery-title">Games Gallery</h1>
+    <div class="games-filter">
+        <input type="text" id="search-input" placeholder="Search games...">
+        <select id="category-filter">
+            <option value="">All Categories</option>
+            <!-- Categories will be populated dynamically -->
+        </select>
+    </div>
+    <div class="games-grid">
+        <!-- Game cards will be rendered here -->
+    </div>
+    <div class="pagination-controls">
+        <button id="prev-page" disabled>Previous</button>
+        <span id="page-info">Page 1 of 1</span>
+        <button id="next-page" disabled>Next</button>
+    </div>
+</div>
+
+<script type="module">
+    const baseUrl = window.location.origin;
+    const apiModule = await import(`${baseUrl}/js/services/api.js`);
+    const { fetchApi } = apiModule;
+
+    const { partialLoader } = await import(`${baseUrl}/js/modules/PartialLoader.js`);
+
+
+    export async function render(container) {
+        const gamesGrid = container.querySelector('.games-grid');
+
+        await fetchApi('api/game-app', 'GET', null, async (stateName, data) => {
+            for (const game of data) {
+                const card = document.createElement('div');
+
+                await partialLoader.loadPartial('game-card', card, {
+                    game: game
+                });
+
+                gamesGrid.appendChild(card);
+            }
+        });
+    }
+</script>
