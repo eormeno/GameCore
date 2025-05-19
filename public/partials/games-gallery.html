@@ -21,11 +21,8 @@
 
 <script type="module">
     const baseUrl = window.location.origin;
-    const apiModule = await import(`${baseUrl}/js/services/api.js`);
-    const { fetchApi } = apiModule;
-
+    const { fetchApi } = await import(`${baseUrl}/js/services/api.js`);
     const { partialLoader } = await import(`${baseUrl}/js/modules/PartialLoader.js`);
-
 
     export async function render(container) {
         const gamesGrid = container.querySelector('.games-grid');
