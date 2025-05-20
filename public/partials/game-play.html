@@ -1,0 +1,11 @@
+<div>
+    <h1 class="game-title">Game Title</h1>
+
+    <script type="module">
+        export function render(container) {
+            const { prefix } = container._partialParams || {};
+            const title = container.querySelector('.game-title');
+            title.textContent = prefix;
+        }
+    </script>
+</div>

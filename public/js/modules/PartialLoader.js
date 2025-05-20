@@ -45,7 +45,7 @@ class PartialLoader {
     }
 
     async _fetchPartial(file) {
-        const response = await fetch(`partials/${file}.html`);
+        const response = await fetch(`/partials/${file}.html`);
         if (!response.ok) throw new Error(`HTTP ${response.status} - ${file}`);
         return response.text();
     }

@@ -87,6 +87,11 @@ window.addEventListener("load", async () => {
         .on("/games", async (match) => {
             await partialLoader.loadPartial('games-gallery', gamesContainer);
         })
+        .on("/games/:prefix/play", async (match) => {
+            await partialLoader.loadPartial('game-play', gamesContainer, {
+                prefix: match.data.prefix
+            });
+        })
         .on("/login", async (match) => {
             await partialLoader.loadPartial('login-form', gamesContainer);
         })

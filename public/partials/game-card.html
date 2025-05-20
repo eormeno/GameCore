@@ -9,8 +9,13 @@
         <!-- <button class="edit-button">Edit</button> -->
     </div>
     <script type="module">
+
+        const baseUrl = window.location.origin;
+        const getRouter = await import(`${baseUrl}/js/router.js`);
+        const router = getRouter.getRouter();
+
         export function render(container) {
-            const { game, pageState } = container._partialParams || {};
+            const { game } = container._partialParams || {};
 
             const image = container.querySelector('.game-image');
             const title = container.querySelector('.game-title');
@@ -23,7 +28,10 @@
             description.textContent = game.description;
 
             playButton.disabled = game.prefab_name === null;
-            playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id, game: game });
+            //playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id, game: game });
+            playButton.onclick = () => {
+                router.navigate(`/games/${game.prefix}/play`);
+            };
         }
     </script>
 </div>
