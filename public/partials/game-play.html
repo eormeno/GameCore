@@ -1,11 +1,33 @@
 <div>
-    <h1 class="game-title">Game Title</h1>
+    <h1 class="game-title"></h1>
 
     <script type="module">
-        export function render(container) {
-            const { prefix } = container._partialParams || {};
-            const title = container.querySelector('.game-title');
-            title.textContent = prefix;
+        const baseUrl = window.location.origin;
+        const apiModule = await import(`${baseUrl}/js/services/api.js`);
+        const { fetchApi } = apiModule;
+        const getRouter = await import(`${baseUrl}/js/router.js`);
+        const router = getRouter.getRouter();
+
+        export async function render(container) {
+            const { id } = container._partialParams || {};
+
+            await fetchApi(`/api/game-app/${id}/play`, 'GET', null, (stateName, data) => {
+                const title = container.querySelector('.game-title');
+                if (stateName === "game") {
+                    title.textContent = data.title;
+                    return;
+                } else if (stateName === "auth_required") {
+                    router.navigate("/login");
+                    return;
+                } else if (stateName === "game_not_found") {
+                    title.textContent = "Game not found";
+                    return;
+                } else if (stateName === "game_play") {
+                    const gameContainer = container.querySelector('.game-container');
+                    gameContainer.innerHTML = data.html;
+                    return;
+                }
+            })
         }
     </script>
 </div>

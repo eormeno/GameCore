@@ -45,9 +45,7 @@ export function initializeRouter() {
     const router = getRouter();
     router.hooks({
         before: (done, match) => {
-
             updateActiveNav(match.url);
-
             done();
         },
         after: async (match) => {
@@ -87,9 +85,9 @@ window.addEventListener("load", async () => {
         .on("/games", async (match) => {
             await partialLoader.loadPartial('games-gallery', gamesContainer);
         })
-        .on("/games/:prefix/play", async (match) => {
+        .on("/games/:id/play", async (match) => {
             await partialLoader.loadPartial('game-play', gamesContainer, {
-                prefix: match.data.prefix
+                id: match.data.id,
             });
         })
         .on("/login", async (match) => {
@@ -99,7 +97,6 @@ window.addEventListener("load", async () => {
             await closeSession();
         })
         .resolve();
-
 });
 
 // Actualizar el estado de autenticación en toda la aplicación
@@ -113,9 +110,8 @@ async function updateAuthState() {
 
     if (token) {
         // Verificar el token con el servidor
-        await fetchApi('api/user', 'GET', null, (stateName, data) => {
+        await fetchApi('/api/user', 'GET', null, (stateName, data) => {
             if (stateName !== 'auth_required') {
-                // Usuario autenticado - cambiar el estado
                 document.body.setAttribute('data-auth-state', 'authenticated');
                 authUserName.innerText = data.name;
             }
@@ -124,8 +120,9 @@ async function updateAuthState() {
 }
 
 async function closeSession() {
-    await fetchApi('api/logout', 'POST', null, async (stateName, data) => {
+    await fetchApi('/api/logout', 'POST', null, async (stateName, data) => {
         localStorage.removeItem('token');
         await updateAuthState();
+        getRouter().navigate('/');
     });
 }

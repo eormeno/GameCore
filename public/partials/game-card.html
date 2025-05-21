@@ -30,7 +30,7 @@
             playButton.disabled = game.prefab_name === null;
             //playButton.onclick = () => pageState.setPageState('fetching_game', { id: game.id, game: game });
             playButton.onclick = () => {
-                router.navigate(`/games/${game.prefix}/play`);
+                router.navigate(`/games/${game.id}/play`);
             };
         }
     </script>
