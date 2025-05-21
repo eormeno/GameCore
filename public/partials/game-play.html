@@ -38,6 +38,24 @@
                     canvasContainer.style.width = `${data.width}px`;
                     canvasContainer.style.height = `${data.height}px`;
                     canvasContainer.style.display = "block";
+                    document.querySelector('.share-btn').addEventListener('click', function () {
+                        let url = window.location.href + 'play/' + data.invitationCode;
+                        let shareText = '¡Mira este juego! ' + url;
+                        if (navigator.share) {
+                            navigator.share({
+                                title: 'Juego Compartido',
+                                text: shareText,
+                                url: url
+                            }).then(() => {
+                                console.log('Juego compartido con éxito');
+                            }).catch((error) => {
+                                console.error('Error al compartir el juego:', error);
+                            });
+                        } else {
+                            // Fallback para navegadores que no soportan la API de compartir
+                            alert('Copia este enlace para compartir: ' + url);
+                        }
+                    });
                     return;
                 } else if (stateName === "auth_required") {
                     router.navigate("/login");
@@ -54,5 +72,7 @@
                 }
             })
         }
+
+
     </script>
 </div>
