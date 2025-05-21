@@ -34,7 +34,7 @@ class GameAppController extends Controller
     {
         try {
             $currentUser = auth()->user();
-            $gameApp = GameApp::findOrFail($gameAppId);
+            $gameApp = GameApp::where('id', $gameAppId)->where('active', true)->firstOrFail();
             $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
             return response()->json([
                 'game' => [
