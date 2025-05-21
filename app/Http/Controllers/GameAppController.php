@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Game;
 use App\Models\GameApp;
 use App\Utils\ImageUtils;
 use App\Contracts\IRenderer;
 use App\Services\GameInstanceService;
 use App\Http\Requests\EventRequestFilter;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class GameAppController extends Controller
 {
@@ -28,20 +30,27 @@ class GameAppController extends Controller
         return response()->json(['displaying_games_gallery' => $gameApps]);
     }
 
-    public function play(GameApp $gameApp, GameInstanceService $gamesService)
+    public function play(int $gameAppId, GameInstanceService $gamesService)
     {
-        $currentUser = auth()->user();
-        $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
-        return response()->json([
-            'game' => [
-                'title' => $currentGame->title,
-                'eventUrl' => route('event', $currentGame->id),
-                'resourcesUrl' => route('res', $gameApp->id),
-                'width' => $gameApp->width,
-                'height' => $gameApp->height,
-                'invitationCode' => $currentGame->invitation_code,
-            ]
-        ]);
+        try {
+            $currentUser = auth()->user();
+            $gameApp = GameApp::findOrFail($gameAppId);
+            $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
+            return response()->json([
+                'game' => [
+                    'title' => $currentGame->title,
+                    'eventUrl' => route('event', $currentGame->id),
+                    'resourcesUrl' => route('res', $gameApp->id),
+                    'width' => $gameApp->width,
+                    'height' => $gameApp->height,
+                    'invitationCode' => $currentGame->invitation_code,
+                ]
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['game_not_found' => ['message' => 'Game not found']]);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+        }
     }
 
     public function playGame(GameApp $game, GameInstanceService $gamesService)

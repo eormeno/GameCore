@@ -15,7 +15,8 @@ export async function fetchApi(endpoint, method = 'GET', body = null, callback =
 
         if (!response.ok) {
             const error = await response.text();
-            pageState.setPageState('error', { error });
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = error;
             return;
         }
 
