@@ -169,7 +169,7 @@ class GameAppController extends Controller
         // ensure create the file and all its parent directories
         try {
             file_put_contents($definitionPath, json_encode($resource));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             mkdir(dirname($definitionPath), 0755, true);
             file_put_contents($definitionPath, json_encode($resource, JSON_PRETTY_PRINT));
         }
