@@ -56,6 +56,18 @@
                             alert('Copia este enlace para compartir: ' + url);
                         }
                     });
+                    document.querySelector('.close-btn').addEventListener('click', function () {
+                        var gamesContainer = document.getElementById('gamesContainer');
+                        if (gamesContainer) {
+                            gamesContainer.innerHTML = '';
+                        }
+                        // Detiene el loop del juego
+                        if (typeof gameRenderer !== 'undefined' && typeof gameRenderer.stopGameLoop === 'function') {
+                            gameRenderer.stopGameLoop();
+                        }
+                        router.navigate('/games');
+                    });
+                    gameRenderer.startGame(data);
                     return;
                 } else if (stateName === "auth_required") {
                     router.navigate("/login");
