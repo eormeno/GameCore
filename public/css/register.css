@@ -1,0 +1,174 @@
+/* GameCore Registration Form Styles */
+
+/* Variables */
+:root {
+    --primary-bg: #1a1a1a;
+    --card-bg: #2b2b2b;
+    --text-color: #f0f0f0;
+    --accent-color: #ff5722;
+    --input-bg: #333333;
+    --input-border: #444444;
+    --input-focus: #ff5722;
+    --button-bg: #ff5722;
+    --button-hover: #e64a19;
+    --button-text: #ffffff;
+    --error-color: #f44336;
+    --success-color: #4caf50;
+    --link-color: #64b5f6;
+    --link-hover: #90caf9;
+}
+
+/* Registration Container Styles */
+.registration-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.registration-container h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--accent-color);
+    font-size: 1.8rem;
+    position: relative;
+    padding-bottom: 0.75rem;
+}
+
+.registration-container h2::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    height: 3px;
+    width: 60px;
+    background: linear-gradient(90deg, var(--accent-color), transparent);
+    border-radius: 2px;
+}
+
+/* Form Styles */
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.95rem;
+    color: var(--text-color);
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+
+.form-group input {
+    padding: 0.9rem 1.2rem;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.2);
+}
+
+.form-group button {
+    padding: 1rem;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-top: 0.5rem;
+}
+
+.form-group button:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-2px);
+}
+
+.form-group button:active {
+    transform: translateY(0);
+}
+
+/* Form Footer */
+.form-footer {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.form-footer a {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.form-footer a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .registration-container {
+        max-width: 100%;
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .registration-container h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-group input {
+        padding: 0.8rem 1rem;
+    }
+
+    .form-group button {
+        padding: 0.8rem;
+    }
+}
+
+/* Error and Success Messages */
+.error-message {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+.success-message {
+    color: var(--success-color);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+/* Input Validation Styles */
+.form-group input.invalid {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+.form-group input.valid {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}

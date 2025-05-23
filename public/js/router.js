@@ -96,6 +96,9 @@ window.addEventListener("load", async () => {
         .on("/logout", async (match) => {
             await closeSession();
         })
+        .on("/register", async (match) => {
+            await partialLoader.loadPartial('register', gamesContainer);
+        })
         .resolve();
 });
 
