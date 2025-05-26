@@ -44,6 +44,9 @@ class GameAppController extends Controller
                     'width' => $gameApp->width,
                     'height' => $gameApp->height,
                     'invitationCode' => $currentGame->invitation_code,
+                    'maxInstancesPerUser' => $gameApp->max_instances_per_user,
+                    'minUsersPerInstance' => $gameApp->min_users_per_instance,
+                    'maxUsersPerInstance' => $gameApp->max_users_per_instance,
                 ]
             ]);
         } catch (ModelNotFoundException $e) {

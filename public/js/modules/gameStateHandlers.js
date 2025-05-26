@@ -31,6 +31,7 @@ export class GameStateHandlers {
      * Handle main game state
      */
     handleGameState(data) {
+        console.log('Handling game state:', data);
         this.uiManager.setPageTitle(data.title);
         this.uiManager.configureCanvas(data.width, data.height);
         this.uiManager.setupEventListeners(data);

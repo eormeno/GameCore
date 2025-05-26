@@ -103,7 +103,7 @@ class GameRenderer {
                 } else {
                     backendElapsed = json.elapsed || -1;
                     delete json.elapsed;
-                    console.log(JSON.stringify(json, null, 2));
+                    // console.log(JSON.stringify(json, null, 2));
                     if (Object.keys(json).length > 0) this.renderComponents(json, 'glCanvas');
                 }
             }
