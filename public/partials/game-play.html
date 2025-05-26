@@ -17,74 +17,10 @@
     <div id="glCanvas" style="width:800px; height:600px; display:none"></div>
 
     <script type="module">
-        const baseUrl = window.location.origin;
-        const apiModule = await import(`${baseUrl}/js/services/api.js`);
-        const { fetchApi } = apiModule;
-        const getRouter = await import(`${baseUrl}/js/router.js`);
-        const router = getRouter.getRouter();
-        const { GameRenderer } = await import(`${baseUrl}/js/GameRenderer.js`);
+        // Import the clean, modular game play functionality
+        const { render } = await import(`${window.location.origin}/js/modules/gamePlay.js`);
 
-        export async function render(container) {
-            const { id } = container._partialParams || {};
-            const gameRenderer = new GameRenderer();
-
-            await fetchApi(`/api/game-app/${id}/play`, 'GET', null, (stateName, data) => {
-                const title = container.querySelector('.game-title');
-                const canvasContainer = document.getElementById('glCanvas');
-
-                // set page title
-                document.title = data.title;
-                if (stateName === "game") {
-                    canvasContainer.style.width = `${data.width}px`;
-                    canvasContainer.style.height = `${data.height}px`;
-                    canvasContainer.style.display = "block";
-                    document.querySelector('.share-btn').addEventListener('click', function () {
-                        let url = window.location.href + 'play/' + data.invitationCode;
-                        let shareText = '¡Mira este juego! ' + url;
-                        if (navigator.share) {
-                            navigator.share({
-                                title: 'Juego Compartido',
-                                text: shareText,
-                                url: url
-                            }).then(() => {
-                                console.log('Juego compartido con éxito');
-                            }).catch((error) => {
-                                console.error('Error al compartir el juego:', error);
-                            });
-                        } else {
-                            // Fallback para navegadores que no soportan la API de compartir
-                            alert('Copia este enlace para compartir: ' + url);
-                        }
-                    });
-                    document.querySelector('.close-btn').addEventListener('click', function () {
-                        var gamesContainer = document.getElementById('gamesContainer');
-                        if (gamesContainer) {
-                            gamesContainer.innerHTML = '';
-                        }
-                        // Detiene el loop del juego
-                        if (typeof gameRenderer !== 'undefined' && typeof gameRenderer.stopGameLoop === 'function') {
-                            gameRenderer.stopGameLoop();
-                        }
-                        router.navigate('/games');
-                    });
-                    gameRenderer.startGame(data);
-                    return;
-                } else if (stateName === "auth_required") {
-                    router.navigate("/login");
-                    return;
-                } else if (stateName === "game_not_found") {
-                    title.style.display = "block";
-                    title.textContent = "Game not found";
-                    canvasContainer.style.display = "none";
-                    return;
-                } else if (stateName === "game_play") {
-                    const gameContainer = container.querySelector('.game-container');
-                    gameContainer.innerHTML = data.html;
-                    return;
-                }
-            })
-        }
-
-
+        // Export the render function for use by the router
+        export { render };
     </script>
 </div>
