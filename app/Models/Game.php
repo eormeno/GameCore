@@ -12,10 +12,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Class Game
+ * Represents a game instance, which can be a playthrough of a game application.
+ * It contains information about the game, its objects, players, and services.
+ *
+ * @package App\Models
+ */
 class Game extends Model
 {
 	use HasFactory;
-	protected $fillable = ['invitation_code', 'game_app_id', 'game_object_id', 'elapsed'];
+	protected $fillable = ['invitation_code', 'game_app_id', 'game_object_id', 'elapsed', 'name', 'finished'];
 
 	public function gameApp(): BelongsTo
 	{
