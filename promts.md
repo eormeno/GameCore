@@ -7,3 +7,13 @@ También tiene un atributo que indica cuántas partidas abiertas (que no hayan t
 Agrega funcionalidad al GameAppController, para que, cuando se ejecute el método play, retorne: 
 - Una lista de partidas "abiertas", ordenadas por fecha, si el jugador puede crear más de una y continuar jugando.
 - Una lista de jugadores de la partida, en caso de que se pueda jugar sólo una partida con más de un jugador.
+
+
+
+
+En base a los modelos: #file:Game.php, #file:GameApp.php, #file:User.php y la tabla pivote #file:11_create_game_user_table.php  Agrega funcionalidad en el servicio #file:GameInstanceService.php para que, dado el usuario actual, un GameApp y un código de invitación (opcional):
+- Si se especifica el código de invitación, buscar la partida (Game) a la que corresponde.
+- Si no se encuentra el usuario actual entre los usuarios de la partida, agregarlo.
+
+
+disparar una excepción si: no existe la partida, o ésta finalizó, o ésta corresponde a otro id de GameApp difrente al especificado, o el GameApp corresponde pero superó la cantidad máxima de usuarios
