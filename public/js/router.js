@@ -90,6 +90,12 @@ window.addEventListener("load", async () => {
                 id: match.data.id,
             });
         })
+        .on("/games/:id/play/:invitation_code", async (match) => {
+            await partialLoader.loadPartial('game-play', gamesContainer, {
+                id: match.data.id,
+                invitation_code: match.data.invitation_code,
+            });
+        })
         .on("/login", async (match) => {
             await partialLoader.loadPartial('login-form', gamesContainer);
         })

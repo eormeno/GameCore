@@ -29,6 +29,8 @@ export async function render(container) {
     try {
         // Extract game ID from container parameters
         const gameId = extractGameId(container);
+        // Extract invitation code if available
+        const invitationCode = extractInvitationCode(container);
         if (!gameId) {
             console.error('No game ID provided');
             return;
@@ -43,7 +45,7 @@ export async function render(container) {
         await controller.initialize(router, gameRenderer, container);
 
         // Fetch game data and handle response
-        await fetchGameData(fetchApi, gameId, controller);
+        await fetchGameData(fetchApi, gameId, invitationCode, controller);
 
     } catch (error) {
         console.error('Error rendering game play:', error);
@@ -59,11 +61,18 @@ function extractGameId(container) {
 }
 
 /**
+ * Extract invitation code from container parameters
+ */
+function extractInvitationCode(container) {
+    return container._partialParams?.invitation_code || null;
+}
+
+/**
  * Fetch game data from API
  */
-async function fetchGameData(fetchApi, gameId, controller) {
+async function fetchGameData(fetchApi, gameId, invitationCode, controller) {
     await fetchApi(
-        `/api/game-app/${gameId}/play`,
+        `/api/game-app/${gameId}/play/${invitationCode || ''}`,
         'GET',
         null,
         (stateName, data) => controller.handleGameState(stateName, data)

@@ -30,10 +30,13 @@ class GameAppController extends Controller
         return response()->json(['displaying_games_gallery' => $gameApps]);
     }
 
-    public function play(int $gameAppId, GameInstanceService $gamesService)
+    public function play(int $gameAppId, GameInstanceService $gamesService, ?string $invitationCode = null)
     {
         try {
             $currentUser = auth()->user();
+            if ($invitationCode) {
+                dd($invitationCode);
+            }
             $gameApp = GameApp::where('id', $gameAppId)->where('active', true)->firstOrFail();
             $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
             return response()->json([
