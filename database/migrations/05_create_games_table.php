@@ -17,9 +17,10 @@ return new class extends Migration
         Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->boolean('finished')->default(false);
+            $table->integer('state')->default(0); // 0: waiting, 1: running, 2: finished
             $table->string('invitation_code')->nullable();
 			$table->bigInteger('elapsed')->default(0);
+            $table->boolean('auto_authorize_players')->default(false);
             $table->foreignId('game_app_id')->constrained();
             $table->timestamps();
         });
