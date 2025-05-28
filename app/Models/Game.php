@@ -23,7 +23,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Game extends Model
 {
     use HasFactory;
-    protected $fillable = ['invitation_code', 'game_app_id', 'game_object_id', 'elapsed', 'name', 'state', 'auto_authorize_players'];
+    protected $fillable = [
+        'invitation_code',
+        'game_app_id',
+        'game_object_id',
+        'elapsed',
+        'name',
+        'state',
+        'auto_authorize_players'
+    ];
 
     protected $casts = [
         'state' => GameState::class,

@@ -34,9 +34,6 @@ class GameAppController extends Controller
     {
         try {
             $currentUser = auth()->user();
-            if ($invitationCode) {
-                dd($invitationCode);
-            }
             $gameApp = GameApp::where('id', $gameAppId)->where('active', true)->firstOrFail();
             $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
             return response()->json([
