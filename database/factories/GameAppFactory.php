@@ -19,7 +19,7 @@ class GameAppFactory extends Factory
             'max_instances_per_user' => 1,
             'min_users_per_instance' => 1,
             'max_users_per_instance' => 1,
-            'allow_join_during_game' => false,
+            'allow_late_join' => false,
             'active' => true,
             'version' => '1.0.0',
         ];
