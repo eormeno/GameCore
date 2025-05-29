@@ -27,7 +27,7 @@ return new class extends Migration
             $table->integer('max_instances_per_user')->default(1);
             $table->integer('min_users_per_instance')->default(1);
             $table->integer('max_users_per_instance')->default(1);
-            $table->boolean('allow_join_during_game')->default(false);
+            $table->boolean('allow_late_join')->default(false);
             $table->boolean('active')->default(true);
             $table->json('service_registry')->nullable();
         });

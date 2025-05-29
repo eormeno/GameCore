@@ -29,7 +29,7 @@ class GameApp extends Model
 		'max_instances_per_user',
 		'min_players_per_instance',
 		'max_players_per_instance',
-        'allow_join_during_game',
+        'allow_late_join',
 		'active',
 		'service_registry',
 	];
