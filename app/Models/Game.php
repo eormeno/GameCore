@@ -39,6 +39,35 @@ class Game extends Model
         'auto_authorize_players' => 'boolean',
     ];
 
+    // Métodos de utilidad
+    public function isWaiting(): bool
+    {
+        return $this->state === GameState::WAITING;
+    }
+
+    public function isRunning(): bool
+    {
+        return $this->state === GameState::RUNNING;
+    }
+
+    public function isFinished(): bool
+    {
+        return $this->state === GameState::FINISHED;
+    }
+
+    public function canJoin(GameApp $gameApp): bool
+    {
+        if ($this->state === GameState::FINISHED || $this->state === GameState::CANCELLED) {
+            return false;
+        }
+
+        if ($this->state === GameState::RUNNING && !$gameApp->allow_late_join) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function gameApp(): BelongsTo
     {
         return $this->belongsTo(GameApp::class);
