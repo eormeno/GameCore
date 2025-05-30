@@ -35,6 +35,8 @@ class Game extends Model
 
     protected $casts = [
         'state' => GameState::class,
+        'elapsed' => 'integer',
+        'auto_authorize_players' => 'boolean',
     ];
 
     public function gameApp(): BelongsTo
