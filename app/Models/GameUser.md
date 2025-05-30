@@ -198,3 +198,14 @@ $actionedBy = $gameUser->actionedBy;
 - No puede haber más usuarios activos que `max_users_per_instance`
 - Un usuario baneado no puede volver a unirse
 - Solo owners/admins pueden expulsar usuarios
+
+## Validaciones de Unión a Partida
+
+### Estados de Game vs allow_late_join
+
+| Estado Game | allow_late_join = true | allow_late_join = false |
+|-------------|------------------------|-------------------------|
+| waiting     | ✅ Permitido          | ✅ Permitido           |
+| running     | ✅ Permitido          | ❌ Bloqueado           |
+| finished    | ❌ Bloqueado          | ❌ Bloqueado           |
+| cancelled   | ❌ Bloqueado          | ❌ Bloqueado           |

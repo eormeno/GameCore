@@ -30,12 +30,12 @@ class GameUser extends Model
     ];
 
     // Constantes para status
-    const STATUS_PENDING_OWNER = 'pending_owner_approval';
-    const STATUS_PENDING_PLAYER = 'pending_player_acceptance';
-    const STATUS_ACTIVE = 'active';
-    const STATUS_LEFT = 'left';
-    const STATUS_KICKED = 'kicked';
-    const STATUS_BANNED = 'banned';
+    public const STATUS_PENDING_OWNER = 'pending_owner_approval';
+    public const STATUS_PENDING_PLAYER = 'pending_player_acceptance';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_LEFT = 'left';
+    public const STATUS_KICKED = 'kicked';
+    public const STATUS_BANNED = 'banned';
 
     // Relaciones
     public function game()

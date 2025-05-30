@@ -54,4 +54,39 @@ class GameApp extends Model
 	{
 		return $this->hasMany(GameAppEvent::class);
 	}
+
+	public function isSinglePlayer(): bool
+	{
+		return $this->max_players_per_instance === 1;
+	}
+
+	public function isMultiplayer(): bool
+	{
+		return $this->max_players_per_instance > 1;
+	}
+
+	public function allowsMultipleSaves(): bool
+	{
+		return $this->max_instances_per_user > 1;
+	}
+
+	public function getUserActiveGames(User $user)
+	{
+		return $this->games()
+			->whereHas('gameUsers', function($query) use ($user) {
+				$query->where('user_id', $user->id)
+					  ->where('status', GameUser::STATUS_ACTIVE);
+			})
+			->whereIn('status', ['waiting', 'running'])
+			->with(['gameUsers' => function($query) use ($user) {
+				$query->where('user_id', $user->id);
+			}])
+			->get();
+	}
+
+	public function canUserCreateNewInstance(User $user): bool
+	{
+		$activeGameCount = $this->getUserActiveGames($user)->count();
+		return $activeGameCount < $this->max_instances_per_user;
+	}
 }
