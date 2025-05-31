@@ -1,68 +1,66 @@
-# Requisito estructurado para funcionalidad de partidas en GameApp (Laravel Backend)
+# Requisitos para funcionalidad de partidas en GameCore
 
 ## Contexto y Modelos Involucrados
 - Modelos: `GameApp`, `Game`, `User`
-- Tabla pivote: `game_user`
-- Archivos relevantes: 
-  - `GameApp.php`
-  - `Game.php`
-  - `User.php`
-  - `11_create_game_user_table.php`
-  - `GameFactory.php`
-  - `GameAppController.php`
-  - `GameInstanceService.php`
-  - `api.php`
+- Modelo pivote: `GameUser`
+- Archivos relevantes:
+    - [`app/Models/GameApp.php`](app/Models/GameApp.php)
+    - [`app/Models/Game.php`](app/Models/Game.php)
+    - [`app/Models/User.php`](app/Models/User.php)
+    - [`app/Models/GameUser.php`](app/Models/GameUser.php)
+    - [`database/factories/GameFactory.php`](database/factories/GameFactory.php)
+    - [`app/Http/Controllers/GameAppController.php`](app/Http/Controllers/GameAppController.php)
+    - [`app/Services/GameInstanceService.php`](app/Services/GameInstanceService.php)
+    - [`routes/api.php`](routes/api.php)
 
-## 1. Atributos y reglas de GameApp y Game
+## 1. Atributos y reglas de GameApp, Game y GameUser
 
-- `GameApp` define:  
-  - min_users_per_instance (>=1)  
-  - max_users_per_instance (>=1)  
-  - max_instances_per_user (>=1)  
-  - width, height (dimensiones de la pantalla del juego)  
-  - resources_url (url de recursos)  
+- [`GameApp`](app/Models/GameApp.php) define:  
+  - `min_users_per_instance` (integer >= 1). Define la cantidad mínima de jugadores para iniciar una partida.
+  - `max_users_per_instance` (integer >= 1). Define la cantidad máxima de jugadores por partida. Cuando el valor es 1, las partidas son de un solo jugador, y cuando es mayor a 1, son multijugador.
+  - `max_instances_per_user` (integer >= 1). Define la cantidad máxima de partidas que un usuario puede tener abiertas al mismo tiempo. Aquí el concepto es equivalente al de "partidas guardadas" en otros juegos. Este valor es independiente de si la partida es de un solo jugador o multijugador.
+  - `width` (integer > 1), `height` (integer > 1). Definen el ancho y alto de la interfaz en donde se renderizá el juego.
+  - `allow_late_join` (boolean). Indica si se permite que nuevos jugadores se unan a una partida ya iniciada.
 
-- `Game`:
-  - invitation_code
-  - game_app_id
-  - game_object_id
-  - elapsed
-  - name
-  - state (0: waiting, 1: running, 2: finished)
-  - auto_authorize_players
+- [`Game`](app/Models/Game.php):
+  - `invitation_code` (string, nullable). Código de invitación para unirse a la partida. Si es null, la partida es abierta.
+  - `game_app_id` (foreign key). Referencia al GameApp asociado.
+  - `game_object_id` (string, nullable). Identificador del objeto de juego raíz asociado.
+  - `elapsed` (integer, nullable). Tiempo transcurrido en la partida desde su inicio.
+  - `name` (string, nullable). Nombre de la partida. Si es null, se generará un nombre por defecto.
+  - `state` (enumeration: 0=waiting, 1=running, 2=finished, 3=cancelled). Estado de la partida.
+  - `auto_authorize_players` (boolean). Indica si los jugadores pueden unirse automáticamente sin aprobación del owner.
 
-- Tabla pivote `game_user`:
-  - id
-  - game_id
-  - user_id
-  - is_owner (es true si el que creó la instancia es el mismo jugador)
-  - access_approved (true si el owner de la partida aprobó la solicitud)
-  - invitation_approved (true si el jugador aceptó jugar en la partida)
-  - timestamps (fecha y hora de creación y modificación)
+- Pivote [`GameUser`](app/Models/GameUser.php):
+    - Ver [`GameUser.md`](app/Models/GameUser.md) para detalles de atributos, relaciones, validaciones y lógica de negocio.
 
 ---
 
-## 2. Endpoint: `play` en GameAppController
+## 2. Endpoint: [`play` en GameAppController](app/Http/Controllers/GameAppController.php#play)
 
-- Recibe: 
-  - usuario autenticado
-  - id de GameApp
-  - parámetro opcional invitation_code
+- Recibe:
+  - `gameAppId` con el identificador de la aplicación de juego.
+  - parámetro opcional `invitation_code`
+  - Inyección al servicio `GameInstanceService` para manejar la lógica de negocio.
+  - El usuario actual (autenticado) a través de `auth->user()`.
 - Retorna JSON con el estado del juego o de una partida, el cual tiene la siguiente estructura genérica:
-  ```json
-  {
+
+```json
+{
     "[estado]": {
         "width": "...",
         "height": "...",
         "resourcesUrl": "...",
     }
-  }
-  ```
-  [estado] puede ser:
-    - "game" cuando tras realizar todas las validaciones, la interfaz del jugador ya puede comenzar a renderizar la partida en sí.
-    - "waiting". Para el caso de juegos multijugador, va mostrando la cantidad de jugadores requerida y la cantidad de jugadores que se van sumando. Y en caso de que el usuario que está recibiendo la respuesta sea el owner de la partida y que se haya llegado a la cantidad mínima de jugadores para iniciar el juego, enviar un atributo para que la UI pueda renderizar el botón "Start Game".
-    - "error". Para retornar cualquier excepción.
-    - "open_games". Con el listado de las partidas abiertas en caso de que la configuración del GameApp permita más de una partida. Y en caso de que se aún queden partidas disponibles, agregar un atributo para indicar a la UI que renderice el botón "New game".
+}
+```
+`[estado]` puede ser:
+- `"game"` cuando tras realizar todas las validaciones, la interfaz del jugador ya puede comenzar a renderizar la partida en sí.
+- `"waiting"`. Para el caso de juegos multijugador, va mostrando la cantidad de jugadores requerida y la cantidad de jugadores que se van sumando. Y en caso de que el usuario que está recibiendo la respuesta sea el owner de la partida y que se haya llegado a la cantidad mínima de jugadores para iniciar el juego, se agrega el atributo `start_game_enabled` con el valor `true` para que la UI pueda renderizar el botón "Start Game".
+- `"error"`. Para retornar cualquier excepción.
+- `"open_games"`. Con el listado de las partidas abiertas en caso de que la configuración del GameApp permita más de una partida. Y en caso de que se aún queden partidas disponibles, agregar un atributo para indicar a la UI que renderice el botón "New game".
+- `resourcesUrl` es la URL donde se pueden obtener los recursos de la apliación de juego, como imágenes, sonidos, etc.
+- `width` y `height` son las dimensiones de la interfaz del juego.
 
 ### 2.1 Si se provee invitation_code:
 - Buscar partida (Game) correspondiente al código.
