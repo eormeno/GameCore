@@ -188,3 +188,22 @@
 
 ---
 **Este requisito estructurado puede ser usado como prompt para implementar la funcionalidad en un entorno de desarrollo como Visual Studio Code.**
+
+
+
+#### Definiciones
+**Partida**: De ahora en adelante, el término "Partida" se refiera a una instancia de `Game`, asociada a un objeto `GameApp` que tiene un conjunto de jugadores (instancias del modelo pivote `GameUser`), un conjunto de servicios con información de la misma y un estado que puede ser `WAITING`, `RUNNING`, `FINISHED` o `CANCELLED`. Puede ser de un solo jugador o multijugador. En otros contextos, una partida puede ser referida como un "save".
+#### Requisitos para el endpoint `play` del GameAppController
+Toda la lógica debe pasar por el método del `GameAppController->play()`, el cual, tal como mencionas anteriormente, recibe $gameAppId + opcional $invitationCode. Este método necesita, para todos los casos acceder a dos informaciones:
+- `$currenUser`. El usuario actualmente autenticado
+- `$gameApp`. Obtenido a partir de gameAppId (el cual debe estar activo o fallar con una excepción `GameNotFoundException`) 
+
+Así, se pueden dar los siguientes casos según se especifique o no el invitationCode:
+1. **Sin invitationCode**
+    * Si `$gameApp->max_users_per_instance == 1`. Es el caso single player.
+        - Si `$gameApp->max_instances_per_user == 1`. El jugador puede tener una única partida, entonces:
+            - [x] Buscar o crear si no existe un Game asociado al User. Ese es el caso que actualmente está implementado con `$gameService->getOrCreateUserGame($currentUser, $gameApp)`. Dado que será una única partida para el jugador autenticado, al crear la partida debe estar en estado `RUNNING`.
+            - [x] Retornar el estado "game" es decir, listo para jugar en esa única instancia para single player (tal como está implementado actualmente).
+            - [ ] En este caso, la partida debería estar en estado `RUNNING`. Si estuviera en otro estado, debe disparar la excepción `GameInvalidStateException` indicando el estado.
+    * Si `$gameApp->max_instances_per_user > 1` (pueden haber múltiples instanciasmás de una partida pueden haber)
+2. **Con invitationCode**
