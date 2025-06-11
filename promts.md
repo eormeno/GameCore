@@ -194,9 +194,11 @@
 #### Definiciones
 **Partida**: De ahora en adelante, el término "Partida" se refiera a una instancia de `Game`, asociada a un objeto `GameApp` que tiene un conjunto de jugadores (instancias del modelo pivote `GameUser`), un conjunto de servicios con información de la misma y un estado que puede ser `WAITING`, `RUNNING`, `FINISHED` o `CANCELLED`. Puede ser de un solo jugador o multijugador. En otros contextos, una partida puede ser referida como un "save".
 #### Requisitos para el endpoint `play` del GameAppController
-Toda la lógica debe pasar por el método del `GameAppController->play()`, el cual, tal como mencionas anteriormente, recibe $gameAppId + opcional $invitationCode. Este método necesita, para todos los casos acceder a dos informaciones:
-- `$currenUser`. El usuario actualmente autenticado
-- `$gameApp`. Obtenido a partir de gameAppId (el cual debe estar activo o fallar con una excepción `GameNotFoundException`) 
+Toda la lógica debe pasar por el método del `GameAppController->play()`, el cual, tal como mencionas anteriormente, recibe `$gameAppId` + opcional `$invitationCode`. Este método necesita, para todos los casos acceder a dos informaciones:
+- `$currenUser`. El usuario actualmente autenticado.
+- `$gameApp`. Obtenido a partir de gameAppId (el cual debe estar activo o fallar con una excepción `GameNotFoundException`)
+- `$invitation`. El código de invitación opcional que puede ser null.
+- `$gameService`. Referencia al servicio `GameInstanceService` que maneja la lógica de las partidas, el cual debe ser inyectado en el controlador. 
 
 Así, se pueden dar los siguientes casos según se especifique o no el invitationCode:
 1. **Sin invitationCode**
