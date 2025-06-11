@@ -196,7 +196,7 @@
 #### Requisitos para el endpoint `play` del GameAppController
 Toda la lógica debe pasar por el método del `GameAppController->play()`, el cual, tal como mencionas anteriormente, recibe `$gameAppId` + opcional `$invitationCode`. Este método necesita, para todos los casos acceder a dos informaciones:
 - `$currenUser`. El usuario actualmente autenticado.
-- `$gameApp`. Obtenido a partir de gameAppId (el cual debe estar activo o fallar con una excepción `GameNotFoundException`)
+- `$gameApp`. Obtenido a partir de `$gameAppId`. Si no existe o no está `active` debe disparar `GameNotFoundException`.
 - `$invitation`. El código de invitación opcional que puede ser null.
 - `$gameService`. Referencia al servicio `GameInstanceService` que maneja la lógica de las partidas, el cual debe ser inyectado en el controlador. 
 
