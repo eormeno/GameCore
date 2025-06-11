@@ -203,7 +203,7 @@ Toda la lógica debe pasar por el método del `GameAppController->play()`, el cu
 - `$gameService`. Referencia inyectada del servicio `GameInstanceService`. 
 
 
-Así, se pueden dar los siguientes casos según se especifique o no el invitationCode:
+Así, se pueden dar los siguientes casos según se especifique o no el `$invitationCode`:
 1. **Sin invitationCode**
     * Si `$gameApp->max_users_per_instance == 1`. Es el caso single player.
         - Si `$gameApp->max_instances_per_user == 1`. El jugador puede tener una única partida, entonces:
