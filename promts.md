@@ -216,10 +216,10 @@ Toda la lógica debe pasar por el método del `GameAppController->play()`, el cu
 - `$isMultiPlayer`. Resulta de la operación booleana`$gameApp->max_users_per_instance > 1`.
 - `$isUniqueGame`. Resultado de la operación booleana`$gameApp->max_instances_per_user == 1`.
 - `$isMultiGame`. Resultado de la operaciòn boleana`$gameApp->max_instances_per_user > 1`.
-- `$gameOfInvitation`. Objeto`Game `resultante de validar`$invitationCode`.
-  - Será`null` si`$invitationCode` es`null`.
+- `$gameOfInvitation`. Objeto`Game `resultante de buscar `$invitationCode`.
+  - Será `null` si`$invitationCode` es`null`.
   - Si no se encuentra se debe disparar`GameNotFoundException`.
-  - Si
+  - Si `$currentUser` está en la lista `$gameOfInvitation->players`, 
 
 Así, se pueden dar los siguientes casos según se especifique o no el `$invitationCode`:
 
