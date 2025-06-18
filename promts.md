@@ -205,14 +205,21 @@ Requisitos para funcionalidad de partidas en GameCore
 
 #### Requisitos para el endpoint `play` de `GameAppController`
 
-Toda la lógica debe pasar por el método del `GameAppController->play()`, el cual, tal como mencionas anteriormente, recibe `$gameAppId` + opcional `$invitationCode`. Este método necesita, para todos los casos acceder a dos informaciones:
+Toda la lógica debe pasar por el método del `GameAppController->play()`, el cual, tal como mencionas anteriormente, recibe `$gameAppId` + opcional `$invitationCode`. Este método requiere tener definidas las siguientes variables:
 
-|         Variable | Descripción                                                                                                     |
-| ---------------: | ---------------------------------------------------------------------------------------------------------------- |
-|  `$currenUser` | El usuario actualmente autenticado.                                                                              |
-|     `$gameApp` | Obtenido a partir de `$gameAppId`. Si no existe o no está `active` debe disparar `GameNotFoundException`. |
-|  `$invitation` | Código de invitación opcional que puede ser null.                                                              |
-| `$gameService` | Inyección del servicio `GameInstanceService`.                                                                 |
+- `$currenUser`. El usuario actualmente autenticado.
+- `$gameApp`. Obtenido a partir de`$gameAppId`. Si no existe o no está`active` debe disparar`GameApplicationNotFoundException`.
+- `$gameService`. Inyección del servicio`GameInstanceService`.
+- `$isGameDefined`. Resulta de la operación booleana`$gameOfInvitation != null.`
+- `$isGameUndefined`. Resulta de la operación booleana`$gameOfInvitation == null.`
+- `$isSinglePlayer`. Resulta de la operación booleana`$gameApp->max_users_per_instance == 1.`
+- `$isMultiPlayer`. Resulta de la operación booleana`$gameApp->max_users_per_instance > 1`.
+- `$isUniqueGame`. Resultado de la operación booleana`$gameApp->max_instances_per_user == 1`.
+- `$isMultiGame`. Resultado de la operaciòn boleana`$gameApp->max_instances_per_user > 1`.
+- `$gameOfInvitation`. Objeto`Game `resultante de validar`$invitationCode`.
+  - Será`null` si`$invitationCode` es`null`.
+  - Si no se encuentra se debe disparar`GameNotFoundException`.
+  - Si
 
 Así, se pueden dar los siguientes casos según se especifique o no el `$invitationCode`:
 
