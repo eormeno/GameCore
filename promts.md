@@ -199,16 +199,16 @@ Requisitos para funcionalidad de partidas en GameCore
 
 **Este requisito estructurado puede ser usado como prompt para implementar la funcionalidad en un entorno de desarrollo como Visual Studio Code.**
 
-#### Definiciones
+### Definiciones
 
 **Partida**: De ahora en adelante, el término "Partida" se refiera a una instancia de `Game`, asociada a un objeto `GameApp` que tiene un conjunto de jugadores (instancias del modelo pivote `GameUser`), un conjunto de servicios con información de la misma y un estado que puede ser `WAITING`, `RUNNING`, `FINISHED` o `CANCELLED`. Puede ser de un solo jugador o multijugador. En otros contextos, una partida puede ser referida como un "save".
 
-#### Requisitos para el endpoint `play` de `GameAppController`
+### Requisitos para el endpoint `play` de `GameAppController`
 
 Toda la lógica debe pasar por el método del `GameAppController->play()`, el cual, tal como mencionas anteriormente, recibe `$gameAppId` + opcional `$invitationCode`. Este método requiere tener definidas las siguientes variables:
 
 - `$currenUser`. El usuario actualmente autenticado.
-- `$gameApp`. Obtenido a partir de`$gameAppId`. Si no existe o no está`active` debe disparar`GameApplicationNotFoundException`.
+- `$gameApp`. Obtenido a partir de`$gameAppId`.
 - `$gameService`. Inyección del servicio`GameInstanceService`.
 - `$isGameDefined`. Resulta de la operación booleana`$gameOfInvitation != null.`
 - `$isGameUndefined`. Resulta de la operación booleana`$gameOfInvitation == null.`
@@ -216,10 +216,33 @@ Toda la lógica debe pasar por el método del `GameAppController->play()`, el cu
 - `$isMultiPlayer`. Resulta de la operación booleana`$gameApp->max_users_per_instance > 1`.
 - `$isUniqueGame`. Resultado de la operación booleana`$gameApp->max_instances_per_user == 1`.
 - `$isMultiGame`. Resultado de la operaciòn boleana`$gameApp->max_instances_per_user > 1`.
-- `$gameOfInvitation`. Objeto`Game `resultante de buscar `$invitationCode`.
-  - Será `null` si`$invitationCode` es`null`.
-  - Si no se encuentra se debe disparar`GameNotFoundException`.
-  - Si `$currentUser` está en la lista `$gameOfInvitation->players`, 
+- `$gameOfInvitation`. Objeto`Game `resultante de buscar`$invitationCode`. Será`null` si`$invitationCode` es`null`.
+
+#### Validaciones
+
+- Si `$gameAppId` no existe o no está `active`, disparar `GameApplicationNotFoundException`.
+- Si `$invitationCode` no se encuentra, disparar `GameNotFoundException`
+
+#### Regla de negocio 1
+
+**Variables evaluadas en `true`:**
+- `$isSinglePlayer`
+- `$isUniqueGame`
+- `$isGameUndefined`
+
+**Acción:**
+- Asignar a `$userGame` al resultado de buscar en `GameUser` el `Game` asociado a `$currenUser`, o `null` si no existe.
+- Si `$userGame == null`. 
+    - Asignar a `$userGame` una nueva instancia de `GameUser` para `$gameApp` y `$currentUser`.
+    - Setear `$userGame`
+
+
+
+ Ese es el caso que actualmente está implementado con`$gameService->getOrCreateUserGame($currentUser, $gameApp)`. Dado que será una única partida para el jugador autenticado, al crear la partida debe estar en estado`RUNNING`.
+
+#### Regla 2
+
+Si `$currentUser` está en la lista `$gameOfInvitation->players`,
 
 Así, se pueden dar los siguientes casos según se especifique o no el `$invitationCode`:
 
