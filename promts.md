@@ -79,7 +79,7 @@ Requisitos para funcionalidad de partidas en GameCore
 - Retornar estructura JSON:
   ```json
   {
-    "game": {
+	"game": {
   	"title": "Adventure Quest",
   	"eventUrl": "http://localhost:8000/api/event/123",
   	"resourcesUrl": "http://localhost:8000/api/res/45",
@@ -89,7 +89,7 @@ Requisitos para funcionalidad de partidas en GameCore
   	"maxInstancesPerUser": 3,
   	"minUsersPerInstance": 1,
   	"maxUsersPerInstance": 4
-    }
+	}
   }
   ```
 
@@ -102,7 +102,7 @@ Requisitos para funcionalidad de partidas en GameCore
 
   ```json
   {
-    "open_games": [
+	"open_games": [
   	{
   	  "id": 23,
   	  "name": "Partida 1",
@@ -115,10 +115,10 @@ Requisitos para funcionalidad de partidas en GameCore
   	  "createdAt": "2025-05-29T12:00:00Z"
   	},
   	...
-    ],
-    "resourcesUrl": "http://localhost:8000/api/res/45",
-    "width": 800,
-    "height": 600
+	],
+	"resourcesUrl": "http://localhost:8000/api/res/45",
+	"width": 800,
+	"height": 600
   }
   ```
 
@@ -131,8 +131,8 @@ Requisitos para funcionalidad de partidas en GameCore
 - Si la cantidad de jugadores agregados >= min_users_per_instance, retornar en el JSON un atributo adicional:
   ```json
   {
-    ...,
-    "showStartGameButton": true
+	...,
+	"showStartGameButton": true
   }
   ```
 - Este atributo permite a la UI mostrar el botón "Start Game" solo cuando el owner puede iniciar la partida.
@@ -233,8 +233,8 @@ Toda la lógica debe pasar por el método del `GameAppController->play()`, el cu
 **Acción:**
 - Asignar a `$userGame` al resultado de buscar en `GameUser` el `Game` asociado a `$currenUser`, o `null` si no existe.
 - Si `$userGame == null`. 
-    - Asignar a `$userGame` una nueva instancia de `GameUser` para `$gameApp` y `$currentUser`.
-    - Setear `$userGame`
+	- Asignar a `$userGame` una nueva instancia de `GameUser` para `$gameApp` y `$currentUser`.
+	- Setear `$userGame`
 
 
 
@@ -248,10 +248,10 @@ Así, se pueden dar los siguientes casos según se especifique o no el `$invitat
 
 1. **Sin invitationCode**
    * Si`$gameApp->max_users_per_instance == 1`. Es el caso single player.
-     - Si`$gameApp->max_instances_per_user == 1`. El jugador puede tener una única partida, entonces:
-       - Si`$invitationCode == null`:
-       - Buscar o crear si no existe un`Game` asociado al`User`. Ese es el caso que actualmente está implementado con`$gameService->getOrCreateUserGame($currentUser, $gameApp)`. Dado que será una única partida para el jugador autenticado, al crear la partida debe estar en estado`RUNNING`.
-       - Retornar el estado "game" es decir, listo para jugar en esa única instancia para single player (tal como está implementado actualmente).
-       - En este caso, la partida debería estar en estado`RUNNING`. Si estuviera en otro estado, debe disparar la excepción`GameInvalidStateException` indicando el estado.
+	 - Si`$gameApp->max_instances_per_user == 1`. El jugador puede tener una única partida, entonces:
+	   - Si`$invitationCode == null`:
+	   - Buscar o crear si no existe un`Game` asociado al`User`. Ese es el caso que actualmente está implementado con`$gameService->getOrCreateUserGame($currentUser, $gameApp)`. Dado que será una única partida para el jugador autenticado, al crear la partida debe estar en estado`RUNNING`.
+	   - Retornar el estado "game" es decir, listo para jugar en esa única instancia para single player (tal como está implementado actualmente).
+	   - En este caso, la partida debería estar en estado`RUNNING`. Si estuviera en otro estado, debe disparar la excepción`GameInvalidStateException` indicando el estado.
    * Si`$gameApp->max_instances_per_user > 1` (pueden haber múltiples instanciasmás de una partida pueden haber)
 2. **Con invitationCode**
