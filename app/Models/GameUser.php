@@ -15,18 +15,6 @@ class GameUser extends Model
 
     protected $table = 'game_user';
 
-    // Constantes para compatibilidad con código existente
-    const STATUS_ACTIVE = 'active';
-    const STATUS_PENDING_OWNER = 'pending_owner_approval';
-    const STATUS_PENDING_PLAYER = 'pending_player_acceptance';
-    const STATUS_LEFT = 'left';
-    const STATUS_KICKED = 'kicked';
-    const STATUS_BANNED = 'banned';
-
-    const JOIN_REQUEST = 'request';
-    const JOIN_INVITATION = 'invitation';
-    const JOIN_AUTO = 'auto';
-
     protected $fillable = [
         'game_id', 'user_id', 'role',
         'status', 'join_method', 'actioned_by', 'reason',
@@ -121,48 +109,8 @@ class GameUser extends Model
         return $this->role === $role;
     }
 
-    public function hasAnyRole(array $roles): bool
-    {
-        foreach ($roles as $role) {
-            if ($this->hasRole($role)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public function isOwner(): bool
     {
         return $this->role === GameUserRole::OWNER;
-    }
-
-    public function isAdministrator(): bool
-    {
-        return $this->role === GameUserRole::ADMINISTRATOR;
-    }
-
-    public function isTester(): bool
-    {
-        return $this->role === GameUserRole::TESTER;
-    }
-
-    public function isPlayer(): bool
-    {
-        return $this->role === GameUserRole::PLAYER;
-    }
-
-    public function hasAdministrativePrivileges(): bool
-    {
-        return $this->role->isAdministrative();
-    }
-
-    public function canManageRole(GameUserRole $targetRole): bool
-    {
-        return $this->role->isHigherThan($targetRole);
-    }
-
-    public function getRoleName(): string
-    {
-        return $this->role->value;
     }
 }

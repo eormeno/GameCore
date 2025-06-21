@@ -10,12 +10,4 @@ enum GameUserStatus: string
 	case LEFT = "left";
 	case KICKED = "kicked";
 	case BANNED = "banned";
-
-	/**
-	 * Get the default status for new game-user relationships
-	 */
-	public static function default(): self
-	{
-		return self::PENDING_OWNER_APPROVAL;
-	}
 }

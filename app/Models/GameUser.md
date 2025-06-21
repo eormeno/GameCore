@@ -11,34 +11,35 @@ game_user:
 ├── id (Primary Key)
 ├── game_id (Foreign Key → games.id)
 ├── user_id (Foreign Key → users.id)
-├── role (Enum) - Rol del usuario en la partida (owner, administrator, tester, player)
-├── status (Enum) - Estado actual del usuario en la partida
-├── join_method (Enum) - Cómo se unió a la partida
-├── actioned_by (Foreign Key → users.id) - Quién ejecutó la última acción
-├── reason (Text) - Razón de kick/ban
-├── joined_at (Timestamp) - Cuándo se volvió activo
-├── left_at (Timestamp) - Cuándo abandonó/fue expulsado
-└── timestamps (created_at, updated_at)
+├── role (String, default: 'player') - Rol del usuario en la partida
+├── status (String, default: 'pending_owner_approval') - Estado actual del usuario
+├── join_method (String, nullable) - Cómo se unió a la partida
+├── actioned_by (Foreign Key → users.id, nullable) - Quién ejecutó la última acción
+├── reason (Text, nullable) - Razón de kick/ban
+├── joined_at (Timestamp, nullable) - Cuándo se volvió activo
+├── left_at (Timestamp, nullable) - Cuándo abandonó/fue expulsado
+├── timestamps (created_at, updated_at)
+└── UNIQUE KEY unique_game_user (game_id, user_id) - Evita duplicados
 ```
 
 ## Estados (status)
 
 | Estado | Constante | Descripción |
 |--------|-----------|-------------|
-| `pending_owner_approval` | `STATUS_PENDING_OWNER` | Usuario solicitó acceso, esperando aprobación del owner |
-| `pending_player_acceptance` | `STATUS_PENDING_PLAYER` | Owner invitó al usuario, esperando aceptación |
-| `active` | `STATUS_ACTIVE` | Jugador activo en la partida |
-| `left` | `STATUS_LEFT` | Usuario abandonó voluntariamente |
-| `kicked` | `STATUS_KICKED` | Usuario fue expulsado por el owner/admin |
-| `banned` | `STATUS_BANNED` | Usuario fue baneado permanentemente |
+| `pending_owner_approval` | `GameUserStatus::PENDING_OWNER_APPROVAL` | Usuario solicitó acceso, esperando aprobación del owner |
+| `pending_player_acceptance` | `GameUserStatus::PENDING_PLAYER_ACCEPTANCE` | Owner invitó al usuario, esperando aceptación |
+| `active` | `GameUserStatus::ACTIVE` | Jugador activo en la partida |
+| `left` | `GameUserStatus::LEFT` | Usuario abandonó voluntariamente |
+| `kicked` | `GameUserStatus::KICKED` | Usuario fue expulsado por el owner/admin |
+| `banned` | `GameUserStatus::BANNED` | Usuario fue baneado permanentemente |
 
 ## Métodos de Join (join_method)
 
 | Método | Constante | Descripción |
 |--------|-----------|-------------|
-| `request` | `JOIN_REQUEST` | Usuario solicitó unirse |
-| `invitation` | `JOIN_INVITATION` | Owner/admin invitó al usuario |
-| `auto` | `JOIN_AUTO` | Se unió automáticamente (sin aprobación) |
+| `request` | `GameUserJoinMethod::REQUEST` | Usuario solicitó unirse |
+| `invitation` | `GameUserJoinMethod::INVITATION` | Owner/admin invitó al usuario |
+| `auto` | `GameUserJoinMethod::AUTO` | Se unió automáticamente (sin aprobación) |
 
 ## Roles
 
@@ -54,23 +55,40 @@ game_user:
 Owner > Administrator > Tester > Player
 ```
 
-## Constantes del Modelo
+## Enums del Modelo
 
-### Estados de Participación
+### Estados de Participación (GameUserStatus)
 ```php
-const STATUS_PENDING_OWNER = 'pending_owner_approval';
-const STATUS_PENDING_PLAYER = 'pending_player_acceptance';
-const STATUS_ACTIVE = 'active';
-const STATUS_LEFT = 'left';
-const STATUS_KICKED = 'kicked';
-const STATUS_BANNED = 'banned';
+enum GameUserStatus: string
+{
+    case PENDING_OWNER_APPROVAL = "pending_owner_approval";
+    case PENDING_PLAYER_ACCEPTANCE = "pending_player_acceptance";
+    case ACTIVE = "active";
+    case LEFT = "left";
+    case KICKED = "kicked";
+    case BANNED = "banned";
+}
 ```
 
-### Métodos de Unión
+### Métodos de Unión (GameUserJoinMethod)
 ```php
-const JOIN_REQUEST = 'request';
-const JOIN_INVITATION = 'invitation';
-const JOIN_AUTO = 'auto';
+enum GameUserJoinMethod: string
+{
+    case REQUEST = "request";
+    case INVITATION = "invitation";
+    case AUTO = "auto";
+}
+```
+
+### Roles (GameUserRole)
+```php
+enum GameUserRole: string
+{
+    case OWNER = "owner";
+    case ADMINISTRATOR = "administrator";
+    case TESTER = "tester";
+    case PLAYER = "player";
+}
 ```
 
 ## Configuración del Modelo
@@ -104,16 +122,16 @@ protected $casts = [
 $gameUser = GameUser::create([
     'game_id' => $game->id,
     'user_id' => $user->id,
-    'status' => GameUser::STATUS_PENDING_OWNER,
-    'join_method' => GameUser::JOIN_REQUEST
+    'status' => GameUserStatus::PENDING_OWNER_APPROVAL,
+    'join_method' => GameUserJoinMethod::REQUEST
 ]);
 
 // Owner invita a un usuario
 $gameUser = GameUser::create([
     'game_id' => $game->id,
     'user_id' => $invitedUser->id,
-    'status' => GameUser::STATUS_PENDING_PLAYER,
-    'join_method' => GameUser::JOIN_INVITATION,
+    'status' => GameUserStatus::PENDING_PLAYER_ACCEPTANCE,
+    'join_method' => GameUserJoinMethod::INVITATION,
     'actioned_by' => $owner->id
 ]);
 
@@ -151,18 +169,18 @@ $adminUsers = GameUser::administrative()->active()->get();
 
 // Obtener solicitudes pendientes para un owner
 $pendingRequests = GameUser::where('game_id', $gameId)
-    ->where('status', GameUser::STATUS_PENDING_OWNER)
+    ->where('status', GameUserStatus::PENDING_OWNER_APPROVAL)
     ->with('user')
     ->get();
 
 // Obtener jugadores pendientes de aceptar invitación
 $pendingInvitations = GameUser::where('user_id', $userId)
-    ->where('status', GameUser::STATUS_PENDING_PLAYER)
+    ->where('status', GameUserStatus::PENDING_PLAYER_ACCEPTANCE)
     ->with('game')
     ->get();
 ```
 
-### Verificación de Roles
+### Verificación de Roles (Métodos Implementados)
 
 ```php
 $gameUser = GameUser::find(1);
@@ -175,23 +193,6 @@ if ($gameUser->hasRole(GameUserRole::OWNER)) {
 if ($gameUser->isOwner()) {
     // Método directo para verificar owner
 }
-
-if ($gameUser->isAdministrator()) {
-    // El usuario tiene permisos administrativos
-}
-
-// Verificar múltiples roles
-if ($gameUser->hasAnyRole([GameUserRole::OWNER, GameUserRole::ADMINISTRATOR])) {
-    // El usuario tiene permisos administrativos
-}
-
-// Verificar privilegios administrativos
-if ($gameUser->hasAdministrativePrivileges()) {
-    // El usuario puede administrar la partida
-}
-
-// Obtener el nombre del rol
-$roleName = $gameUser->getRoleName(); // 'owner', 'administrator', etc.
 ```
 
 ### Verificación de Estados
@@ -210,7 +211,7 @@ if ($gameUser->isPending()) {
 }
 
 // Verificar estado específico
-if ($gameUser->status === GameUser::STATUS_BANNED) {
+if ($gameUser->status === GameUserStatus::BANNED) {
     // Usuario baneado
 }
 ```
@@ -220,13 +221,13 @@ if ($gameUser->status === GameUser::STATUS_BANNED) {
 ```php
 // Activar un usuario (cuando ambas partes aprueban)
 $gameUser->update([
-    'status' => GameUser::STATUS_ACTIVE,
+    'status' => GameUserStatus::ACTIVE,
     'joined_at' => now()
 ]);
 
 // Expulsar un usuario
 $gameUser->update([
-    'status' => GameUser::STATUS_KICKED,
+    'status' => GameUserStatus::KICKED,
     'left_at' => now(),
     'actioned_by' => $admin->id,
     'reason' => 'Violación de reglas'
@@ -234,7 +235,7 @@ $gameUser->update([
 
 // Banear un usuario
 $gameUser->update([
-    'status' => GameUser::STATUS_BANNED,
+    'status' => GameUserStatus::BANNED,
     'left_at' => now(),
     'actioned_by' => $admin->id,
     'reason' => 'Comportamiento tóxico repetido'
@@ -242,7 +243,7 @@ $gameUser->update([
 
 // Usuario abandona voluntariamente
 $gameUser->update([
-    'status' => GameUser::STATUS_LEFT,
+    'status' => GameUserStatus::LEFT,
     'left_at' => now()
 ]);
 ```
@@ -259,7 +260,7 @@ $gameHistory = GameUser::where('game_id', $gameId)
 // Verificar si un usuario puede unirse (no está baneado)
 $canJoin = !GameUser::where('game_id', $gameId)
     ->where('user_id', $userId)
-    ->where('status', GameUser::STATUS_BANNED)
+    ->where('status', GameUserStatus::BANNED)
     ->exists();
 
 // Contar jugadores activos
@@ -286,28 +287,50 @@ $gameAdmins = GameUser::where('game_id', $gameId)
 
 ### Flujo 1: Usuario Solicita Acceso
 1. Usuario accede con invitation_code
-2. Se crea registro con `status = STATUS_PENDING_OWNER`, `join_method = JOIN_REQUEST`
+2. Se crea registro con `status = GameUserStatus::PENDING_OWNER_APPROVAL`, `join_method = GameUserJoinMethod::REQUEST`
 3. Owner recibe notificación
-4. Owner aprueba → `status = STATUS_ACTIVE`, `joined_at = now()`
+4. Owner aprueba → `status = GameUserStatus::ACTIVE`, `joined_at = now()`
 
 ### Flujo 2: Owner Invita Usuario
 1. Owner envía invitación
-2. Se crea registro con `status = STATUS_PENDING_PLAYER`, `join_method = JOIN_INVITATION`
+2. Se crea registro con `status = GameUserStatus::PENDING_PLAYER_ACCEPTANCE`, `join_method = GameUserJoinMethod::INVITATION`
 3. Usuario recibe notificación
-4. Usuario acepta → `status = STATUS_ACTIVE`, `joined_at = now()`
+4. Usuario acepta → `status = GameUserStatus::ACTIVE`, `joined_at = now()`
 
 ### Flujo 3: Auto-autorización
 1. Usuario accede con invitation_code
 2. Si `auto_authorize_players = true` en Game
-3. Se crea directamente con `status = STATUS_ACTIVE`, `join_method = JOIN_AUTO`
+3. Se crea directamente con `status = GameUserStatus::ACTIVE`, `join_method = GameUserJoinMethod::AUTO`
 
 ### Flujo 4: Single Player
 1. Usuario crea nueva partida
 2. Se asigna automáticamente como owner
-3. Estado directo `STATUS_ACTIVE` con `JOIN_AUTO`
+3. Estado directo `GameUserStatus::ACTIVE` con `GameUserJoinMethod::AUTO`
 
-## Relaciones
+## Relaciones del Modelo
 
+### Relaciones BelongsTo
+```php
+// Relación con la partida
+public function game(): BelongsTo
+{
+    return $this->belongsTo(Game::class);
+}
+
+// Relación con el usuario
+public function user(): BelongsTo
+{
+    return $this->belongsTo(User::class);
+}
+
+// Relación con el usuario que ejecutó la acción
+public function actionedBy(): BelongsTo
+{
+    return $this->belongsTo(User::class, 'actioned_by');
+}
+```
+
+### Uso de las Relaciones
 ```php
 // Obtener la partida
 $game = $gameUser->game;
@@ -337,15 +360,14 @@ $user = User::with(['gameUsers' => function($query) {
 - Un usuario baneado no puede volver a unirse a la misma partida
 - Solo owners/admins pueden expulsar usuarios
 - Solo owners pueden asignar roles de administrator
-- Un usuario no puede tener múltiples registros activos en la misma partida
+- Un usuario no puede tener múltiples registros en la misma partida (constraint único)
 
 ### A nivel de base de datos:
 ```sql
--- Índice único para evitar duplicados
-UNIQUE KEY unique_active_user_game (game_id, user_id, status) 
-WHERE status = 'active';
+-- Índice único para evitar duplicados en la relación game-user
+UNIQUE KEY unique_game_user (game_id, user_id);
 
--- Índices para consultas frecuentes
+-- Índices para consultas frecuentes (recomendados)
 INDEX idx_game_status (game_id, status);
 INDEX idx_user_status (user_id, status);
 INDEX idx_game_role (game_id, role);
@@ -359,7 +381,7 @@ protected static function booted()
 {
     // Cuando se activa un usuario
     static::updated(function ($gameUser) {
-        if ($gameUser->wasChanged('status') && $gameUser->status === self::STATUS_ACTIVE) {
+        if ($gameUser->wasChanged('status') && $gameUser->status === GameUserStatus::ACTIVE) {
             // Disparar evento de usuario activado
             event(new UserJoinedGame($gameUser));
         }
@@ -368,7 +390,7 @@ protected static function booted()
     // Cuando se expulsa un usuario
     static::updated(function ($gameUser) {
         if ($gameUser->wasChanged('status') && 
-            in_array($gameUser->status, [self::STATUS_KICKED, self::STATUS_BANNED])) {
+            in_array($gameUser->status, [GameUserStatus::KICKED, GameUserStatus::BANNED])) {
             // Disparar evento de usuario expulsado
             event(new UserRemovedFromGame($gameUser));
         }
@@ -404,7 +426,7 @@ public function owner()
 public function pending()
 {
     return $this->state([
-        'status' => GameUser::STATUS_PENDING_OWNER,
+        'status' => GameUserStatus::PENDING_OWNER_APPROVAL,
         'joined_at' => null,
     ]);
 }
@@ -417,7 +439,7 @@ public function test_user_can_be_activated()
     $gameUser = GameUser::factory()->pending()->create();
     
     $gameUser->update([
-        'status' => GameUser::STATUS_ACTIVE,
+        'status' => GameUserStatus::ACTIVE,
         'joined_at' => now()
     ]);
     
@@ -432,5 +454,86 @@ public function test_owner_has_owner_role()
     $this->assertTrue($gameUser->hasRole(GameUserRole::OWNER));
     $this->assertTrue($gameUser->isOwner());
     $this->assertEquals('owner', $gameUser->getRoleName());
+}
+```
+
+## Scopes Disponibles
+
+El modelo GameUser incluye varios scopes útiles para consultas comunes:
+
+### Scopes de Estado
+```php
+// Obtener solo usuarios activos
+GameUser::active()->get();
+
+// Obtener usuarios pendientes (cualquier tipo de pendiente)
+GameUser::pending()->get();
+```
+
+### Scopes por Rol
+```php
+// Obtener solo owners
+GameUser::owners()->get();
+
+// Obtener solo administradores
+GameUser::administrators()->get();
+
+// Obtener solo testers
+GameUser::testers()->get();
+
+// Obtener usuarios por rol específico
+GameUser::byRole(GameUserRole::PLAYER)->get();
+GameUser::byRole('player')->get(); // También acepta string
+
+// Obtener usuarios con privilegios administrativos (owners + administrators)
+GameUser::administrative()->get();
+```
+
+### Combinando Scopes
+```php
+// Administradores activos de una partida
+$adminUsers = GameUser::where('game_id', $gameId)
+    ->administrative()
+    ->active()
+    ->with('user')
+    ->get();
+
+// Owners activos
+$activeOwners = GameUser::owners()->active()->get();
+```
+
+## Métodos de Instancia
+
+### Verificación de Estados
+```php
+$gameUser = GameUser::find(1);
+
+// Verificar si está activo
+if ($gameUser->isActive()) {
+    // Usuario puede participar en la partida
+}
+
+// Verificar si está pendiente (cualquier tipo)
+if ($gameUser->isPending()) {
+    // Usuario esperando aprobación/aceptación
+}
+```
+
+### Verificación de Roles
+```php
+$gameUser = GameUser::find(1);
+
+// Verificar rol específico (acepta enum o string)
+if ($gameUser->hasRole(GameUserRole::OWNER)) {
+    // El usuario es owner de esta partida
+}
+
+if ($gameUser->hasRole('administrator')) {
+    // También acepta string
+}
+
+// Método específico para verificar owner
+if ($gameUser->isOwner()) {
+    // Método directo para verificar owner
 }
 ```

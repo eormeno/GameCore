@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\GameApp;
 use App\Enums\GameState;
 use App\Models\GameUser;
+use App\Enums\GameUserRole;
+use App\Enums\GameUserStatus;
+use App\Enums\GameUserJoinMethod;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Collection;
 use App\Exceptions\GameCancelledException;
@@ -77,7 +80,7 @@ class GameInstanceService
         return Game::where('game_app_id', $gameApp->id)
             ->whereIn('state', [GameState::WAITING, GameState::RUNNING])
             ->with(['gameUsers' => function($query) {
-                $query->where('status', GameUser::STATUS_ACTIVE)->with('user');
+                $query->where('status', GameUserStatus::ACTIVE)->with('user');
             }])
             ->get();
     }
@@ -95,9 +98,9 @@ class GameInstanceService
         GameUser::create([
             'game_id' => $game->id,
             'user_id' => $user->id,
-            'role' => \App\Enums\GameUserRole::OWNER,
-            'status' => GameUser::STATUS_ACTIVE,
-            'join_method' => GameUser::JOIN_AUTO,
+            'role' => GameUserRole::OWNER,
+            'status' => GameUserStatus::ACTIVE,
+            'join_method' => GameUserJoinMethod::AUTO,
             'joined_at' => now()
         ]);
 
@@ -106,7 +109,7 @@ class GameInstanceService
 
     private function buildWaitingResponse(Game $game, GameUser $currentUser, GameApp $gameApp): array
     {
-        $users = $game->gameUsers()->with('user')->where('status', GameUser::STATUS_ACTIVE)->get();
+        $users = $game->gameUsers()->with('user')->where('status', GameUserStatus::ACTIVE)->get();
         $currentPlayers = $users->count();
         $canStart = $currentUser->isOwner() && $currentPlayers >= $gameApp->min_players_per_instance;
 
@@ -151,9 +154,9 @@ class GameInstanceService
                         'invitationCode' => $game->invitation_code,
                         'state' => $game->state->name,
                         'stateValue' => $game->state->value,
-                        'currentPlayers' => $game->gameUsers->where('status', GameUser::STATUS_ACTIVE)->count(),
+                        'currentPlayers' => $game->gameUsers->where('status', GameUserStatus::ACTIVE)->count(),
                         'maxPlayers' => $game->gameApp->max_players_per_instance,
-                        'users' => $game->gameUsers->where('status', GameUser::STATUS_ACTIVE)->map(function($gu) {
+                        'users' => $game->gameUsers->where('status', GameUserStatus::ACTIVE)->map(function($gu) {
                             return [
                                 'id' => $gu->user->id,
                                 'name' => $gu->user->name,
