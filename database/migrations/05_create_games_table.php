@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->string('state')->default('waiting');
+            $table->string('state')->default('waiting'); // Enum GameState, puede ser 'waiting', 'active', 'finished', etc.
             $table->string('invitation_code')->nullable();
             $table->bigInteger('elapsed')->default(0);
             $table->boolean('auto_authorize_players')->default(false);

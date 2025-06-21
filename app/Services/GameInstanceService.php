@@ -95,7 +95,7 @@ class GameInstanceService
         GameUser::create([
             'game_id' => $game->id,
             'user_id' => $user->id,
-            'is_owner' => true,
+            'role' => \App\Enums\GameUserRole::OWNER,
             'status' => GameUser::STATUS_ACTIVE,
             'join_method' => GameUser::JOIN_AUTO,
             'joined_at' => now()
@@ -108,7 +108,7 @@ class GameInstanceService
     {
         $users = $game->gameUsers()->with('user')->where('status', GameUser::STATUS_ACTIVE)->get();
         $currentPlayers = $users->count();
-        $canStart = $currentUser->is_owner && $currentPlayers >= $gameApp->min_players_per_instance;
+        $canStart = $currentUser->isOwner() && $currentPlayers >= $gameApp->min_players_per_instance;
 
         return [
             'waiting' => [
@@ -125,7 +125,7 @@ class GameInstanceService
                         return [
                             'id' => $gu->user->id,
                             'name' => $gu->user->name,
-                            'is_owner' => $gu->is_owner
+                            'is_owner' => $gu->isOwner()
                         ];
                     }),
                     'createdAt' => $game->created_at
@@ -157,7 +157,7 @@ class GameInstanceService
                             return [
                                 'id' => $gu->user->id,
                                 'name' => $gu->user->name,
-                                'is_owner' => $gu->is_owner
+                                'is_owner' => $gu->isOwner()
                             ];
                         }),
                         'createdAt' => $game->created_at

@@ -11,9 +11,7 @@ game_user:
 ├── id (Primary Key)
 ├── game_id (Foreign Key → games.id)
 ├── user_id (Foreign Key → users.id)
-├── is_owner (Boolean) - Si es el creador/dueño de la partida
-├── is_administrator (Boolean) - Si tiene permisos administrativos
-├── is_tester (Boolean) - Si es un tester de la partida
+├── role (Enum) - Rol del usuario en la partida (owner, administrator, tester, player)
 ├── status (Enum) - Estado actual del usuario en la partida
 ├── join_method (Enum) - Cómo se unió a la partida
 ├── actioned_by (Foreign Key → users.id) - Quién ejecutó la última acción
@@ -42,12 +40,14 @@ game_user:
 | `invitation` | `JOIN_INVITATION` | Owner/admin invitó al usuario |
 | `auto` | `JOIN_AUTO` | Se unió automáticamente (sin aprobación) |
 
-## Roles y Permisos
+## Roles
 
-### Roles Disponibles
-- **Owner**: Creador de la partida, máximos permisos
-- **Administrator**: Permisos administrativos delegados
-- **Tester**: Acceso especial para pruebas
+| Rol | Constante | Descripción |
+|-----|-----------|-------------|
+| `owner` | `GameUserRole::OWNER` | Creador de la partida, máximos permisos |
+| `administrator` | `GameUserRole::ADMINISTRATOR` | Permisos administrativos delegados |
+| `tester` | `GameUserRole::TESTER` | Acceso especial para pruebas |
+| `player` | `GameUserRole::PLAYER` | Jugador regular |
 
 ### Jerarquía de Permisos
 ```
@@ -78,7 +78,7 @@ const JOIN_AUTO = 'auto';
 ### Campos Fillable
 ```php
 protected $fillable = [
-    'game_id', 'user_id', 'is_owner', 'is_administrator', 'is_tester',
+    'game_id', 'user_id', 'role',
     'status', 'join_method', 'actioned_by', 'reason',
     'joined_at', 'left_at'
 ];
@@ -87,9 +87,9 @@ protected $fillable = [
 ### Casts
 ```php
 protected $casts = [
-    'is_owner' => 'boolean',
-    'is_administrator' => 'boolean',
-    'is_tester' => 'boolean',
+    'role' => GameUserRole::class,
+    'status' => GameUserStatus::class,
+    'join_method' => GameUserJoinMethod::class,
     'joined_at' => 'datetime',
     'left_at' => 'datetime',
 ];
@@ -121,9 +121,9 @@ $gameUser = GameUser::create([
 $gameUser = GameUser::create([
     'game_id' => $game->id,
     'user_id' => $user->id,
-    'is_owner' => true,
-    'status' => GameUser::STATUS_ACTIVE,
-    'join_method' => GameUser::JOIN_AUTO,
+    'role' => GameUserRole::OWNER,
+    'status' => GameUserStatus::ACTIVE,
+    'join_method' => GameUserJoinMethod::AUTO,
     'joined_at' => now()
 ]);
 ```
@@ -142,6 +142,12 @@ $owners = GameUser::owners()->with(['user', 'game'])->get();
 
 // Obtener administradores activos
 $admins = GameUser::administrators()->active()->get();
+
+// Obtener usuarios por rol específico
+$testers = GameUser::byRole(GameUserRole::TESTER)->get();
+
+// Obtener usuarios con privilegios administrativos
+$adminUsers = GameUser::administrative()->active()->get();
 
 // Obtener solicitudes pendientes para un owner
 $pendingRequests = GameUser::where('game_id', $gameId)
@@ -162,21 +168,30 @@ $pendingInvitations = GameUser::where('user_id', $userId)
 $gameUser = GameUser::find(1);
 
 // Verificar rol específico
-if ($gameUser->hasRole('owner')) {
+if ($gameUser->hasRole(GameUserRole::OWNER)) {
     // El usuario es owner de esta partida
 }
 
-if ($gameUser->hasRole('administrator')) {
+if ($gameUser->isOwner()) {
+    // Método directo para verificar owner
+}
+
+if ($gameUser->isAdministrator()) {
     // El usuario tiene permisos administrativos
 }
 
 // Verificar múltiples roles
-if ($gameUser->hasAnyRole(['owner', 'administrator'])) {
+if ($gameUser->hasAnyRole([GameUserRole::OWNER, GameUserRole::ADMINISTRATOR])) {
     // El usuario tiene permisos administrativos
 }
 
-// Obtener todos los roles
-$roles = $gameUser->getRoles(); // ['owner', 'tester']
+// Verificar privilegios administrativos
+if ($gameUser->hasAdministrativePrivileges()) {
+    // El usuario puede administrar la partida
+}
+
+// Obtener el nombre del rol
+$roleName = $gameUser->getRoleName(); // 'owner', 'administrator', etc.
 ```
 
 ### Verificación de Estados
@@ -254,14 +269,14 @@ $activeCount = GameUser::where('game_id', $gameId)
 
 // Obtener partidas donde el usuario es owner
 $ownedGames = GameUser::where('user_id', $userId)
-    ->owners()
+    ->byRole(GameUserRole::OWNER)
     ->active()
     ->with('game')
     ->get();
 
 // Buscar usuarios por rol en una partida específica
 $gameAdmins = GameUser::where('game_id', $gameId)
-    ->administrators()
+    ->byRole(GameUserRole::ADMINISTRATOR)
     ->active()
     ->with('user')
     ->get();
@@ -333,7 +348,7 @@ WHERE status = 'active';
 -- Índices para consultas frecuentes
 INDEX idx_game_status (game_id, status);
 INDEX idx_user_status (user_id, status);
-INDEX idx_game_owner (game_id, is_owner);
+INDEX idx_game_role (game_id, role);
 ```
 
 ## Eventos del Modelo
@@ -371,11 +386,9 @@ public function definition()
     return [
         'game_id' => Game::factory(),
         'user_id' => User::factory(),
-        'is_owner' => false,
-        'is_administrator' => false,
-        'is_tester' => false,
-        'status' => GameUser::STATUS_ACTIVE,
-        'join_method' => GameUser::JOIN_REQUEST,
+        'role' => GameUserRole::PLAYER,
+        'status' => GameUserStatus::ACTIVE,
+        'join_method' => GameUserJoinMethod::REQUEST,
         'joined_at' => now(),
     ];
 }
@@ -383,8 +396,8 @@ public function definition()
 public function owner()
 {
     return $this->state([
-        'is_owner' => true,
-        'join_method' => GameUser::JOIN_AUTO,
+        'role' => GameUserRole::OWNER,
+        'join_method' => GameUserJoinMethod::AUTO,
     ]);
 }
 
@@ -416,7 +429,8 @@ public function test_owner_has_owner_role()
 {
     $gameUser = GameUser::factory()->owner()->create();
     
-    $this->assertTrue($gameUser->hasRole('owner'));
-    $this->assertContains('owner', $gameUser->getRoles());
+    $this->assertTrue($gameUser->hasRole(GameUserRole::OWNER));
+    $this->assertTrue($gameUser->isOwner());
+    $this->assertEquals('owner', $gameUser->getRoleName());
 }
 ```

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GameUserRole;
 use App\Enums\GameUserStatus;
 use App\Enums\GameUserJoinMethod;
 use Illuminate\Database\Eloquent\Model;
@@ -14,18 +15,28 @@ class GameUser extends Model
 
     protected $table = 'game_user';
 
+    // Constantes para compatibilidad con código existente
+    const STATUS_ACTIVE = 'active';
+    const STATUS_PENDING_OWNER = 'pending_owner_approval';
+    const STATUS_PENDING_PLAYER = 'pending_player_acceptance';
+    const STATUS_LEFT = 'left';
+    const STATUS_KICKED = 'kicked';
+    const STATUS_BANNED = 'banned';
+
+    const JOIN_REQUEST = 'request';
+    const JOIN_INVITATION = 'invitation';
+    const JOIN_AUTO = 'auto';
+
     protected $fillable = [
-        'game_id', 'user_id', 'is_owner', 'is_administrator', 'is_tester',
+        'game_id', 'user_id', 'role',
         'status', 'join_method', 'actioned_by', 'reason',
         'joined_at', 'left_at'
     ];
 
     protected $casts = [
+        'role' => GameUserRole::class,
         'status' => GameUserStatus::class,
         'join_method' => GameUserJoinMethod::class,
-        'is_owner' => 'boolean',
-        'is_administrator' => 'boolean',
-        'is_tester' => 'boolean',
         'joined_at' => 'datetime',
         'left_at' => 'datetime',
     ];
@@ -62,17 +73,30 @@ class GameUser extends Model
 
     public function scopeOwners($query)
     {
-        return $query->where('is_owner', true);
+        return $query->where('role', GameUserRole::OWNER);
     }
 
     public function scopeAdministrators($query)
     {
-        return $query->where('is_administrator', true);
+        return $query->where('role', GameUserRole::ADMINISTRATOR);
     }
 
     public function scopeTesters($query)
     {
-        return $query->where('is_tester', true);
+        return $query->where('role', GameUserRole::TESTER);
+    }
+
+    public function scopeByRole($query, GameUserRole|string $role)
+    {
+        if (is_string($role)) {
+            return $query->where('role', $role);
+        }
+        return $query->where('role', $role);
+    }
+
+    public function scopeAdministrative($query)
+    {
+        return $query->whereIn('role', [GameUserRole::OWNER, GameUserRole::ADMINISTRATOR]);
     }
 
     // Métodos de estado
@@ -89,14 +113,12 @@ class GameUser extends Model
         ]);
     }
 
-    public function hasRole(string $role): bool
+    public function hasRole(GameUserRole|string $role): bool
     {
-        return match($role) {
-            'owner' => $this->is_owner,
-            'administrator' => $this->is_administrator,
-            'tester' => $this->is_tester,
-            default => false
-        };
+        if (is_string($role)) {
+            $role = GameUserRole::from($role);
+        }
+        return $this->role === $role;
     }
 
     public function hasAnyRole(array $roles): bool
@@ -109,12 +131,38 @@ class GameUser extends Model
         return false;
     }
 
-    public function getRoles(): array
+    public function isOwner(): bool
     {
-        $roles = [];
-        if ($this->is_owner) $roles[] = 'owner';
-        if ($this->is_administrator) $roles[] = 'administrator';
-        if ($this->is_tester) $roles[] = 'tester';
-        return $roles;
+        return $this->role === GameUserRole::OWNER;
+    }
+
+    public function isAdministrator(): bool
+    {
+        return $this->role === GameUserRole::ADMINISTRATOR;
+    }
+
+    public function isTester(): bool
+    {
+        return $this->role === GameUserRole::TESTER;
+    }
+
+    public function isPlayer(): bool
+    {
+        return $this->role === GameUserRole::PLAYER;
+    }
+
+    public function hasAdministrativePrivileges(): bool
+    {
+        return $this->role->isAdministrative();
+    }
+
+    public function canManageRole(GameUserRole $targetRole): bool
+    {
+        return $this->role->isHigherThan($targetRole);
+    }
+
+    public function getRoleName(): string
+    {
+        return $this->role->value;
     }
 }
