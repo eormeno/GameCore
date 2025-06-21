@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\GameUserStatus;
+use App\Enums\GameUserJoinMethod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,25 +21,14 @@ class GameUser extends Model
     ];
 
     protected $casts = [
+        'status' => GameUserStatus::class,
+        'join_method' => GameUserJoinMethod::class,
         'is_owner' => 'boolean',
         'is_administrator' => 'boolean',
         'is_tester' => 'boolean',
         'joined_at' => 'datetime',
         'left_at' => 'datetime',
     ];
-
-    // Constantes para status
-    const STATUS_PENDING_OWNER = 'pending_owner_approval';
-    const STATUS_PENDING_PLAYER = 'pending_player_acceptance';
-    const STATUS_ACTIVE = 'active';
-    const STATUS_LEFT = 'left';
-    const STATUS_KICKED = 'kicked';
-    const STATUS_BANNED = 'banned';
-
-    // Constantes para join_method
-    const JOIN_REQUEST = 'request';
-    const JOIN_INVITATION = 'invitation';
-    const JOIN_AUTO = 'auto';
 
     // Relaciones
     public function game(): BelongsTo
@@ -58,14 +49,14 @@ class GameUser extends Model
     // Scopes
     public function scopeActive($query)
     {
-        return $query->where('status', self::STATUS_ACTIVE);
+        return $query->where('status', GameUserStatus::ACTIVE);
     }
 
     public function scopePending($query)
     {
         return $query->whereIn('status', [
-            self::STATUS_PENDING_OWNER,
-            self::STATUS_PENDING_PLAYER
+            GameUserStatus::PENDING_OWNER_APPROVAL,
+            GameUserStatus::PENDING_PLAYER_ACCEPTANCE
         ]);
     }
 
@@ -87,14 +78,14 @@ class GameUser extends Model
     // Métodos de estado
     public function isActive(): bool
     {
-        return $this->status === self::STATUS_ACTIVE;
+        return $this->status === GameUserStatus::ACTIVE;
     }
 
     public function isPending(): bool
     {
         return in_array($this->status, [
-            self::STATUS_PENDING_OWNER,
-            self::STATUS_PENDING_PLAYER
+            GameUserStatus::PENDING_OWNER_APPROVAL,
+            GameUserStatus::PENDING_PLAYER_ACCEPTANCE
         ]);
     }
 

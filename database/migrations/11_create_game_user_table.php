@@ -17,20 +17,16 @@ return new class extends Migration {
             $table->boolean('is_owner')->default(false);
             $table->boolean('is_administrator')->default(false);
             $table->boolean('is_tester')->default(false);
-            $table->enum('status', [
-                'pending_owner_approval',    // Usuario solicitó acceso
-                'pending_player_acceptance', // Owner invitó al usuario
-                'active',                    // Jugador activo en partida
-                'left',                      // Usuario abandonó
-                'kicked',                    // Usuario fue expulsado
-                'banned'                     // Usuario fue baneado
-            ])->default('pending_owner_approval');
-            $table->enum('join_method', ['request', 'invitation', 'auto'])->nullable();
+            $table->string('status')->default('pending_owner_approval'); // enum GameUserStatus (puede ser 'pending_owner_approval', 'pending_player_acceptance', 'active', 'left', 'kicked', 'banned')
+            $table->string('join_method')->nullable(); // enum GameUserJoinMethod, puede ser 'invite', 'join_code', etc.
             $table->foreignId('actioned_by')->nullable()->constrained('users'); // Quien hizo la última acción
             $table->text('reason')->nullable(); // Razón de kick/ban
             $table->timestamp('joined_at')->nullable(); // Cuando se volvió activo
             $table->timestamp('left_at')->nullable(); // Cuando abandonó/fue expulsado
             $table->timestamps();
+
+            // Índice único para evitar duplicados en la relación game-user
+            $table->unique(['game_id', 'user_id']);
         });
     }
 
