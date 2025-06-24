@@ -54,8 +54,8 @@ class GameUser extends Model
     public function scopePending($query)
     {
         return $query->whereIn('status', [
-            GameUserStatus::PENDING_OWNER_APPROVAL,
-            GameUserStatus::PENDING_PLAYER_ACCEPTANCE
+            GameUserStatus::REQUESTED,
+            GameUserStatus::INVITED
         ]);
     }
 
@@ -96,8 +96,8 @@ class GameUser extends Model
     public function isPending(): bool
     {
         return in_array($this->status, [
-            GameUserStatus::PENDING_OWNER_APPROVAL,
-            GameUserStatus::PENDING_PLAYER_ACCEPTANCE
+            GameUserStatus::REQUESTED,
+            GameUserStatus::INVITED
         ]);
     }
 

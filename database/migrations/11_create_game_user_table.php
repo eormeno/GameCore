@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('game_id')->constrained();
             $table->foreignId('user_id')->constrained();
             $table->string('role')->default('player'); // enum GameUserRole (puede ser 'owner', 'administrator', 'tester', 'player')
-            $table->string('status')->default('pending_owner_approval'); // enum GameUserStatus (puede ser 'pending_owner_approval', 'pending_player_acceptance', 'active', 'left', 'kicked', 'banned')
+            $table->string('status')->default('requested'); // enum GameUserStatus (puede ser 'requested', 'invited', 'active', 'left', 'kicked', 'banned')
             $table->string('join_method')->nullable(); // enum GameUserJoinMethod, puede ser 'invite', 'join_code', etc.
             $table->foreignId('actioned_by')->nullable()->constrained('users'); // Quien hizo la última acción
             $table->text('reason')->nullable(); // Razón de kick/ban
