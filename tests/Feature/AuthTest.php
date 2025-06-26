@@ -1,10 +1,9 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 test('Root route returns Ok status', function () {
-    $response = $this->get('/');
+    $response = $this->get('/api');
 
     $response->assertOk()->assertJson([
         'status' => 1
@@ -24,30 +23,21 @@ test('usuario puede registrarse', function () {
 });
 
 test('usuario puede hacer login y obtener token', function () {
-    User::factory()->create([
-        'email' => 'test@example.com',
-        'password' => Hash::make('Password123!'),
+    User::factory()->adminUser()->create();
+    $response = $this->postJson('/api/login', adminUserCredentials());
+    $response->assertOk()->assertJsonStructure([
+        'successful_login' => [
+            'token'
+        ]
     ]);
-
-    $response = $this->postJson('/api/login', [
-        'email' => 'test@example.com',
-        'password' => 'Password123!',
-    ]);
-
-    $response->assertOk()->assertJsonStructure(['token']);
 });
 
 test('usuario autenticado puede acceder a ruta protegida', function () {
-    $user = User::factory()->create();
-    $token = $user->createToken('test-token')->plainTextToken;
-
-    $response = $this->getJson('/api/user', [
-        'Authorization' => "Bearer $token",
-    ]);
-
+    $user = loginUser();
+    $response = $this->getJson('/api/user');
     $response
         ->assertOk()
-        ->assertJsonPath('email', $user->email);
+        ->assertJsonPath('user.email', $user->email);
 });
 
 test('usuario no autenticado no puede acceder a ruta protegida', function () {

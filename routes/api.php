@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameAppController;
 use App\Http\Controllers\DatabaseTableController;
 
+Route::get('/', fn() => response()->json(['status' => 1]))->name('root');
+
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
