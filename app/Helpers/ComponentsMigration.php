@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use App\Models\Components\PersistentComponent;
+use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 
 
 class ComponentsMigration extends Migration
@@ -41,6 +42,8 @@ class ComponentsMigration extends Migration
 
             if ($this->logs)
                 print "Created {$tables} tables found in {$this->namespace($this->filename)}\n";
+        } catch (DirectoryNotFoundException $e) {
+            // print "Erro: {$e->getMessage()}\n"; // Uncomment this line if you want to log the error
         } catch (Exception $e) {
             print "Error: {$e->getMessage()}\n";
         }
@@ -66,7 +69,7 @@ class ComponentsMigration extends Migration
         $namespace = "GameApps/" . implode('/', $words);
         $path = app_path($namespace);
         if (!is_dir($path)) {
-            throw new Exception("Folder $path does not exist");
+            throw new DirectoryNotFoundException("Folder $path does not exist");
         }
         return $namespace;
     }
