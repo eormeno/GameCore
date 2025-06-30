@@ -10,6 +10,8 @@ use Illuminate\Database\Migrations\Migration;
 // TODO Unificar implementación con ComponentsMigration.php
 return new class extends Migration {
 
+    private bool $logs = false;
+
     public function up(): void
     {
         $tables = 0;
@@ -28,7 +30,9 @@ return new class extends Migration {
             });
         }, GameService::class, IPersistent::class);
 
-        print "Created {$tables} tables found in {$this->namespace()}\n";
+        if ($this->logs) {
+            print "Creating {$tables} tables found in {$this->namespace()}\n";
+        }
     }
 
     public function down(): void

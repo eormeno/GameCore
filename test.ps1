@@ -12,6 +12,7 @@ if ($filter -eq $null) {
 # A dictionary with the prefix and the test class name
 $testClasses = @{
     'auth' = 'AuthTest';
+    'cnt' = 'CNTPlayGameTest';
     'gtn' = 'GTNPlayGameTest';
     'bba' = 'BBAPlayGameTest';
     'mtq' = 'MTQPlayGameTest';
