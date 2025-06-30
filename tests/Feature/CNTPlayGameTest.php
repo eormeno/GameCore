@@ -3,8 +3,7 @@
 const TEST_PREFIX = 'cnt';
 
 test("User can play the game app", function () {
-	loginUser();
-	$gameApp = reloadGameApps(TEST_PREFIX);
+	$gameApp = getUserPlayingGame(TEST_PREFIX);
 	$this->assertNotNull($gameApp);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
