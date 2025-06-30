@@ -50,9 +50,17 @@ class GameAppController extends Controller
                 ]
             ]);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['game_not_found' => ['message' => 'Game not found']]);
+            return response()->json([
+                'exception' => [
+                    'game_not_found' => ['message' => 'Game not found or is not active.']
+                ]
+            ], 404);
         } catch (Exception $e) {
-            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+            return response()->json([
+                'exception' => [
+                    'error' => ['message' => 'An error occurred while trying to play the game.']
+                ]
+            ], 500);
         }
     }
 

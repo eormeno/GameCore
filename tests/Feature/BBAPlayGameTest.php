@@ -1,6 +1,6 @@
 <?php
 
-test("Auth user can play app", function () {
+test("User can play the game app", function () {
     loginUser();
     $gameApp = reloadGameApps('bba');
     $this->assertNotNull($gameApp);
@@ -19,7 +19,17 @@ test("Auth user can play app", function () {
             'maxUsersPerInstance'
         ]
     ]);
+});
 
+test("Trying to play a deactivated game app returns 404", function () {
+    loginUser();
+    $gameApp = reloadGameApps('rpg');
+    $this->assertNotNull($gameApp);
+    $response = $this->get("/api/game-app/{$gameApp->id}/play");
+    $json = $response->json();
+    $response->assertStatus(404);
+    $this->assertArrayHasKey('exception', $json);
+    $this->assertArrayHasKey('game_not_found', $json['exception']);
 });
 
 test("The game's root gameobject is created", function () {
