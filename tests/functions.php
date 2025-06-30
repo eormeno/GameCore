@@ -28,7 +28,15 @@ function adminUserCredentials(): array
 
 function write($response): void
 {
-    echo PHP_EOL . json_encode(json_decode($response->getContent()), JSON_PRETTY_PRINT) . PHP_EOL;
+    $content = $response->getContent();
+    $decoded = json_decode($content);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo PHP_EOL . "Raw response: " . $content . PHP_EOL;
+        return;
+    }
+
+    echo PHP_EOL . json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
 }
 
 function setupGameApp(string $prefix): GameApp
