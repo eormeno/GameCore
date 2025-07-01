@@ -35,6 +35,21 @@ class GameAppController extends Controller
         try {
             $currentUser = auth()->user();
             $gameApp = GameApp::where('id', $gameAppId)->where('active', true)->firstOrFail();
+
+            // If maxInstancesPerUser > 1, return list of open games
+            if ($gameApp->max_instances_per_user > 1) {
+                // Ensure user has at least one game or create one
+                $gamesService->getOrCreateUserGame($currentUser, $gameApp);
+
+                $openGames = $this->getOpenGames($currentUser, $gameApp);
+                return response()->json([
+                    'open_games' => $openGames,
+                    'resourcesUrl' => route('res', $gameApp->id),
+                    'width' => $gameApp->width,
+                    'height' => $gameApp->height,
+                ]);
+            }
+
             $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
             return response()->json([
                 'game' => [
@@ -121,6 +136,42 @@ class GameAppController extends Controller
                 'Expires' => '15'   // 15 seconds
             ]
         );
+    }
+
+    /**
+     * Get open games for a user and game app
+     * Open games are games that are not finished and can accept more players
+     */
+    private function getOpenGames($user, GameApp $gameApp): array
+    {
+        // Get all games for this game app that the user is part of
+        $userGames = $user->games()
+            ->where('game_app_id', $gameApp->id)
+            ->where('state', '!=', 'finished')
+            ->with(['players' => function($query) {
+                $query->select('users.id', 'users.name', 'game_user.role', 'game_user.status')
+                      ->wherePivotIn('status', ['active', 'invited']);
+            }])
+            ->get();
+
+        return $userGames->map(function ($game) {
+            return [
+                'id' => $game->id,
+                'name' => $game->name ?? 'Unnamed Game',
+                'invitationCode' => $game->invitation_code,
+                'state' => $game->state,
+                'users' => $game->players->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'is_owner' => $user->pivot->role === 'owner',
+                        'access_approved' => $user->pivot->status === 'active',
+                        'invitation_approved' => in_array($user->pivot->status, ['active', 'invited']),
+                    ];
+                }),
+                'createdAt' => $game->created_at,
+            ];
+        })->toArray();
     }
 
     private function findResource(string $basePath, string $resourceName): string|null

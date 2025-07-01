@@ -2,7 +2,7 @@
 
 const TEST_PREFIX = 'cnt';
 
-test("User can play the game app", function () {
+test("1. User can play the game app", function () {
 	$gameApp = getUserPlayingGame(TEST_PREFIX);
 	$this->assertNotNull($gameApp);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
@@ -23,9 +23,10 @@ test("User can play the game app", function () {
 });
 
 // The client receives a list of still open saved games with their invitation codes because the maxInstancesPerUser is greater than 1
-test("User receives a list of open saved games", function () {
-	$gameApp = getUserPlayingGame(TEST_PREFIX);
-	$this->assertNotNull($gameApp);
+test("2. User receives a list of open saved games", function () {
+	$newGame = getUserPlayingGame(TEST_PREFIX);
+	$this->assertNotNull($newGame);
+	$gameApp = $newGame->gameApp;
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
 	$response->assertJsonStructure([
@@ -53,7 +54,7 @@ test("User receives a list of open saved games", function () {
 	]);
 });
 
-test("Trying to play a deactivated game app returns 404", function () {
+test("3. Trying to play a deactivated game app returns 404", function () {
 	loginUser();
 	$gameApp = reloadGameApps('rpg');
 	$this->assertNotNull($gameApp);
@@ -64,7 +65,7 @@ test("Trying to play a deactivated game app returns 404", function () {
 	$this->assertArrayHasKey('game_not_found', $json['exception']);
 });
 
-test("The game's root gameobject is created", function () {
+test("4. The game's root gameobject is created", function () {
 	$newGame = getUserPlayingGame(TEST_PREFIX);
 	$rootPrefab = existsRootPrefab(TEST_PREFIX);
 	$rootGameObject = rootGameObjectIsCreated($newGame);
@@ -76,7 +77,7 @@ test("The game's root gameobject is created", function () {
 	// showTable('container_components');
 });
 
-test("Events interaction returns the active gameobject with its view", function () {
+test("5. Events interaction returns the active gameobject with its view", function () {
 	$newGame = getUserPlayingGame(TEST_PREFIX);
 
 	// Reload the game (this must be the first event)

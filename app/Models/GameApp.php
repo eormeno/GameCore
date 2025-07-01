@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\GameState;
+use App\Enums\GameUserStatus;
 use App\Models\Prefab\Prefab;
 use App\Models\Events\GameAppEvent;
 use Illuminate\Database\Eloquent\Model;
@@ -76,7 +77,7 @@ class GameApp extends Model
 		return $this->games()
 			->whereHas('gameUsers', function($query) use ($user) {
 				$query->where('user_id', $user->id)
-					  ->where('status', GameUser::STATUS_ACTIVE);
+					  ->where('status', GameUserStatus::ACTIVE);
 			})
 			->whereIn('state', [GameState::WAITING, GameState::RUNNING]) // usar enum
 			->with(['gameUsers' => function($query) use ($user) {
