@@ -7,6 +7,12 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property int $game_app_id
+ */
 class GameAppEvent extends Model
 {
 	protected $fillable = ['name', 'description', 'game_app_id'];

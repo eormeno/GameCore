@@ -18,6 +18,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * Represents a game instance, which can be a playthrough of a game application.
  * It contains information about the game, its objects, players, and services.
  *
+ * @property int $id
+ * @property string $invitation_code
+ * @property int $game_app_id
+ * @property int|null $game_object_id
+ * @property int|null $elapsed
+ * @property string|null $name
+ * @property \App\Enums\GameState|null $state
+ * @property bool $auto_authorize_players
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $title
+ *
  * @package App\Models
  */
 class Game extends Model

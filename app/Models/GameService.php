@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Events\GameEventListenerManager;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $slug
+ * @property string $type
+ * @property int $game_id
+ */
 class GameService extends Model
 {
     public $timestamps = false;

@@ -11,6 +11,26 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @property int $id
+ * @property string $prefix
+ * @property string $name
+ * @property string $description
+ * @property int $min_age
+ * @property string|null $image
+ * @property string|null $prefab_name
+ * @property array|null $prefab_attributes
+ * @property string $client
+ * @property int $width
+ * @property int $height
+ * @property string|null $version
+ * @property int $max_instances_per_user
+ * @property int $min_players_per_instance
+ * @property int $max_players_per_instance
+ * @property bool $allow_late_join
+ * @property bool $active
+ * @property array|null $service_registry
+ */
 class GameApp extends Model
 {
 	use HasFactory;

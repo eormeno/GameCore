@@ -6,6 +6,10 @@ use App\Models\GameObject\GameObject;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
+/**
+ * @property string $name
+ * @property string $type
+ */
 abstract class Base extends Model
 {
     protected $keyType = 'string';  // PK is string

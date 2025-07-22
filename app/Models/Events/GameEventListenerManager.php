@@ -7,8 +7,13 @@ use App\Events\GameEvent;
 use App\Models\GameService;
 use App\Models\Components\Component;
 use App\Models\GameObject\GameObject;
+use App\Models\Events\GameAppEvent;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $game_app_event_id
+ */
 class GameEventListenerManager extends Model
 {
 	protected $fillable = ['game_app_event_id'];
@@ -20,6 +25,7 @@ class GameEventListenerManager extends Model
 		$gameAppId = $game->gameApp()->first()->id;
 		$eventNames = is_array($eventNames) ? $eventNames : [$eventNames];
 		foreach ($eventNames as $name) {
+			/** @var GameAppEvent $gameAppEvent */
 			$gameAppEvent = GameAppEvent::firstOrCreate(['game_app_id' => $gameAppId, 'name' => $name]);
 			$event = static::firstOrCreate(['game_app_event_id' => $gameAppEvent->id]);
 			if (is_a($listener, Component::class)) {

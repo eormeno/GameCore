@@ -21,11 +21,11 @@ class GameAppController extends Controller
             'prefix',
             'name',
             'description',
-            'card_image',
+            'image',
             'prefab_name',
             'max_instances_per_user',
-            'min_users_per_instance',
-            'max_users_per_instance',
+            'min_players_per_instance',
+            'max_players_per_instance',
         ]);
         return response()->json(['displaying_games_gallery' => $gameApps]);
     }
@@ -60,8 +60,8 @@ class GameAppController extends Controller
                     'height' => $gameApp->height,
                     'invitationCode' => $currentGame->invitation_code,
                     'maxInstancesPerUser' => $gameApp->max_instances_per_user,
-                    'minUsersPerInstance' => $gameApp->min_users_per_instance,
-                    'maxUsersPerInstance' => $gameApp->max_users_per_instance,
+                    'minUsersPerInstance' => $gameApp->min_players_per_instance,
+                    'maxUsersPerInstance' => $gameApp->max_players_per_instance,
                 ]
             ]);
         } catch (ModelNotFoundException $e) {

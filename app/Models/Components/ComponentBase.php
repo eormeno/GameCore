@@ -13,6 +13,14 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Events\GameEventListenerManager;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $type
+ * @property int $game_object_id
+ * @property bool $enabled
+ * @property string|null $state
+ * @property array|null $messages
+ */
 class ComponentBase extends Model implements IGameEventListener
 {
 	use DebugHelper;
@@ -88,7 +96,7 @@ class ComponentBase extends Model implements IGameEventListener
 		return null;
 	}
 
-	protected static function createFromSlug(
+	public static function createFromSlug(
 		Base $gameObject,
 		string $slug_type,
 		array $attributes,

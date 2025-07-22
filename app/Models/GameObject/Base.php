@@ -11,6 +11,18 @@ use App\Models\Events\GameEventListenerManager;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $version
+ * @property bool $active
+ * @property bool $active_parents
+ * @property int|null $game_object_id
+ * @property int $game_id
+ * @property string|null $state
+ * @property array|null $state_components
+ * @property array|null $indexed_children
+ */
 abstract class Base extends Model
 {
     use DebugHelper;
