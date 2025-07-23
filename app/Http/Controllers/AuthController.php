@@ -40,7 +40,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($request->password, (string)$user->password)) {
             return response()->json([
                 'failed_login' => [
                     'message' => 'Las credenciales no coinciden con nuestros registros.'
