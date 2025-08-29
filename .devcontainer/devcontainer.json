@@ -1,0 +1,48 @@
+{
+    "name": "GameCore Framework",
+    "dockerFile": "Dockerfile",
+    "forwardPorts": [
+        8000
+    ],
+    "postCreateCommand": "composer install && cp .env.example .env && php artisan key:generate && php artisan migrate --seed --force && php artisan games",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "codingyu.laravel-goto-view",
+                "cweijan.dbclient-jdbc",
+                "cweijan.vscode-mysql-client2",
+                "foxundermoon.shell-format",
+                "george-alisson.html-preview-vscode",
+                "github.codespaces",
+                "github.copilot",
+                "github.copilot-chat",
+                "github.github-vscode-theme",
+                "github.vscode-pull-request-github",
+                "glitchbl.laravel-create-view",
+                "ihunte.laravel-blade-wrapper",
+                "marcuselg.markdowntoolbar",
+                "mehedidracula.php-namespace-resolver",
+                "mikestead.dotenv",
+                "ms-ceintl.vscode-language-pack-es",
+                "naoray.laravel-goto-components",
+                "onecentlin.laravel-blade",
+                "onecentlin.laravel-extension-pack",
+                "onecentlin.laravel5-snippets",
+                "pgl.laravel-jump-controller",
+                "pkief.material-icon-theme",
+                "qwtel.sqlite-viewer",
+                "ryannaddy.laravel-artisan",
+                "shd101wyy.markdown-preview-enhanced",
+                "shufo.vscode-blade-formatter",
+                "simonsiefke.svg-preview",
+                "vscode-icons-team.vscode-icons",
+                "xdebug.php-debug",
+                "zaaack.markdown-editor"
+            ]
+        }
+    }
+}
