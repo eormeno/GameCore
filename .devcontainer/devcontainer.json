@@ -4,7 +4,20 @@
     "forwardPorts": [
         8000
     ],
-    "postCreateCommand": "composer install && cp .env.example .env && php artisan key:generate && php artisan migrate --seed --force && php artisan games",
+    "postCreateCommand": [
+        "mkdir -p tests/Unit",
+        "composer install",
+        "cp .env.example .env",
+        "php artisan key:generate",
+        "php artisan migrate --seed --force",
+        "php artisan games",
+        "chmod +x migrate.sh",
+        "ln -sf $(pwd)/migrate.sh /usr/local/bin/migrate",
+        "chmod +x start.sh",
+        "ln -sf $(pwd)/start.sh /usr/local/bin/start",
+        "chmod +x test.sh",
+        "ln -sf $(pwd)/test.sh /usr/local/bin/gametest"
+    ],
     "customizations": {
         "vscode": {
             "settings": {
