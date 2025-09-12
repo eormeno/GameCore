@@ -32,4 +32,27 @@ class DatabaseTableController extends Controller
         $tables = $this->databaseTableService->getTables($showIgnored, $withData, $pattern);
         return response()->json($tables);
     }
+
+    /**
+     * Get table data
+     *
+     * @param Request $request
+     * @param string $tableName
+     * @return JsonResponse
+     */
+    public function show(Request $request, string $tableName): JsonResponse
+    {
+        try {
+            $limit = $request->integer('limit', 100);
+            $offset = $request->integer('offset', 0);
+            
+            $data = $this->databaseTableService->getTableData($tableName, $limit, $offset);
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch table data',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

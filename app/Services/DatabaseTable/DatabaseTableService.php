@@ -37,6 +37,14 @@ class DatabaseTableService implements DatabaseTableServiceInterface
     /**
      * @inheritdoc
      */
+    public function getTableData(string $tableName, int $limit = 100, int $offset = 0): array
+    {
+        return $this->driver->getTableData($tableName, $limit, $offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getTablesJson(bool $showIgnored = false, bool $withData = false, ?string $pattern = null, bool $pretty_print = false): string
     {
         $tables = $this->getTables($showIgnored, $withData, $pattern);

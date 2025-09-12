@@ -15,6 +15,16 @@ interface DatabaseTableServiceInterface
     public function getTables(bool $showIgnored = false, bool $withData = false, ?string $pattern = null): array;
 
     /**
+     * Get table data
+     *
+     * @param string $tableName Name of the table
+     * @param int $limit Maximum number of records to return
+     * @param int $offset Number of records to skip
+     * @return array Table data
+     */
+    public function getTableData(string $tableName, int $limit = 100, int $offset = 0): array;
+
+    /**
      * Get the JSON representation of tables
      *
      * @param bool $showIgnored Whether to include ignored tables

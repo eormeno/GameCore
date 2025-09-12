@@ -23,3 +23,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Database Tables endpoints
 Route::get('/tables', [DatabaseTableController::class, 'index']);
+Route::get('/tables/{tableName}', [DatabaseTableController::class, 'show']);

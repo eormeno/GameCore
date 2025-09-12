@@ -60,6 +60,35 @@ abstract class AbstractDatabaseDriver
     }
 
     /**
+     * Get data from a specific table
+     *
+     * @param string $tableName Name of the table
+     * @param int $limit Maximum number of records to return
+     * @param int $offset Number of records to skip
+     * @return array Table data
+     */
+    public function getTableData(string $tableName, int $limit = 100, int $offset = 0): array
+    {
+        // Validate table exists and is not in ignored list
+        if (!Schema::hasTable($tableName)) {
+            throw new \InvalidArgumentException("Table '{$tableName}' does not exist.");
+        }
+
+        // Check if table is in ignored list (for security)
+        $ignoredTables = Config::get('tables.ignore', []);
+        if (in_array($tableName, $ignoredTables)) {
+            throw new \InvalidArgumentException("Access to table '{$tableName}' is not allowed.");
+        }
+
+        // Get table data with pagination
+        return DB::table($tableName)
+            ->offset($offset)
+            ->limit($limit)
+            ->get()
+            ->toArray();
+    }
+
+    /**
      * Filter out tables that should be ignored according to config
      *
      * @param array $tables List of table names to filter
