@@ -1,7 +1,11 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
+
 test("1. Debugger returns all installed Game Apps", function () {
-    $response = $this->get("/api/debug/game-apps");
+    Artisan::call('games'); // Call the games command to load game apps
+    
+    $response = $this->get("/api/debug/game-apps?active=true");
     $response->assertStatus(200);
     $response->assertJsonStructure([
         '*' => [
@@ -10,10 +14,13 @@ test("1. Debugger returns all installed Game Apps", function () {
             'active',
         ]
     ]);
+    write($response);
 });
 
 test("2. Debugger returns detailed info for a specific Game App", function () {
+    Artisan::call('games'); // Call the games command to load game apps
     $gameAppPrefix = 'cnt'; // Example prefix, change as needed
+    
     $response = $this->get("/api/debug/game-apps/{$gameAppPrefix}");
     $response->assertStatus(200);
     $response->assertJsonStructure([
@@ -59,4 +66,5 @@ test("2. Debugger returns detailed info for a specific Game App", function () {
             ]
         ]
     ]);
+    write($response);
 });

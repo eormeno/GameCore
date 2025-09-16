@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameAppController;
 use App\Http\Controllers\DatabaseTableController;
+use App\Http\Controllers\DebugController;
 
 Route::get('/', fn() => response()->json(['status' => 1]))->name('root');
 
@@ -23,3 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Database Tables endpoints
 Route::get('/tables', [DatabaseTableController::class, 'index']);
+
+// Debug endpoints
+Route::get('/debug/game-apps', [DebugController::class, 'getAllGameApps']);
+Route::get('/debug/game-apps/{gameAppPrefix}', [DebugController::class, 'getGameAppDetails']);
