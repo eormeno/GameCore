@@ -13,6 +13,7 @@ fi
 # Declare an associative array with the prefix and the test class name
 declare -A testClasses=(
     ["auth"]="AuthTest"
+    ["debug"]="DebugTest"
     ["cnt"]="CNTPlayGameTest"
     ["gtn"]="GTNPlayGameTest"
     ["bba"]="BBAPlayGameTest"

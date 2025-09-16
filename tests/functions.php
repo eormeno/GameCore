@@ -3,6 +3,8 @@
 use App\Models\Game;
 use App\Models\User;
 use App\Models\GameApp;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 
 function reloadGameApps(string $prefix): GameApp
 {
