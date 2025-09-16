@@ -4,9 +4,10 @@ namespace App\Services;
 
 use App\Models\Game;
 use App\Models\GameApp;
-use App\Models\GameUser;
 use App\Enums\GameState;
+use App\Models\GameUser;
 use App\Enums\GameUserStatus;
+use Illuminate\Support\Facades\Log;
 
 class GameAppDebugService
 {
@@ -41,7 +42,7 @@ class GameAppDebugService
     public function getGameAppDetails(string $prefix): ?array
     {
         $gameApp = GameApp::where('prefix', $prefix)->first();
-        
+
         if (!$gameApp) {
             return null;
         }
@@ -65,10 +66,43 @@ class GameAppDebugService
             'allow_late_join' => $gameApp->allow_late_join,
             'active' => $gameApp->active,
             'service_registry' => $gameApp->service_registry ?? [],
-            'detailed_info' => $this->getDetailedInfo($gameApp)
+            'detailed_info' => $this->getGameAppInstances($gameApp)
         ];
 
         return $details;
+    }
+
+    public function getGameAppInstances(GameApp $gameApp)
+    {
+        $games = $gameApp->games()
+            ->with([
+                'gameUsers' => function ($query) {
+                    $query->with('user:id,name');
+                }
+            ])
+            ->get();
+        
+        return $games->map(function (Game $game) {
+            $gameUsers = $game->gameUsers->map(function (GameUser $gameUser) {
+                return [
+                    'id' => $gameUser->user->id,
+                    'name' => $gameUser->user->name,
+                    'role' => $gameUser->role->value,
+                    'status' => $gameUser->status->value,
+                    'joined_at' => $gameUser->joined_at?->toISOString(),
+                ];
+            });
+
+            return [
+                'id' => $game->id,
+                'name' => $game->name,
+                'state' => $game->state->value,
+                'invitation_code' => $game->invitation_code,
+                'created_at' => $game->created_at->toISOString(),
+                'updated_at' => $game->updated_at->toISOString(),
+                'users' => $gameUsers->toArray()
+            ];
+        })->toArray();
     }
 
     /**
@@ -95,7 +129,7 @@ class GameAppDebugService
             ->get();
 
         $activeGames = $games->whereIn('state', [GameState::WAITING, GameState::RUNNING]);
-        
+
         $totalUsers = GameUser::whereIn('game_id', $games->pluck('id'))->distinct('user_id')->count();
         $activeUsers = GameUser::whereIn('game_id', $activeGames->pluck('id'))
             ->where('status', GameUserStatus::ACTIVE)

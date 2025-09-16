@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->string('invitation_code')->nullable();
             $table->bigInteger('elapsed')->default(0);
             $table->boolean('auto_authorize_players')->default(false);
-            $table->foreignId('game_app_id')->constrained();
+            $table->foreignId('game_app_id')->constrained('game_apps')->onDelete('cascade');
             $table->timestamps();
         });
     }

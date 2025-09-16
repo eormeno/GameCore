@@ -18,8 +18,10 @@ test("1. Debugger returns all installed Game Apps", function () {
 });
 
 test("2. Debugger returns detailed info for a specific Game App", function () {
-    Artisan::call('games'); // Call the games command to load game apps
-    $gameAppPrefix = 'cnt'; // Example prefix, change as needed
+    // Create test data using the helper function
+    $game = getUserPlayingGame('bba'); // This creates user, gameapp, and game instance
+    
+    $gameAppPrefix = 'bba';
     
     $response = $this->get("/api/debug/game-apps/{$gameAppPrefix}");
     $response->assertStatus(200);
@@ -42,25 +44,20 @@ test("2. Debugger returns detailed info for a specific Game App", function () {
         'active',
         'service_registry',
         'detailed_info' => [
-            'total_instances',
-            'active_instances',
-            'total_users',
-            'active_users',
-            'instances' => [
-                '*' => [
-                    'id',
-                    'name',
-                    'state',
-                    'invitationCode',
-                    'createdAt',
-                    'users' => [
-                        '*' => [
-                            'id',
-                            'name',
-                            'is_owner',
-                            'access_approved',
-                            'invitation_approved'
-                        ]
+            '*' => [
+                'id',
+                'name',
+                'state',
+                'invitation_code',
+                'created_at',
+                'updated_at',
+                'users' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'role',
+                        'status',
+                        'joined_at'
                     ]
                 ]
             ]

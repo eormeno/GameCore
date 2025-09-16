@@ -64,6 +64,11 @@ class Game extends Model
         return $this->belongsToMany(User::class)->withTimestamps();
     }
 
+    public function gameUsers(): HasMany
+    {
+        return $this->hasMany(GameUser::class);
+    }
+
     public function services(): HasMany
     {
         return $this->hasMany(GameService::class);

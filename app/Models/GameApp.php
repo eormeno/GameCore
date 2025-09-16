@@ -45,7 +45,7 @@ class GameApp extends Model
 
 	public function games(): HasMany
 	{
-		return $this->hasMany(Game::class);
+		return $this->hasMany(Game::class, 'game_app_id');
 	}
 
 	public function prefab(): HasOne
