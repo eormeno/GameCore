@@ -17,7 +17,7 @@ class GameAppsLoader
         return array_filter($this->result);
     }
 
-    protected function updateGameApps(array $gameApps):void
+    protected function updateGameApps(array $gameApps): void
     {
         foreach ($gameApps as $folder => $element) {
             if ($config = $element['config'] ?? null) {
@@ -28,7 +28,7 @@ class GameAppsLoader
                     $game_app->update($config);
                     $this->result['updated']++;
                 } else {
-                    GameApp::factory()->create($config);
+                    GameApp::create($config);
                     $this->result['created']++;
                 }
             }

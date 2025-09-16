@@ -38,6 +38,7 @@ class GameApp extends Model
 
 	protected $casts = [
 		'active' => 'boolean',
+		'allow_late_join' => 'boolean',
 		'prefab_attributes' => 'array',
 		'service_registry' => 'array',
 	];

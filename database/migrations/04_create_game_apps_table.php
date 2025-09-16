@@ -17,13 +17,13 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->integer('min_age')->default(18);
-            $table->string('card_image');
+            $table->string('card_image')->nullable();
             $table->string('prefab_name')->nullable();
             $table->json('prefab_attributes')->nullable();
             $table->string('client')->default('webgl');
             $table->integer('width')->default(800);
             $table->integer('height')->default(450);
-            $table->string('version')->nullable();
+            $table->string('version')->default('1.0.0');
             $table->integer('max_instances_per_user')->default(1);
             $table->integer('min_users_per_instance')->default(1);
             $table->integer('max_users_per_instance')->default(1);
