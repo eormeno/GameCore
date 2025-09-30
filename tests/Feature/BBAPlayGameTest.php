@@ -1,7 +1,8 @@
 <?php
 
 test("User can play the game app", function () {
-	loginUser();
+	$testUsers = seedTestUsers();
+	loginUserByIndex($testUsers, 0);
 	$gameApp = reloadGameApps('bba');
 	$this->assertNotNull($gameApp);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
@@ -22,7 +23,8 @@ test("User can play the game app", function () {
 });
 
 test("Trying to play a deactivated game app returns 404", function () {
-	loginUser();
+	$testUsers = seedTestUsers();
+	loginUserByIndex($testUsers, 0);
 	$gameApp = reloadGameApps('rpg');
 	$this->assertNotNull($gameApp);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");

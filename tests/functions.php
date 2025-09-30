@@ -14,11 +14,25 @@ function reloadGameApps(string $prefix): GameApp
     return $gameApp;
 }
 
-function loginUser(): User
+function seedTestUsers(): array
 {
-    $user = User::factory()->adminUser()->create();
-    Auth::login($user);
-    return $user;
+    $testUsers = [];
+    Artisan::call('db:seed', ['--class' => 'UsersSeeder']);
+    $seedUsers = User::all();
+    foreach ($seedUsers as $user) {
+        $testUsers[] = $user;
+    }
+    return $testUsers;
+}
+
+function loginUserByIndex(array $seedUsers, int $index): ?User
+{
+    if (isset($seedUsers[$index])) {
+        $user = $seedUsers[$index];
+        Auth::login($user);
+        return $user;
+    }
+    return null;
 }
 
 function adminUserCredentials(): array
@@ -43,7 +57,8 @@ function write($response): void
 
 function setupGameApp(string $prefix): GameApp
 {
-    $user = loginUser();
+    $testUsers = seedTestUsers();
+    $user = loginUserByIndex($testUsers, 0);
     $gameApp = reloadGameApps($prefix);
     return $gameApp;
 }

@@ -33,7 +33,8 @@ test('usuario puede hacer login y obtener token', function () {
 });
 
 test('usuario autenticado puede acceder a ruta protegida', function () {
-    $user = loginUser();
+    $testUsers = seedTestUsers();
+    $user = loginUserByIndex($testUsers, 0);
     $response = $this->getJson('/api/user');
     $response
         ->assertOk()

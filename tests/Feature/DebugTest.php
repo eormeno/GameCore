@@ -14,7 +14,7 @@ test("1. Debugger returns all installed Game Apps", function () {
             'active',
         ]
     ]);
-    write($response);
+    // write($response);
 });
 
 test("2. Debugger returns detailed info for a specific Game App", function () {
@@ -63,5 +63,5 @@ test("2. Debugger returns detailed info for a specific Game App", function () {
             ]
         ]
     ]);
-    write($response);
+    // write($response);
 });
