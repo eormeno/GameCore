@@ -1,10 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
-
 test("1. Debugger returns all installed Game Apps", function () {
-    Artisan::call('games'); // Call the games command to load game apps
-    
+    reloadGameApps();    
     $response = $this->get("/api/debug/game-apps?active=true");
     $response->assertStatus(200);
     $response->assertJsonStructure([

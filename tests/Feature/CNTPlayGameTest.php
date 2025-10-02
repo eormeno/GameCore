@@ -55,9 +55,10 @@ test("2. User receives a list of open saved games", function () {
 });
 
 test("3. Trying to play a deactivated game app returns 404", function () {
+	reloadGameApps();
 	$testUsers = seedTestUsers();
-	loginUserByIndex($testUsers, 0);
-	$gameApp = reloadGameApps('rpg');
+	loginUser($testUsers[0]);
+	$gameApp = findGameApp('rpg');
 	$this->assertNotNull($gameApp);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$json = $response->json();

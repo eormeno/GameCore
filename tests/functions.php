@@ -6,10 +6,14 @@ use App\Models\GameApp;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 
-function reloadGameApps(string $prefix): GameApp
+function reloadGameApps(): void
 {
     Artisan::call('games');
-    $gameApp = GameApp::where('prefix', $prefix)->firstOrFail();
+}
+
+function findGameApp(string $prefix): GameApp
+{
+    $gameApp = GameApp::where('prefix', $prefix)->first();
     test()->assertNotNull($gameApp);
     return $gameApp;
 }
@@ -25,14 +29,9 @@ function seedTestUsers(): array
     return $testUsers;
 }
 
-function loginUserByIndex(array $seedUsers, int $index): ?User
+function loginUser(User $user): void
 {
-    if (isset($seedUsers[$index])) {
-        $user = $seedUsers[$index];
-        Auth::login($user);
-        return $user;
-    }
-    return null;
+    Auth::login($user);
 }
 
 function adminUserCredentials(): array
@@ -57,9 +56,10 @@ function write($response): void
 
 function setupGameApp(string $prefix): GameApp
 {
+    reloadGameApps();
     $testUsers = seedTestUsers();
-    $user = loginUserByIndex($testUsers, 0);
-    $gameApp = reloadGameApps($prefix);
+    loginUser($testUsers[0]);
+    $gameApp = findGameApp($prefix);
     return $gameApp;
 }
 
@@ -74,12 +74,13 @@ function userShowGameApp(string $prefix): void
 function getUserPlayingGame(string $prefix): Game
 {
     $gameApp = setupGameApp($prefix);
+    // The user wants to play a game application
     $response = test()->get(route('play', $gameApp));
     if ($response->exception) {
         throw $response->exception;
     }
     $response->assertStatus(200);
-    // the game is created
+    // the game instance is created for the user
     $newGame = Game::where('game_app_id', $gameApp->id)->first();
     test()->assertNotNull($newGame);
     return $newGame;

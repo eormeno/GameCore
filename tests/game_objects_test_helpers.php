@@ -17,12 +17,12 @@ function existsGameObjectsInDatabase(array $rows): void
 
 function existsRootPrefab(string $prefix): Prefab
 {
-	$gameApp = reloadGameApps($prefix);
+	reloadGameApps();
+	$gameApp = findGameApp($prefix);
 	$prefab = Prefab::castPrefab($gameApp->prefab);
 	test()->assertNotNull($prefab);
 	return $prefab;
 }
-
 
 function rootGameObjectIsCreated(Game $game): GameObject
 {
