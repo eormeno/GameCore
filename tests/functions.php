@@ -34,6 +34,17 @@ function loginUser(User $user): void
     Auth::login($user);
 }
 
+function loginTestUser(int $index = 0): User
+{
+    $testUsers = seedTestUsers();
+    if (!isset($testUsers[$index])) {
+        throw new Exception("No test user at index {$index}");
+    }
+    $user = $testUsers[$index];
+    Auth::login($user);
+    return $user;
+}
+
 function adminUserCredentials(): array
 {
     $adminEmail = env('ADMIN_EMAIL', '');
@@ -71,6 +82,15 @@ function userShowGameApp(string $prefix): void
     // $response->assertSee($gameApp->name);
 }
 
+function userWantsToPlayTheGameApplication(GameApp $gameApp): void
+{
+    $response = test()->get(route('play', $gameApp));
+    if ($response->exception) {
+        throw $response->exception;
+    }
+    $response->assertStatus(200);
+}
+
 function getUserPlayingGame(string $prefix): Game
 {
     $gameApp = setupGameApp($prefix);
@@ -84,6 +104,16 @@ function getUserPlayingGame(string $prefix): Game
     $newGame = Game::where('game_app_id', $gameApp->id)->first();
     test()->assertNotNull($newGame);
     return $newGame;
+}
+
+function findUserGameInstance(GameApp $gameApp): Game
+{
+    $user = Auth::user();
+    $game = Game::where('game_app_id', $gameApp->id)
+        ->where('owner_id', $user->id)
+        ->first();
+    test()->assertNotNull($game);
+    return $game;
 }
 
 function showTable($table, $columns = [], $limit = 100)

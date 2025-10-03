@@ -1,7 +1,7 @@
 <?php
 
 test("1. Debugger returns all installed Game Apps", function () {
-    reloadGameApps();    
+    reloadGameApps();
     $response = $this->get("/api/debug/game-apps?active=true");
     $response->assertStatus(200);
     $response->assertJsonStructure([
@@ -15,11 +15,16 @@ test("1. Debugger returns all installed Game Apps", function () {
 });
 
 test("2. Debugger returns detailed info for a specific Game App", function () {
-    // Create test data using the helper function
-    $game = getUserPlayingGame('bba'); // This creates user, gameapp, and game instance
-    
     $gameAppPrefix = 'bba';
-    
+
+    reloadGameApps();
+    $gameApp = findGameApp($gameAppPrefix);
+
+    loginTestUser(0);
+
+    userWantsToPlayTheGameApplication($gameApp);
+    $game = findUserGameInstance($gameApp);
+
     $response = $this->get("/api/debug/game-apps/{$gameAppPrefix}");
     $response->assertStatus(200);
     $response->assertJsonStructure([
