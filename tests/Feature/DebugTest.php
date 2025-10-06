@@ -23,7 +23,7 @@ test("2. Debugger returns detailed info for a specific Game App", function () {
     loginTestUser(0);
 
     userWantsToPlayTheGameApplication($gameApp);
-    $game = findUserGameInstance($gameApp);
+    //$game = findUserGameInstance($gameApp);
 
     $response = $this->get("/api/debug/game-apps/{$gameAppPrefix}");
     $response->assertStatus(200);

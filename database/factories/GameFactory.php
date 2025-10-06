@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\GameApp;
 use App\Models\Prefab\Prefab;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game>
@@ -39,9 +40,15 @@ class GameFactory extends Factory
 	// After creating the Game, attach the authenticated User
 	public function forAuthUser(): static
 	{
-		$user = auth()->user();
+		$user = Auth::user();
 		return $this->afterCreating(function ($game) use ($user) {
-			$game->players()->attach($user);
+			$game->gameUsers()->create([
+				'user_id' => $user->id,
+				'role' => \App\Enums\GameUserRole::OWNER,
+				'status' => \App\Enums\GameUserStatus::ACTIVE,
+				'join_method' => \App\Enums\GameUserJoinMethod::AUTO,
+				'joined_at' => now(),
+			]);
 		});
 	}
 
@@ -50,7 +57,13 @@ class GameFactory extends Factory
 	{
 		$user = User::where('email', $email)->first();
 		return $this->afterCreating(function ($game) use ($user) {
-			$game->players()->attach($user);
+			$game->gameUsers()->create([
+				'user_id' => $user->id,
+				'role' => \App\Enums\GameUserRole::OWNER,
+				'status' => \App\Enums\GameUserStatus::ACTIVE,
+				'join_method' => \App\Enums\GameUserJoinMethod::AUTO,
+				'joined_at' => now(),
+			]);
 		});
 	}
 

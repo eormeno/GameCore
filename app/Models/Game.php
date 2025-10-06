@@ -59,11 +59,6 @@ class Game extends Model
         return $this->gameObjects->firstWhere('name', $name);
     }
 
-    public function players(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class)->withTimestamps();
-    }
-
     public function gameUsers(): HasMany
     {
         return $this->hasMany(GameUser::class);

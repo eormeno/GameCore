@@ -7,6 +7,7 @@ use App\Models\Game;
 use App\Models\GameApp;
 use App\Utils\ImageUtils;
 use App\Contracts\IRenderer;
+use Illuminate\Support\Facades\Auth;
 use App\Services\GameInstanceService;
 use App\Http\Requests\EventRequestFilter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -33,7 +34,7 @@ class GameAppController extends Controller
     public function play(int $gameAppId, GameInstanceService $gamesService, ?string $invitationCode = null)
     {
         try {
-            $currentUser = auth()->user();
+            $currentUser = Auth::user();
             $gameApp = GameApp::where('id', $gameAppId)->where('active', true)->firstOrFail();
 
             // If maxInstancesPerUser > 1, return list of open games
@@ -81,7 +82,7 @@ class GameAppController extends Controller
 
     public function playGame(GameApp $game, GameInstanceService $gamesService)
     {
-        $currentUser = auth()->user();
+        $currentUser = Auth::user();
         dd($game);
         // $currentGame = $gamesService->getOrCreateUserGame($currentUser, $game);
         // return response()->json([
@@ -148,9 +149,9 @@ class GameAppController extends Controller
         $userGames = $user->games()
             ->where('game_app_id', $gameApp->id)
             ->where('state', '!=', 'finished')
-            ->with(['players' => function($query) {
-                $query->select('users.id', 'users.name', 'game_user.role', 'game_user.status')
-                      ->wherePivotIn('status', ['active', 'invited']);
+            ->with(['gameUsers' => function($query) {
+                $query->whereIn('status', ['active', 'invited'])
+                      ->with('user:id,name');
             }])
             ->get();
 
@@ -160,13 +161,13 @@ class GameAppController extends Controller
                 'name' => $game->name ?? 'Unnamed Game',
                 'invitationCode' => $game->invitation_code,
                 'state' => $game->state,
-                'users' => $game->players->map(function ($user) {
+                'users' => $game->gameUsers->map(function ($gameUser) {
                     return [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'is_owner' => $user->pivot->role === 'owner',
-                        'access_approved' => $user->pivot->status === 'active',
-                        'invitation_approved' => in_array($user->pivot->status, ['active', 'invited']),
+                        'id' => $gameUser->user->id,
+                        'name' => $gameUser->user->name,
+                        'is_owner' => $gameUser->role->value === 'owner',
+                        'access_approved' => $gameUser->status->value === 'active',
+                        'invitation_approved' => in_array($gameUser->status->value, ['active', 'invited']),
                     ];
                 }),
                 'createdAt' => $game->created_at,
