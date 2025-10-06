@@ -4,20 +4,19 @@ namespace Database\Factories;
 
 use App\Models\User;
 use App\Models\GameApp;
+use App\Enums\GameUserRole;
+use App\Enums\GameUserStatus;
 use App\Models\Prefab\Prefab;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Enums\GameUserJoinMethod;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game>
  */
 class GameFactory extends Factory
 {
-	/**
-	 * Define the model's default state.
-	 *
-	 * @return array<string, mixed>
-	 */
+	
 	public function definition(): array
 	{
 		return [
@@ -37,31 +36,31 @@ class GameFactory extends Factory
 		});
 	}
 
-	// After creating the Game, attach the authenticated User
+	// After creating the Game, attach the currently authenticated User as OWNER
 	public function forAuthUser(): static
 	{
 		$user = Auth::user();
 		return $this->afterCreating(function ($game) use ($user) {
 			$game->gameUsers()->create([
 				'user_id' => $user->id,
-				'role' => \App\Enums\GameUserRole::OWNER,
-				'status' => \App\Enums\GameUserStatus::ACTIVE,
-				'join_method' => \App\Enums\GameUserJoinMethod::AUTO,
+				'role' => GameUserRole::OWNER,
+				'status' => GameUserStatus::ACTIVE,
+				'join_method' => GameUserJoinMethod::AUTO,
 				'joined_at' => now(),
 			]);
 		});
 	}
 
-	// After creating the Game, attach the User with the given email
+	// After creating the Game, attach the User with the given email as OWNER
 	public function forUserEmail(string $email): static
 	{
 		$user = User::where('email', $email)->first();
 		return $this->afterCreating(function ($game) use ($user) {
 			$game->gameUsers()->create([
 				'user_id' => $user->id,
-				'role' => \App\Enums\GameUserRole::OWNER,
-				'status' => \App\Enums\GameUserStatus::ACTIVE,
-				'join_method' => \App\Enums\GameUserJoinMethod::AUTO,
+				'role' => GameUserRole::OWNER,
+				'status' => GameUserStatus::ACTIVE,
+				'join_method' => GameUserJoinMethod::AUTO,
 				'joined_at' => now(),
 			]);
 		});

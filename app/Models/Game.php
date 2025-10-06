@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Game extends Model
 {
-    use HasFactory;
+    //use HasFactory;
     protected $fillable = [
         'invitation_code',
         'game_app_id',

@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="GameCore Data Model" id="data-model">
-        <mxGraphModel dx="894" dy="362" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+        <mxGraphModel dx="1268" dy="1068" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -400,9 +400,9 @@
                         <mxPoint x="-20" y="21" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="game-gameuser-label2" value="*" style="resizable=0;html=1;whiteSpace=wrap;align=right;verticalAlign=bottom;" parent="game-gameuser-rel" connectable="0" vertex="1">
+                <mxCell id="game-gameuser-label2" value="gameUsers" style="resizable=0;html=1;whiteSpace=wrap;align=right;verticalAlign=bottom;" parent="game-gameuser-rel" connectable="0" vertex="1">
                     <mxGeometry x="1" relative="1" as="geometry">
-                        <mxPoint x="16" y="24" as="offset"/>
+                        <mxPoint x="70" y="24" as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="gameobject-components-rel" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="gameobject-entity" target="components-entity" edge="1">
@@ -422,7 +422,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="title" value="GameCore - Data Model Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" parent="1" vertex="1">
-                    <mxGeometry x="650" y="30.000000000000007" width="300" height="30" as="geometry"/>
+                    <mxGeometry x="650" y="7.105427357601002e-15" width="300" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="legend" value="Legend" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=tableLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
                     <mxGeometry x="1170.6299999999997" y="392.30999999999995" width="200" height="145.86450000000005" as="geometry">

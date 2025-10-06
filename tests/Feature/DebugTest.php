@@ -65,5 +65,5 @@ test("2. Debugger returns detailed info for a specific Game App", function () {
             ]
         ]
     ]);
-    // write($response);
+    write($response);
 });
