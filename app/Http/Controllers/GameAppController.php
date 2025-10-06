@@ -44,10 +44,17 @@ class GameAppController extends Controller
 
                 $openGames = $this->getOpenGames($currentUser, $gameApp);
                 return response()->json([
-                    'open_games' => $openGames,
-                    'resourcesUrl' => route('res', $gameApp->id),
-                    'width' => $gameApp->width,
-                    'height' => $gameApp->height,
+                    'open_games' => [
+                        'title' => $gameApp->name,
+                        'invitationCode' => $invitationCode,
+                        'games' => $openGames,
+                        'maxInstancesPerUser' => $gameApp->max_instances_per_user,
+                        'minUsersPerInstance' => $gameApp->min_users_per_instance,
+                        'maxUsersPerInstance' => $gameApp->max_users_per_instance,
+                        'resourcesUrl' => route('res', $gameApp->id),
+                        'width' => $gameApp->width,
+                        'height' => $gameApp->height,
+                    ]
                 ]);
             }
 
@@ -149,13 +156,13 @@ class GameAppController extends Controller
         $userGames = $user->games()
             ->where('game_app_id', $gameApp->id)
             ->where('state', '!=', 'finished')
-            ->with(['gameUsers' => function($query) {
+            ->with(['gameUsers' => function ($query) {
                 $query->whereIn('status', ['active', 'invited'])
-                      ->with('user:id,name');
+                    ->with('user:id,name');
             }])
             ->get();
 
-        return $userGames->map(function ($game) {
+        $response = $userGames->map(function ($game) {
             return [
                 'id' => $game->id,
                 'name' => $game->name ?? 'Unnamed Game',
@@ -173,6 +180,8 @@ class GameAppController extends Controller
                 'createdAt' => $game->created_at,
             ];
         })->toArray();
+        //dd(json_encode($response, JSON_PRETTY_PRINT));
+        return $response;
     }
 
     private function findResource(string $basePath, string $resourceName): string|null

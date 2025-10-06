@@ -30,6 +30,25 @@ export class UIManager {
         }
     }
 
+    renderOpenGames(games, maxInstancesPerUser) {
+        // renderiza una lista de juegos abiertos dentro del canvas container
+        const canvas = this.getCanvasContainer();
+        if (canvas) {
+            const gamesList = document.createElement('div');
+            gamesList.className = 'open-games-list';
+
+            games.forEach(game => {
+                const gameItem = document.createElement('div');
+                gameItem.className = 'game-item';
+                gameItem.textContent = `${game.name} (${game.invitationCode}) - State: ${game.state} - Players: ${game.current_players} / ${maxInstancesPerUser}`;
+                gamesList.appendChild(gameItem);
+            });
+
+            canvas.innerHTML = ''; // Clear previous content
+            canvas.appendChild(gamesList);
+        }
+    }
+
     /**
      * Setup event listeners
      */

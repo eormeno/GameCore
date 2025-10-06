@@ -14,6 +14,7 @@ export class GameStateHandlers {
     handle(stateName, data) {
         const handlers = {
             'game': () => this.handleGameState(data),
+            'open_games': () => this.handleOpenGamesState(data),
             'auth_required': () => this.handleAuthRequired(),
             'game_not_found': () => this.handleGameNotFound(),
             'game_play': () => this.handleGamePlay(data)
@@ -57,6 +58,15 @@ export class GameStateHandlers {
      */
     handleGamePlay(data) {
         this.uiManager.renderGameContent(data.html);
+    }
+
+    /**
+     * Handle open games state
+     */
+    handleOpenGamesState(data) {
+        this.uiManager.setPageTitle(data.title);
+        this.uiManager.configureCanvas(data.width, data.height);
+        this.uiManager.renderOpenGames(data.games, data.maxInstancesPerUser);
     }
 
     /**
