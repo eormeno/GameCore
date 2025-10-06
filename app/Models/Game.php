@@ -10,8 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Class Game
@@ -22,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Game extends Model
 {
-    //use HasFactory;
     protected $fillable = [
         'invitation_code',
         'game_app_id',
