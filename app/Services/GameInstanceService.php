@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Game;
 use App\Models\User;
 use App\Models\GameApp;
+use App\Enums\GameState;
 use App\Models\GameUser;
 use App\Enums\GameUserRole;
 use App\Enums\GameUserStatus;
@@ -35,6 +36,7 @@ class GameInstanceService
 		$game = Game::create([
 			'game_app_id' => $gameApp->id,
 			'invitation_code' => uniqid(),
+			'state' => GameState::RUNNING
 		]);
 
 		// 2. Crear GameUser asociando el usuario pasado por parámetro como OWNER

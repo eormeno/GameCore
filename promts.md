@@ -109,8 +109,8 @@ Requisitos para funcionalidad de partidas en GameCore
   	  "invitationCode": "CODE1",
   	  "state": "waiting",
   	  "users": [
-  		{ "id": 1, "name": "Alice", "is_owner": true, "access_approved": true, "invitation_approved": true },
-  		{ "id": 2, "name": "Bob", "is_owner": false, "access_approved": true, "invitation_approved": true }
+  		{ "id": 1, "name": "Alice", "is_owner": true },
+  		{ "id": 2, "name": "Bob", "is_owner": false }
   	  ],
   	  "createdAt": "2025-05-29T12:00:00Z"
   	},

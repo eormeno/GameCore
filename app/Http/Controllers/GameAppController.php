@@ -46,14 +46,13 @@ class GameAppController extends Controller
                 return response()->json([
                     'open_games' => [
                         'title' => $gameApp->name,
-                        'invitationCode' => $invitationCode,
-                        'games' => $openGames,
                         'maxInstancesPerUser' => $gameApp->max_instances_per_user,
                         'minUsersPerInstance' => $gameApp->min_users_per_instance,
                         'maxUsersPerInstance' => $gameApp->max_users_per_instance,
                         'resourcesUrl' => route('res', $gameApp->id),
                         'width' => $gameApp->width,
                         'height' => $gameApp->height,
+                        'games' => $openGames,
                     ]
                 ]);
             }
@@ -172,15 +171,13 @@ class GameAppController extends Controller
                     return [
                         'id' => $gameUser->user->id,
                         'name' => $gameUser->user->name,
-                        'is_owner' => $gameUser->role->value === 'owner',
-                        'access_approved' => $gameUser->status->value === 'active',
-                        'invitation_approved' => in_array($gameUser->status->value, ['active', 'invited']),
+                        'is_owner' => $gameUser->isOwner(),
+                        'join_method' => $gameUser->join_method,
                     ];
                 }),
                 'createdAt' => $game->created_at,
             ];
         })->toArray();
-        //dd(json_encode($response, JSON_PRETTY_PRINT));
         return $response;
     }
 

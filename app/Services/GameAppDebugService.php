@@ -142,8 +142,6 @@ class GameAppDebugService
                     'id' => $gameUser->user->id,
                     'name' => $gameUser->user->name,
                     'is_owner' => $gameUser->role->value === 'owner',
-                    'access_approved' => $gameUser->status === GameUserStatus::ACTIVE,
-                    'invitation_approved' => $gameUser->status === GameUserStatus::ACTIVE
                 ];
             });
 
