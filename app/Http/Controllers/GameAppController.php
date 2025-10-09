@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Services\GameInstanceService;
 use App\Http\Requests\EventRequestFilter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Enums\GameState;
 
 class GameAppController extends Controller
 {
@@ -151,33 +152,34 @@ class GameAppController extends Controller
      */
     private function getOpenGames($user, GameApp $gameApp): array
     {
-        // Get all games for this game app that the user is part of
+        // Get all games for this game app that the user is part except itself
+        // and that are not finished nor cancelled
         $userGames = $user->games()
             ->where('game_app_id', $gameApp->id)
-            ->where('state', '!=', 'finished')
-            ->with(['gameUsers' => function ($query) {
-                $query->whereIn('status', ['active', 'invited'])
-                    ->with('user:id,name');
-            }])
+            ->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING])
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        $response = $userGames->map(function ($game) {
+        // for each game, get its id, name, invitation_code, state, users (id, name, is_owner) and created_at,
+        // excluding current user, and return as array
+        $response = $userGames->map(function ($game) use ($user) {
             return [
                 'id' => $game->id,
-                'name' => $game->name ?? 'Unnamed Game',
+                'name' => $game->title,
                 'invitationCode' => $game->invitation_code,
                 'state' => $game->state,
-                'users' => $game->gameUsers->map(function ($gameUser) {
+                'users' => $game->gameUsers->filter(function ($gu) use ($user) {
+                    return $gu->user_id !== $user->id;
+                })->map(function ($gu) {
                     return [
-                        'id' => $gameUser->user->id,
-                        'name' => $gameUser->user->name,
-                        'is_owner' => $gameUser->isOwner(),
-                        'join_method' => $gameUser->join_method,
+                        'id' => $gu->user->id,
+                        'name' => $gu->user->name,
+                        'is_owner' => $gu->role === 'OWNER',
                     ];
-                }),
-                'createdAt' => $game->created_at,
+                })->values(),
+                'createdAt' => $game->created_at->toDateTimeString(),
             ];
-        })->toArray();
+        })->values()->toArray();
         return $response;
     }
 

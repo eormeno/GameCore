@@ -16,8 +16,8 @@ class GameInstanceService
 {
 	public function getOrCreateUserGame($user, GameApp $gameApp): Game
 	{
-		$count = $this->countUserGameInstances($user, $gameApp);
-		if ($count < $gameApp->max_instances_per_user) {
+		$count = $this->countActiveUserGameInstances($user, $gameApp);
+		if ($count == 0) {
 			$this->newGame($user, $gameApp);
 		}
 		$currentGame = $user->games()->where('game_app_id', $gameApp->id)->first();
@@ -63,8 +63,11 @@ class GameInstanceService
 		return $game;
 	}
 
-	private function countUserGameInstances($user, GameApp $gameApp)
+	private function countActiveUserGameInstances($user, GameApp $gameApp)
 	{
-		return $user->games()->where('game_app_id', $gameApp->id)->count();
+		$query = $user->games();
+		$query->where('game_app_id', $gameApp->id);
+		$query->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING]);
+		return $query->count();
 	}
 }
