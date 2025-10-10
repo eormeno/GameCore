@@ -12,6 +12,7 @@ export class GameStateHandlers {
      * Handle different game states
      */
     handle(stateName, data) {
+        console.log(`Handling state: ${stateName}`, data);
         const handlers = {
             'game': () => this.handleGameState(data),
             'open_games': () => this.handleOpenGamesState(data),

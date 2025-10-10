@@ -14,24 +14,61 @@ use App\Enums\GameUserJoinMethod;
 
 class GameInstanceService
 {
-	private GameAppService $gameAppService;
 
-	public function __construct(GameAppService $gameAppService)
-	{
-		$this->gameAppService = $gameAppService;
-	}
-
-	public function getOrCreateUserGame($user, GameApp $gameApp): Game
+	public function getDefaultGame($user, GameApp $gameApp): Game
 	{
 		$count = $this->countActiveUserGameInstances($user, $gameApp);
 		if ($count == 0) {
 			$this->newGame($user, $gameApp);
 		}
-		$currentGame = $user->games()->where('game_app_id', $gameApp->id)->first();
+
+		// Get the game corresponding to the GameUser with the most recent last_played_at
+		$gameUser = GameUser::where('user_id', $user->id)
+			->whereHas('game', function ($query) use ($gameApp) {
+				$query->where('game_app_id', $gameApp->id)
+					->whereIn('state', [GameState::RUNNING, GameState::PAUSED]);
+			})
+			->orderBy('last_played_at', 'desc')
+			->first();
+
+		$currentGame = $gameUser->game;
 		$currentGame->gameObject;
-		$currentGame->title = $gameApp->name;
-		$currentGame->description = $gameApp->description;
+		$currentGame->currentGameUser = $gameUser;
+
 		return $currentGame;
+	}
+
+	/**
+	 * Transform Game model to API format with essential information
+	 *
+	 * @param Game $game
+	 * @return array
+	 */
+	public function toApiFormat(Game $game): array
+	{
+		$gameUser = $game->currentGameUser;
+		$gameInfo = $game->only([
+			'id',
+			'name',
+			'invitation_code',
+			'auto_authorize_players',
+		]);
+
+		$gameInfo['state'] = $game->state->value;
+		$gameInfo['events_url'] = route('event', $game->id);
+
+		if (isset($gameUser)) {
+			$gameUserInfo['role'] = $gameUser->role->value;
+			$gameUserInfo['status'] = $gameUser->status->value;
+			$gameUserInfo['join_method'] = $gameUser->join_method->value;
+			$gameUserInfo['joined_at'] = $gameUser->joined_at->toDateTimeString();
+			$gameUserInfo['last_played_at'] = $gameUser->last_played_at->toDateTimeString();
+			$gameUserInfo['created_at'] = $gameUser->created_at->toDateTimeString();
+
+			$gameInfo['game_user'] = $gameUserInfo;
+		}
+
+		return $gameInfo;
 	}
 
 	private function newGame(
@@ -53,6 +90,7 @@ class GameInstanceService
 			'status' => GameUserStatus::ACTIVE,
 			'join_method' => GameUserJoinMethod::AUTO,
 			'joined_at' => now(),
+			'last_played_at' => now(),
 		]);
 
 		// 3. Crear los servicios del GameApp
@@ -84,8 +122,6 @@ class GameInstanceService
 	 */
 	public function getOpenGames($user, GameApp $gameApp): array
 	{
-		$gameAppInfo = $this->gameAppService->toApiFormat($gameApp);
-		
 		// Get all games for this game app that the user is part except itself
 		// and that are not finished nor cancelled
 		$userGames = $user->games()
@@ -99,9 +135,9 @@ class GameInstanceService
 		$openGames = $userGames->map(function ($game) use ($user) {
 			return [
 				'id' => $game->id,
-				'name' => $game->title,
+				'name' => $game->name,
 				'invitationCode' => $game->invitation_code,
-				'state' => $game->state,
+				'state' => $game->state->value,
 				'users' => $game->gameUsers->filter(function ($gu) use ($user) {
 					return $gu->user_id !== $user->id;
 				})->map(function ($gu) {
@@ -115,11 +151,6 @@ class GameInstanceService
 			];
 		})->values()->toArray();
 
-		return [
-			'open_games' => [
-				'game_app' => $gameAppInfo,
-				'games' => $openGames,
-			]
-		];
+		return $openGames;
 	}
 }

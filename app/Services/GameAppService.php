@@ -55,21 +55,21 @@ class GameAppService
         return $gameAppInfo;
     }
 
-    /**
-     * Transform GameApp model to detailed API format for individual game responses
-     *
-     * @param GameApp $gameApp
-     * @return array
-     */
-    public function toDetailedApiFormat(GameApp $gameApp): array
-    {
-        return [
-            'resourcesUrl' => route('res', $gameApp->id),
-            'width' => $gameApp->width,
-            'height' => $gameApp->height,
-            'maxInstancesPerUser' => $gameApp->max_instances_per_user,
-            'minUsersPerInstance' => $gameApp->min_users_per_instance,
-            'maxUsersPerInstance' => $gameApp->max_users_per_instance,
-        ];
-    }
+    // /**
+    //  * Transform GameApp model to detailed API format for individual game responses
+    //  *
+    //  * @param GameApp $gameApp
+    //  * @return array
+    //  */
+    // public function toDetailedApiFormat(GameApp $gameApp): array
+    // {
+    //     return [
+    //         'resourcesUrl' => route('res', $gameApp->id),
+    //         'width' => $gameApp->width,
+    //         'height' => $gameApp->height,
+    //         'maxInstancesPerUser' => $gameApp->max_instances_per_user,
+    //         'minUsersPerInstance' => $gameApp->min_users_per_instance,
+    //         'maxUsersPerInstance' => $gameApp->max_users_per_instance,
+    //     ];
+    // }
 }

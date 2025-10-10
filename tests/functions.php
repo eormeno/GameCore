@@ -71,6 +71,7 @@ function setupGameApp(string $prefix): GameApp
     $testUsers = seedTestUsers();
     loginUser($testUsers[0]);
     $gameApp = findGameApp($prefix);
+    test()->assertNotNull($gameApp);
     return $gameApp;
 }
 

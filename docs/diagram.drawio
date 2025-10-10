@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="GameCore Data Model" id="data-model">
-        <mxGraphModel dx="1268" dy="1068" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+        <mxGraphModel dx="1344" dy="888" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -122,7 +122,7 @@
                     <mxGeometry y="218" width="200" height="24" as="geometry"/>
                 </mxCell>
                 <mxCell id="gameuser-entity" value="GameUser (Pivot)" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=tableLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
-                    <mxGeometry x="230" y="319.9999999999999" width="200" height="290.47970000000015" as="geometry">
+                    <mxGeometry x="230" y="289.9999999999999" width="200" height="314.47970000000015" as="geometry">
                         <mxRectangle x="350" y="400" width="110" height="26" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
@@ -156,8 +156,11 @@
                 <mxCell id="20" value="left_at" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="gameuser-entity" vertex="1">
                     <mxGeometry y="242" width="200" height="24" as="geometry"/>
                 </mxCell>
-                <mxCell id="21" value="timestamps" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=2" parent="gameuser-entity" vertex="1">
+                <mxCell id="23" value="last_played_at" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="gameuser-entity">
                     <mxGeometry y="266" width="200" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="timestamps" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontStyle=2" parent="gameuser-entity" vertex="1">
+                    <mxGeometry y="290" width="200" height="24" as="geometry"/>
                 </mxCell>
                 <mxCell id="gameobject-entity" value="GameObject" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=tableLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
                     <mxGeometry x="840.63" y="580" width="200" height="266" as="geometry">

@@ -39,26 +39,19 @@ class GameAppController extends Controller
             $currentUser = Auth::user();
             $gameApp = $gameAppService->findActiveById($gameAppId);
 
-            // If maxInstancesPerUser > 1, return list of open games
+            $info['game_app'] = $gameAppService->toApiFormat($gameApp);
+
+            $defaultGame = $gamesService->getDefaultGame($currentUser, $gameApp);
+
+            $info['default_game'] = $gamesService->toApiFormat($defaultGame);
+
             if ($gameApp->max_instances_per_user > 1) {
-                // Ensure user has at least one game or create one
-                $gamesService->getOrCreateUserGame($currentUser, $gameApp);
-
                 $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
-                return response()->json($openGames);
+                $info['open_games'] = $openGames;
             }
+            $ret['first_screen'] = $info;
+            return response()->json($ret);
 
-            $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
-            $gameInfo = array_merge(
-                [
-                    'title' => $currentGame->title,
-                    'eventUrl' => route('event', $currentGame->id),
-                    'invitationCode' => $currentGame->invitation_code,
-                ],
-                $gameAppService->toDetailedApiFormat($gameApp)
-            );
-            
-            return response()->json(['game' => $gameInfo]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [

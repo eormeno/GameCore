@@ -3,32 +3,17 @@
 const TEST_PREFIX = 'cnt';
 
 test("1. User can play the game app", function () {
-	$gameApp = getUserPlayingGame(TEST_PREFIX);
-	$this->assertNotNull($gameApp);
+	$gameApp = setupGameApp(TEST_PREFIX);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
-	$response->assertJsonStructure([
-		'game' => [
-			'title',
-			'eventUrl',
-			'resourcesUrl',
-			'width',
-			'height',
-			'invitationCode',
-			'maxInstancesPerUser',
-			'minUsersPerInstance',
-			'maxUsersPerInstance'
-		]
-	]);
+	assertGameAppPlayResponseStructure($response, true);
 });
 
 // The client receives a list of still open saved games with their invitation codes because the maxInstancesPerUser is greater than 1
 test("2. User receives a list of open saved games", function () {
 	$gameApp = setupGameApp(TEST_PREFIX);
-	$this->assertNotNull($gameApp);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
-	write($response);
 	// $response->assertJsonStructure([
 	// 	'open_games' => [
 	// 		'*' => [

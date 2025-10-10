@@ -18,7 +18,7 @@ class GameUser extends Model
     protected $fillable = [
         'game_id', 'user_id', 'role',
         'status', 'join_method', 'actioned_by', 'reason',
-        'joined_at', 'left_at'
+        'joined_at', 'left_at', 'last_played_at'
     ];
 
     protected $casts = [
@@ -27,6 +27,7 @@ class GameUser extends Model
         'join_method' => GameUserJoinMethod::class,
         'joined_at' => 'datetime',
         'left_at' => 'datetime',
+        'last_played_at' => 'datetime',
     ];
 
     // Relaciones

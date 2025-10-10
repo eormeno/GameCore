@@ -21,10 +21,11 @@ return new class extends Migration {
             $table->text('reason')->nullable(); // Razón de kick/ban
             $table->timestamp('joined_at')->nullable(); // Cuando se volvió activo
             $table->timestamp('left_at')->nullable(); // Cuando abandonó/fue expulsado
+            $table->timestamp('last_played_at')->nullable(); // Última vez que jugó
             $table->timestamps();
 
             // Índice único para evitar duplicados en la relación game-user
-            $table->unique(['game_id', 'user_id']);
+            //$table->unique(['game_id', 'user_id']);
         });
     }
 

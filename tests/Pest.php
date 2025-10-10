@@ -43,4 +43,5 @@ expect()->extend('toBeOne', function () {
 */
 
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/api_structures.php';
 require_once __DIR__ . '/game_objects_test_helpers.php';
