@@ -23,13 +23,14 @@ class GameAppsLoader
             if ($config = $element['config'] ?? null) {
                 $config['prefix'] = $folder;
                 $config['service_registry'] = $element['Services'] ?? [];
-                $game_app = GameApp::where('prefix', $folder)->first();
-                if ($game_app) {
-                    $game_app->update($config);
-                    $this->result['updated']++;
-                } else {
-                    GameApp::create($config);
+                $game_app = GameApp::updateOrCreate(
+                    ['prefix' => $folder],
+                    $config
+                );
+                if ($game_app->wasRecentlyCreated) {
                     $this->result['created']++;
+                } else {
+                    $this->result['updated']++;
                 }
             }
         }

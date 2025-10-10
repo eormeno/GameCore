@@ -34,6 +34,7 @@ class GameApp extends Model
         'allow_late_join',
 		'active',
 		'service_registry',
+		'card_image',
 	];
 
 	protected $casts = [
