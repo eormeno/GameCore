@@ -30,14 +30,13 @@ export class UIManager {
         }
     }
 
-    renderOpenGames(games, maxInstancesPerUser) {
-        // renderiza una lista de juegos abiertos dentro del canvas container
+    renderFirstScreen(data) {
         const canvas = this.getCanvasContainer();
         if (canvas) {
             const gamesList = document.createElement('div');
             gamesList.className = 'open-games-list';
 
-            games.forEach(game => {
+            data.open_games.forEach(game => {
                 const gameItem = document.createElement('div');
                 gameItem.className = 'game-item';
 

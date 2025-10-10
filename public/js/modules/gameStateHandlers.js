@@ -14,8 +14,8 @@ export class GameStateHandlers {
     handle(stateName, data) {
         console.log(`Handling state: ${stateName}`, data);
         const handlers = {
+            'first_screen': () => this.handleFirstScreen(data),
             'game': () => this.handleGameState(data),
-            'open_games': () => this.handleOpenGamesState(data),
             'auth_required': () => this.handleAuthRequired(),
             'game_not_found': () => this.handleGameNotFound(),
             'game_play': () => this.handleGamePlay(data)
@@ -33,7 +33,6 @@ export class GameStateHandlers {
      * Handle main game state
      */
     handleGameState(data) {
-        console.log('Handling game state:', data);
         this.uiManager.setPageTitle(data.title);
         this.uiManager.configureCanvas(data.width, data.height);
         this.uiManager.setupEventListeners(data);
@@ -62,13 +61,12 @@ export class GameStateHandlers {
     }
 
     /**
-     * Handle open games state
+     * Handle first screen state
      */
-    handleOpenGamesState(data) {
-        const game_app = data.game_app;
-        this.uiManager.setPageTitle(game_app.name);
-        this.uiManager.configureCanvas(game_app.width, game_app.height);
-        this.uiManager.renderOpenGames(data.games, data.maxInstancesPerUser);
+    handleFirstScreen(data) {
+        this.uiManager.setPageTitle(data.game_app.name);
+        this.uiManager.configureCanvas(data.game_app.width, data.game_app.height);
+        this.uiManager.renderFirstScreen(data);
     }
 
     /**
