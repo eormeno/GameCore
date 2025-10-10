@@ -12,7 +12,6 @@ export class GameStateHandlers {
      * Handle different game states
      */
     handle(stateName, data) {
-        console.log(`Handling state: ${stateName}`, data);
         const handlers = {
             'first_screen': () => this.handleFirstScreen(data),
             'game': () => this.handleGameState(data),

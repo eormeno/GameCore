@@ -1,0 +1,840 @@
+/* First Screen Styles */
+.first-screen-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Game App Section */
+.game-app-section {
+    background: linear-gradient(145deg, #2b2b2b 0%, #222222 100%);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #444;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.game-app-header {
+    text-align: center;
+}
+
+.game-app-name {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    color: #ff5722;
+    text-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
+}
+
+.game-app-info {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.game-app-dimensions::before {
+    content: "📐 ";
+}
+
+.game-app-players::before {
+    content: "👥 ";
+}
+
+/* Games Selection Section */
+.first-screen-container .games-selection-section {
+    background: linear-gradient(145deg, #2b2b2b 0%, #222222 100%) !important;
+    border-radius: 8px !important;
+    padding: 24px !important;
+    border: 1px solid #444 !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.section-header {
+    text-align: center;
+    border-bottom: 1px solid #444;
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+}
+
+.section-header h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #f0f0f0;
+}
+
+.section-subtitle {
+    margin: 0;
+    color: #cccccc;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Default Game Section (Featured) */
+.default-game-section {
+    position: relative;
+}
+
+.default-game-card.featured {
+    background: linear-gradient(145deg, #2a3f2a 0%, #1e2d1e 100%);
+    border: 2px solid #ff5722;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 6px 16px rgba(255, 87, 34, 0.2);
+}
+
+.featured-badge {
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 0 0 8px 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.default-game-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.default-game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #555;
+    padding-bottom: 12px;
+}
+
+.game-main-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.game-main-info .game-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    color: #f0f0f0;
+}
+
+.game-time-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.time-ago {
+    font-size: 0.9rem;
+    color: #ff5722;
+    font-weight: 500;
+    text-align: right;
+}
+
+.game-state {
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.game-state.waiting {
+    background: linear-gradient(90deg, #ffa726, #ff9800);
+}
+
+.game-state.finished {
+    background: linear-gradient(90deg, #ab47bc, #9c27b0);
+}
+
+.default-game-info {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.invitation-code {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    background: #333333;
+    color: #f0f0f0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #444;
+}
+
+.invitation-code::before {
+    content: "🎮 ";
+}
+
+.user-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.user-role, .user-status, .join-method {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.user-role {
+    background: linear-gradient(90deg, #42678e, #33506e);
+}
+
+.user-status {
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+}
+
+.join-method {
+    background: linear-gradient(90deg, #ffa726, #ff9800);
+}
+
+.game-timestamps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.joined-at::before {
+    content: "📅 Unido: ";
+}
+
+.last-played::before {
+    content: "🕒 Última vez: ";
+}
+
+.default-game-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+/* Open Games Section */
+.open-games-section {
+    background: linear-gradient(145deg, #252525 0%, #1a1a1a 100%);
+    border-radius: 6px;
+    padding: 16px;
+    border: 1px solid #333;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.open-games-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 12px;
+}
+
+.open-games-header h4 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+    color: #cccccc;
+}
+
+.games-count {
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Ultra Compact First Screen Layout */
+.first-screen-compact {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.first-screen-compact .saved-games-section {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+}
+
+.first-screen-compact .saved-games-content {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.first-screen-compact .open-games-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex: 1 !important;
+    min-height: 270px !important; /* Mínimo espacio para 10 slots */
+}
+
+/* Ultra Compact Game Slots */
+.game-slot {
+    display: flex !important;
+    align-items: center !important;
+    background: linear-gradient(145deg, #2b2b2b 0%, #222222 100%) !important;
+    border-radius: 4px !important;
+    padding: 6px 8px !important;
+    border: 1px solid #444 !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+}
+
+.game-slot:hover:not(.empty-slot) {
+    background: linear-gradient(145deg, #333333 0%, #2a2a2a 100%) !important;
+    border-color: #ff5722 !important;
+    transform: none !important; /* Sin animaciones que cambien tamaño */
+}
+
+.game-slot.empty-slot {
+    background: linear-gradient(145deg, #1a1a1a 0%, #151515 100%) !important;
+    border: 1px dashed #333 !important;
+    opacity: 0.6 !important;
+}
+
+.game-slot.empty-slot:hover {
+    opacity: 0.8 !important;
+    border-color: #ff5722 !important;
+}
+
+.open-game-item:hover:not(.empty-slot) {
+    background: linear-gradient(145deg, #333333 0%, #2a2a2a 100%);
+    border-color: #ff5722;
+    box-shadow: 0 2px 6px rgba(255, 87, 34, 0.2);
+}
+
+.open-game-item.empty-slot {
+    background: linear-gradient(145deg, #1a1a1a 0%, #151515 100%);
+    border: 1px dashed #333;
+    cursor: default;
+    opacity: 0.6;
+}
+
+.open-game-item.empty-slot:hover {
+    opacity: 0.8;
+    border-color: #ff5722;
+}
+
+/* Slot Number */
+.game-slot-number {
+    min-width: 24px;
+    width: 24px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff5722;
+    color: white;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.empty-slot .game-slot-number {
+    background: #444;
+    color: #888;
+}
+
+/* Main Content Area */
+.game-item-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0; /* Allow text truncation */
+}
+
+.game-basic-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.game-item-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #f0f0f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.game-item-code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #ff5722;
+    background: rgba(255, 87, 34, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.game-time-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    flex-shrink: 0;
+}
+
+.time-ago {
+    font-size: 0.8rem;
+    color: #cccccc;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.game-item-state {
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.game-players-info {
+    min-width: 60px;
+    flex-shrink: 0;
+}
+
+.game-item-users {
+    font-size: 0.8rem;
+    color: #cccccc;
+    white-space: nowrap;
+}
+
+/* Empty Slot Content */
+.empty-slot-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.empty-slot-text {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+/* Actions */
+.game-item-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+/* Extra small buttons for compact layout */
+.btn-xs {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    min-width: 28px;
+    height: 24px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-xs:hover {
+    transform: scale(1.1);
+}
+
+.btn-xs:active {
+    transform: scale(0.95);
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #f44336, #d32f2f);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(90deg, #d32f2f, #c62828);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #444;
+    color: #cccccc;
+}
+
+.btn-outline:hover {
+    background: #ff5722;
+    border-color: #ff5722;
+    color: white;
+}
+
+/* Compact Slot Elements */
+.slot-number {
+    min-width: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 0.7rem !important;
+    font-weight: bold !important;
+    border-radius: 2px !important;
+    flex-shrink: 0 !important;
+}
+
+.slot-content {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+.slot-content .game-name {
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 120px !important;
+}
+
+.slot-content .game-code {
+    font-family: 'Courier New', monospace !important;
+    font-size: 0.7rem !important;
+    background: rgba(255, 87, 34, 0.1) !important;
+    padding: 1px 4px !important;
+    border-radius: 2px !important;
+    white-space: nowrap !important;
+}
+
+.slot-content .time-ago {
+    font-size: 0.7rem !important;
+    color: #999 !important;
+    white-space: nowrap !important;
+    min-width: 60px !important;
+}
+
+.slot-content .game-status {
+    font-size: 0.65rem !important;
+    padding: 1px 4px !important;
+    border-radius: 2px !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+}
+
+.slot-actions {
+    display: flex !important;
+    gap: 2px !important;
+    flex-shrink: 0 !important;
+}
+
+.slot-btn {
+    width: 20px !important;
+    height: 20px !important;
+    border: none !important;
+    border-radius: 2px !important;
+    font-size: 0.65rem !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: opacity 0.2s ease !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.slot-btn:hover {
+    opacity: 0.8 !important;
+    transform: none !important; /* Sin animaciones de escala */
+}
+
+.slot-btn:active {
+    opacity: 0.6 !important;
+}
+
+/* Empty slot styles - FORCE VISIBILITY */
+.empty-slot {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 0.7 !important;
+    background: linear-gradient(145deg, #1a1a1a 0%, #151515 100%) !important;
+    border: 1px dashed #333 !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+}
+
+.empty-slot .empty-text {
+    font-size: 0.8rem !important;
+    color: #666 !important;
+    font-style: italic !important;
+}
+
+.empty-slot .slot-number {
+    background: #444 !important;
+    color: #888 !important;
+}
+
+.empty-slot .new-game-btn {
+    background: transparent !important;
+    border: 1px solid #444 !important;
+    color: #cccccc !important;
+}
+
+.empty-slot .new-game-btn:hover {
+    background: #ff5722 !important;
+    border-color: #ff5722 !important;
+    color: white !important;
+}
+
+.empty-slot:hover {
+    opacity: 1 !important;
+    border-color: #555 !important;
+}
+
+/* No Games Message */
+.no-games-message {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(145deg, #2b2b2b 0%, #222222 100%);
+    border-radius: 8px;
+    border: 1px solid #444;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.no-games-content h3 {
+    font-size: 1.5rem;
+    margin: 0 0 16px 0;
+    opacity: 0.9;
+}
+
+.no-games-content p {
+    font-size: 1.1rem;
+    margin: 0 0 24px 0;
+    opacity: 0.7;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #ff5722, #e64a19);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #e64a19, #d84315);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(90deg, #42678e, #33506e);
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(90deg, #42678ec9, #33506ec9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    min-width: 80px;
+}
+
+.btn-large {
+    padding: 14px 28px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 200px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .first-screen-container {
+        padding: 15px;
+        gap: 16px;
+    }
+    
+    .game-app-name {
+        font-size: 1.8rem;
+    }
+    
+    .game-app-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .game-app-section,
+    .games-selection-section,
+    .no-games-message {
+        padding: 15px;
+    }
+    
+    .open-games-section {
+        padding: 12px;
+    }
+    
+    .default-game-info {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .game-main-info .game-name {
+        font-size: 1.2rem;
+    }
+    
+    .default-game-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .game-time-info {
+        align-items: flex-start;
+    }
+    
+    .default-game-actions {
+        flex-direction: column;
+    }
+    
+    .open-games-list {
+        max-height: 280px;
+    }
+    
+    .open-game-item {
+        min-height: 28px;
+        max-height: 28px;
+        padding: 6px 8px;
+    }
+    
+    .game-basic-info {
+        min-width: 150px;
+        gap: 6px;
+    }
+    
+    .game-item-name {
+        max-width: 80px;
+        font-size: 0.85rem;
+    }
+    
+    .game-time-status {
+        min-width: 120px;
+        gap: 6px;
+    }
+    
+    .game-item-actions {
+        gap: 2px;
+    }
+    
+    .btn-xs {
+        min-width: 24px;
+        height: 20px;
+        padding: 2px 4px;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .first-screen-container {
+        padding: 10px;
+        gap: 12px;
+    }
+    
+    .game-app-name {
+        font-size: 1.5rem;
+    }
+    
+    .game-app-section,
+    .games-selection-section,
+    .no-games-message {
+        padding: 12px;
+    }
+    
+    .open-games-section {
+        padding: 10px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-large {
+        padding: 12px 20px;
+        font-size: 1rem;
+        min-width: 100%;
+    }
+}

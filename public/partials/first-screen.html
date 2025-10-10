@@ -1,0 +1,29 @@
+<div class="first-screen-compact" style="background: #1a1a1a; color: #f0f0f0; font-family: 'Segoe UI', sans-serif; padding: 12px; height: 100vh; max-height: 100vh; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column;">
+    
+    <!-- Game Header - Ultra Compact -->
+    <div class="game-header-compact" style="text-align: center; margin-bottom: 12px; flex-shrink: 0;">
+        <h1 class="game-title" data-field="name" style="color: #ff5722; font-size: 1.8rem; margin: 0 0 4px 0; font-weight: bold;">Counter</h1>
+        <div class="game-info-line" style="font-size: 0.9rem; color: #cccccc;">
+            <span data-field="dimensions">📐 800x600</span> • 
+            <span data-field="players">👥 1-4 jugadores</span>
+        </div>
+    </div>
+
+    <!-- Partidas Guardadas - Compact Grid -->
+    <div class="saved-games-section" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div class="section-title" style="text-align: center; margin-bottom: 8px; flex-shrink: 0;">
+            <h2 style="font-size: 1.3rem; margin: 0; color: #f0f0f0;">Partidas Guardadas</h2>
+            <p style="font-size: 0.85rem; margin: 2px 0 0 0; color: #999;">Selecciona una partida para continuar</p>
+        </div>
+        
+        <div class="games-slots-container" style="flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: calc(100vh - 120px);">
+            <div class="open-games-list" style="display: grid; grid-template-columns: 1fr; gap: 3px; max-height: 300px; overflow: hidden;">
+                <!-- Los 10 slots se poblarán dinámicamente aquí -->
+            </div>
+            
+            <div class="games-counter" style="text-align: center; margin-top: 8px; flex-shrink: 0;">
+                <span class="games-count" data-field="count" style="background: linear-gradient(90deg, #ff5722, #e64a19); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">1/10 partidas</span>
+            </div>
+        </div>
+    </div>
+</div>
