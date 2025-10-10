@@ -40,7 +40,8 @@ export class UIManager {
             games.forEach(game => {
                 const gameItem = document.createElement('div');
                 gameItem.className = 'game-item';
-                gameItem.textContent = `${game.name} (${game.invitationCode}) - State: ${game.state} - Players: ${game.current_players} / ${maxInstancesPerUser}`;
+
+                gameItem.textContent = `${game.createdAt} (${game.invitationCode})`;
                 gamesList.appendChild(gameItem);
             });
 

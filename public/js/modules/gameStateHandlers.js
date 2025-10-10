@@ -64,8 +64,9 @@ export class GameStateHandlers {
      * Handle open games state
      */
     handleOpenGamesState(data) {
-        this.uiManager.setPageTitle(data.title);
-        this.uiManager.configureCanvas(data.width, data.height);
+        const game_app = data.game_app;
+        this.uiManager.setPageTitle(game_app.name);
+        this.uiManager.configureCanvas(game_app.width, game_app.height);
         this.uiManager.renderOpenGames(data.games, data.maxInstancesPerUser);
     }
 

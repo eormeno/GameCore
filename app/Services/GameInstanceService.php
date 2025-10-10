@@ -14,6 +14,13 @@ use App\Enums\GameUserJoinMethod;
 
 class GameInstanceService
 {
+	private GameAppService $gameAppService;
+
+	public function __construct(GameAppService $gameAppService)
+	{
+		$this->gameAppService = $gameAppService;
+	}
+
 	public function getOrCreateUserGame($user, GameApp $gameApp): Game
 	{
 		$count = $this->countActiveUserGameInstances($user, $gameApp);
@@ -69,5 +76,50 @@ class GameInstanceService
 		$query->where('game_app_id', $gameApp->id);
 		$query->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING]);
 		return $query->count();
+	}
+
+	/**
+	 * Get open games for a user and game app
+	 * Open games are games that are not finished and can accept more players
+	 */
+	public function getOpenGames($user, GameApp $gameApp): array
+	{
+		$gameAppInfo = $this->gameAppService->toApiFormat($gameApp);
+		
+		// Get all games for this game app that the user is part except itself
+		// and that are not finished nor cancelled
+		$userGames = $user->games()
+			->where('game_app_id', $gameApp->id)
+			->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING])
+			->orderBy('created_at', 'desc')
+			->get();
+
+		// For each game, get its id, name, invitation_code, state, users (id, name, is_owner) and created_at,
+		// excluding current user, and return as array
+		$openGames = $userGames->map(function ($game) use ($user) {
+			return [
+				'id' => $game->id,
+				'name' => $game->title,
+				'invitationCode' => $game->invitation_code,
+				'state' => $game->state,
+				'users' => $game->gameUsers->filter(function ($gu) use ($user) {
+					return $gu->user_id !== $user->id;
+				})->map(function ($gu) {
+					return [
+						'id' => $gu->user->id,
+						'name' => $gu->user->name,
+						'is_owner' => $gu->role === 'OWNER',
+					];
+				})->values(),
+				'createdAt' => $game->created_at->toDateTimeString(),
+			];
+		})->values()->toArray();
+
+		return [
+			'open_games' => [
+				'game_app' => $gameAppInfo,
+				'games' => $openGames,
+			]
+		];
 	}
 }

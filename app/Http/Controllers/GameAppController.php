@@ -9,6 +9,7 @@ use App\Utils\ImageUtils;
 use App\Contracts\IRenderer;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GameInstanceService;
+use App\Services\GameAppService;
 use App\Http\Requests\EventRequestFilter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Enums\GameState;
@@ -16,9 +17,9 @@ use App\Enums\GameState;
 class GameAppController extends Controller
 {
 
-    public function all()
+    public function all(GameAppService $gameAppService)
     {
-        $gameApps = GameApp::where('active', true)->get([
+        $gameApps = $gameAppService->getAllActive([
             'id',
             'prefix',
             'name',
@@ -32,46 +33,32 @@ class GameAppController extends Controller
         return response()->json(['displaying_games_gallery' => $gameApps]);
     }
 
-    public function play(int $gameAppId, GameInstanceService $gamesService, ?string $invitationCode = null)
+    public function play(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService, ?string $invitationCode = null)
     {
         try {
             $currentUser = Auth::user();
-            $gameApp = GameApp::where('id', $gameAppId)->where('active', true)->firstOrFail();
+            $gameApp = $gameAppService->findActiveById($gameAppId);
 
             // If maxInstancesPerUser > 1, return list of open games
             if ($gameApp->max_instances_per_user > 1) {
                 // Ensure user has at least one game or create one
                 $gamesService->getOrCreateUserGame($currentUser, $gameApp);
 
-                $openGames = $this->getOpenGames($currentUser, $gameApp);
-                return response()->json([
-                    'open_games' => [
-                        'title' => $gameApp->name,
-                        'maxInstancesPerUser' => $gameApp->max_instances_per_user,
-                        'minUsersPerInstance' => $gameApp->min_users_per_instance,
-                        'maxUsersPerInstance' => $gameApp->max_users_per_instance,
-                        'resourcesUrl' => route('res', $gameApp->id),
-                        'width' => $gameApp->width,
-                        'height' => $gameApp->height,
-                        'games' => $openGames,
-                    ]
-                ]);
+                $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
+                return response()->json($openGames);
             }
 
             $currentGame = $gamesService->getOrCreateUserGame($currentUser, $gameApp);
-            return response()->json([
-                'game' => [
+            $gameInfo = array_merge(
+                [
                     'title' => $currentGame->title,
                     'eventUrl' => route('event', $currentGame->id),
-                    'resourcesUrl' => route('res', $gameApp->id),
-                    'width' => $gameApp->width,
-                    'height' => $gameApp->height,
                     'invitationCode' => $currentGame->invitation_code,
-                    'maxInstancesPerUser' => $gameApp->max_instances_per_user,
-                    'minUsersPerInstance' => $gameApp->min_users_per_instance,
-                    'maxUsersPerInstance' => $gameApp->max_users_per_instance,
-                ]
-            ]);
+                ],
+                $gameAppService->toDetailedApiFormat($gameApp)
+            );
+            
+            return response()->json(['game' => $gameInfo]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [
@@ -144,43 +131,6 @@ class GameAppController extends Controller
                 'Expires' => '15'   // 15 seconds
             ]
         );
-    }
-
-    /**
-     * Get open games for a user and game app
-     * Open games are games that are not finished and can accept more players
-     */
-    private function getOpenGames($user, GameApp $gameApp): array
-    {
-        // Get all games for this game app that the user is part except itself
-        // and that are not finished nor cancelled
-        $userGames = $user->games()
-            ->where('game_app_id', $gameApp->id)
-            ->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // for each game, get its id, name, invitation_code, state, users (id, name, is_owner) and created_at,
-        // excluding current user, and return as array
-        $response = $userGames->map(function ($game) use ($user) {
-            return [
-                'id' => $game->id,
-                'name' => $game->title,
-                'invitationCode' => $game->invitation_code,
-                'state' => $game->state,
-                'users' => $game->gameUsers->filter(function ($gu) use ($user) {
-                    return $gu->user_id !== $user->id;
-                })->map(function ($gu) {
-                    return [
-                        'id' => $gu->user->id,
-                        'name' => $gu->user->name,
-                        'is_owner' => $gu->role === 'OWNER',
-                    ];
-                })->values(),
-                'createdAt' => $game->created_at->toDateTimeString(),
-            ];
-        })->values()->toArray();
-        return $response;
     }
 
     private function findResource(string $basePath, string $resourceName): string|null
