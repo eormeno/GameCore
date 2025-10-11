@@ -12,7 +12,6 @@ use App\Services\GameInstanceService;
 use App\Services\GameAppService;
 use App\Http\Requests\EventRequestFilter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Enums\GameState;
 
 class GameAppController extends Controller
 {
@@ -31,12 +30,16 @@ class GameAppController extends Controller
 
             $gamesService->createFirstTimeGame($currentUser, $gameApp);
 
-            $info['game_app'] = $gameAppService->gameAppToApiFormat($gameApp);
-            $gamesService->createFirstTimeGame($currentUser, $gameApp);
+            $game_app = $gameAppService->gameAppToApiFormat($gameApp);
             $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
-            $info['open_games'] = $gamesService->toApiFormat($openGames);
+            $open_games = $gamesService->toApiFormat($openGames);
 
-            return response()->json(['first_screen' => $info]);
+            return response()->json([
+                'first_screen' => [
+                    'game_app' => $game_app,
+                    'open_games' => $open_games
+                ]
+            ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [
