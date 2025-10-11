@@ -25,7 +25,7 @@ return new class extends Migration {
             $table->timestamps();
 
             // Índice único para evitar duplicados en la relación game-user
-            //$table->unique(['game_id', 'user_id']);
+            $table->unique(['game_id', 'user_id']);
         });
     }
 
