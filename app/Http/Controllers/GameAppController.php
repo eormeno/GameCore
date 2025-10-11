@@ -27,10 +27,22 @@ class GameAppController extends Controller
         try {
             $currentUser = Auth::user();
             $gameApp = $gameAppService->findActiveById($gameAppId);
-
+            $game_app = $gameAppService->gameAppToApiFormat($gameApp);
             $gamesService->createFirstTimeGame($currentUser, $gameApp);
 
-            $game_app = $gameAppService->gameAppToApiFormat($gameApp);
+            if ($gameApp->max_instances_per_user == 1) {
+                $currentGame = $gamesService->getDefaultGame($currentUser, $gameApp);
+                return response()->json([
+                    'game' => [
+                        'title' => $gameApp->name,
+                        'eventUrl' => route('event', $currentGame->id),
+                        'resourcesUrl' => route('res', $gameApp->id),
+                        'width' => $gameApp->width,
+                        'height' => $gameApp->height
+                    ]
+                ]);
+            }
+
             $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
             $open_games = $gamesService->toApiFormat($openGames);
 
