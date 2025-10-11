@@ -26,7 +26,7 @@ class GameInstanceService
 		$gameUser = GameUser::where('user_id', $user->id)
 			->whereHas('game', function ($query) use ($gameApp) {
 				$query->where('game_app_id', $gameApp->id)
-					->whereIn('state', [GameState::RUNNING, GameState::PAUSED]);
+					->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING]);
 			})
 			->orderBy('last_played_at', 'desc')
 			->first();
@@ -38,13 +38,22 @@ class GameInstanceService
 		return $currentGame;
 	}
 
+	public function toApiFormat(Game | array $games): array
+	{
+		$gamesArray = [];
+		foreach ($games as $game) {
+			$gamesArray[] = $this->gameToApiFormat($game);
+		}
+		return $gamesArray;
+	}
+
 	/**
 	 * Transform Game model to API format with essential information
 	 *
 	 * @param Game $game
 	 * @return array
 	 */
-	public function toApiFormat(Game $game): array
+	private function gameToApiFormat(Game $game): array
 	{
 		$gameUser = $game->currentGameUser;
 		$gameInfo = $game->only([
@@ -120,36 +129,75 @@ class GameInstanceService
 	 * Get open games for a user and game app
 	 * Open games are games that are not finished and can accept more players
 	 */
+	// public function getOpenGames($user, GameApp $gameApp): array
+	// {
+	// 	// Get all games for this game app that the user is part except itself
+	// 	// and that are not finished nor cancelled
+	// 	$userGames = $user->games()
+	// 		->where('game_app_id', $gameApp->id)
+	// 		->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING])
+	// 		->orderBy('created_at', 'desc')
+	// 		->get();
+
+	// 	// For each game, get its id, name, invitation_code, state, users (id, name, is_owner) and created_at,
+	// 	// excluding current user, and return as array
+	// 	$openGames = $userGames->map(function ($game) use ($user) {
+	// 		return [
+	// 			'id' => $game->id,
+	// 			'name' => $game->name,
+	// 			'invitationCode' => $game->invitation_code,
+	// 			'state' => $game->state->value,
+	// 			'users' => $game->gameUsers->filter(function ($gu) use ($user) {
+	// 				return $gu->user_id !== $user->id;
+	// 			})->map(function ($gu) {
+	// 				return [
+	// 					'id' => $gu->user->id,
+	// 					'name' => $gu->user->name,
+	// 					'is_owner' => $gu->role === 'OWNER',
+	// 				];
+	// 			})->values(),
+	// 			'createdAt' => $game->created_at->toDateTimeString(),
+	// 		];
+	// 	})->values()->toArray();
+
+	// 	return $openGames;
+	// }
+
+	/**
+	 * Create a new game for the user if they have no active games for the given game app
+	 *
+	 * @param User $user
+	 * @param GameApp $gameApp
+	 * @return void
+	 */
+	public function createFirstTimeGame($user, GameApp $gameApp): void
+	{
+		$count = $this->countActiveUserGameInstances($user, $gameApp);
+		if ($count == 0) {
+			$this->newGame($user, $gameApp);
+		}
+	}
+
 	public function getOpenGames($user, GameApp $gameApp): array
 	{
 		// Get all games for this game app that the user is part except itself
 		// and that are not finished nor cancelled
-		$userGames = $user->games()
-			->where('game_app_id', $gameApp->id)
-			->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING])
-			->orderBy('created_at', 'desc')
+		$gameUser = GameUser::where('user_id', $user->id)
+			->whereHas('game', function ($query) use ($gameApp) {
+				$query->where('game_app_id', $gameApp->id)
+					->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING]);
+			})
+			->orderBy('last_played_at', 'desc')
 			->get();
 
-		// For each game, get its id, name, invitation_code, state, users (id, name, is_owner) and created_at,
-		// excluding current user, and return as array
-		$openGames = $userGames->map(function ($game) use ($user) {
-			return [
-				'id' => $game->id,
-				'name' => $game->name,
-				'invitationCode' => $game->invitation_code,
-				'state' => $game->state->value,
-				'users' => $game->gameUsers->filter(function ($gu) use ($user) {
-					return $gu->user_id !== $user->id;
-				})->map(function ($gu) {
-					return [
-						'id' => $gu->user->id,
-						'name' => $gu->user->name,
-						'is_owner' => $gu->role === 'OWNER',
-					];
-				})->values(),
-				'createdAt' => $game->created_at->toDateTimeString(),
-			];
-		})->values()->toArray();
+		$openGames = [];
+
+		foreach ($gameUser as $gu) {
+			$currentGame = $gu->game;
+			$currentGame->gameObject;
+			$currentGame->currentGameUser = $gu;
+			$openGames[] = $currentGame;
+		}
 
 		return $openGames;
 	}

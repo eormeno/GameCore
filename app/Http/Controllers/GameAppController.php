@@ -41,17 +41,16 @@ class GameAppController extends Controller
 
             $info['game_app'] = $gameAppService->toApiFormat($gameApp);
 
-            $defaultGame = $gamesService->getDefaultGame($currentUser, $gameApp);
+            $gamesService->createFirstTimeGame($currentUser, $gameApp);
 
-            $info['default_game'] = $gamesService->toApiFormat($defaultGame);
+            //$defaultGame = $gamesService->getDefaultGame($currentUser, $gameApp);
 
-            if ($gameApp->max_instances_per_user > 1) {
-                $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
-                $info['open_games'] = $openGames;
-            }
+            //$info['default_game'] = $gamesService->toApiFormat($defaultGame);
+
+            $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
+            $info['open_games'] = $gamesService->toApiFormat($openGames);
             $ret['first_screen'] = $info;
             return response()->json($ret);
-
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [

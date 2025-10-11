@@ -26,43 +26,22 @@ function getGameAppPlayResponseStructure(): array
                 'allow_late_join',
                 'resourcesUrl'
             ],
-            'default_game' => [
-                'id',
-                'name',
-                'invitation_code',
-                'auto_authorize_players',
-                'state',
-                'events_url',
-                'game_user' => [
-                    'role',
-                    'status',
-                    'join_method',
-                    'joined_at',
-                    'last_played_at',
-                    'created_at'
-                ]
-            ]
-        ]
-    ];
-}
-
-/**
- * Get the JSON structure for open games (optional part of response)
- * 
- * @return array
- */
-function getOpenGamesStructure(): array
-{
-    return [
-        'first_screen' => [
             'open_games' => [
                 '*' => [
                     'id',
                     'name',
-                    'invitationCode',
+                    'invitation_code',
+                    'auto_authorize_players',
                     'state',
-                    'users',
-                    'createdAt'
+                    'events_url',
+                    'game_user' => [
+                        'role',
+                        'status',
+                        'join_method',
+                        'joined_at',
+                        'last_played_at',
+                        'created_at'
+                    ]
                 ]
             ]
         ]
@@ -70,17 +49,12 @@ function getOpenGamesStructure(): array
 }
 
 /**
- * Assert game app play response structure with optional open_games validation
+ * Assert game app play response structure
  * 
  * @param \Illuminate\Testing\TestResponse $response
  * @return void
  */
-function assertGameAppPlayResponseStructure($response, bool $openGamesIsMandatory = false): void
+function assertGameAppPlayResponseStructure($response): void
 {
-    // Assert main structure
     $response->assertJsonStructure(getGameAppPlayResponseStructure());
-
-    if ($openGamesIsMandatory) {
-        $response->assertJsonStructure(getOpenGamesStructure());
-    }
 }
