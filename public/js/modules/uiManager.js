@@ -20,7 +20,6 @@ export class UIManager {
      * Configure canvas dimensions and visibility
      */
     configureCanvas(width, height) {
-        console.log(`Configuring canvas to ${width}x${height}`);
         const canvas = this.getCanvasContainer();
         if (canvas) {
             Object.assign(canvas.style, {
@@ -38,27 +37,20 @@ export class UIManager {
             return;
         }
 
-        console.log('Rendering first screen with data:', data);
-
         try {
             // Load the first-screen template
             const templateHtml = await this.loadTemplate('first-screen.html');
-            console.log('Template loaded successfully');
-            
+
             canvas.innerHTML = templateHtml;
-            console.log('Template inserted into canvas');
 
             // Load CSS if not already loaded
             this.loadCSS('first-screen.css');
-            console.log('CSS loaded');
 
             // Populate the template with data
             this.populateFirstScreenData(data);
-            console.log('Data populated');
 
             // Setup event listeners for the first screen
             this.setupFirstScreenEventListeners(data);
-            console.log('Event listeners setup complete');
 
         } catch (error) {
             console.error('Error rendering first screen:', error);
@@ -92,41 +84,29 @@ export class UIManager {
         // Add timestamp to force cache busting
         link.href = `/css/${cssFileName}?v=${Date.now()}`;
         document.head.appendChild(link);
-        
-        console.log(`CSS loaded: ${link.href}`);
     }
 
     /**
      * Populate the first screen template with actual data
      */
     populateFirstScreenData(data) {
-        console.log('Populating first screen data:', data);
         const container = this.getCanvasContainer();
         if (!container) {
             console.error('Container not found in populateFirstScreenData');
             return;
         }
-        
-        console.log('Populating first screen data - full data object:', data);
-        console.log('Has first_screen?', !!data.first_screen);
-        console.log('Direct game_app?', !!data.game_app);
-        console.log('Direct default_game?', !!data.default_game);
 
         // Try both structures to be safe
         const gameAppData = data.first_screen?.game_app || data.game_app;
         const defaultGameData = data.first_screen?.default_game || data.default_game;
         const openGamesData = data.first_screen?.open_games || data.open_games;
 
-        console.log('Using gameAppData:', gameAppData);
-        console.log('Using defaultGameData:', defaultGameData);
-        console.log('Using openGamesData:', openGamesData);
-
         // Populate game app data
         this.populateGameAppData(gameAppData);
-        
+
         // Populate default game data
         this.populateDefaultGameData(defaultGameData);
-        
+
         // Populate open games data
         this.populateOpenGamesData(openGamesData);
     }
@@ -135,14 +115,14 @@ export class UIManager {
      * Populate game app information
      */
     populateGameAppData(gameApp) {
-        console.log('Populating game app data:', gameApp);
-        
+
         if (!gameApp) {
             console.log('No game app data - using defaults');
             return;
         }
 
-        const nameElement = document.querySelector('.game-app-name[data-field="name"]');
+        // Update game name in header
+        const nameElement = document.querySelector('[data-field="game-name"]');
         if (nameElement) {
             nameElement.textContent = gameApp.name || 'Unknown Game';
             console.log('Set game name to:', nameElement.textContent);
@@ -150,19 +130,13 @@ export class UIManager {
             console.log('Game name element not found');
         }
 
-        const dimensionsElement = document.querySelector('[data-field="dimensions"]');
-        if (dimensionsElement) {
-            const dimensions = `${gameApp.width || 800}x${gameApp.height || 600}`;
-            dimensionsElement.textContent = `📐 ${dimensions}`;
-            console.log('Set dimensions to:', dimensions);
-        }
-
-        const playersElement = document.querySelector('[data-field="players"]');
+        // Update game players info
+        const playersElement = document.querySelector('[data-field="game-players"]');
         if (playersElement) {
             const minUsers = gameApp.min_users_per_instance || 1;
             const maxUsers = gameApp.max_users_per_instance || 4;
-            playersElement.textContent = `👥 ${minUsers}-${maxUsers} jugadores`;
-            console.log('Set players to:', `${minUsers}-${maxUsers} jugadores`);
+            const playersText = minUsers === maxUsers ? `👥 ${minUsers} jugador${minUsers > 1 ? 'es' : ''}` : `👥 ${minUsers}-${maxUsers} jugadores`;
+            playersElement.textContent = playersText;
         }
     }
 
@@ -170,8 +144,7 @@ export class UIManager {
      * Populate default game information
      */
     populateDefaultGameData(defaultGame) {
-        console.log('Populating default game data:', defaultGame);
-        
+
         if (!defaultGame) {
             // Hide the games selection section if no default game
             const section = document.querySelector('.games-selection-section');
@@ -187,15 +160,10 @@ export class UIManager {
         this.setElementText('[data-field="state"]', defaultGame.state || 'unknown');
         this.setElementText('[data-field="invitation_code"]', `🎮 ${defaultGame.invitation_code || 'No Code'}`);
 
-        console.log('Set game name to:', defaultGame.name);
-        console.log('Set state to:', defaultGame.state);
-        console.log('Set invitation code to:', defaultGame.invitation_code);
-
         // Set game state styling
         const stateElement = document.querySelector('[data-field="state"]');
         if (stateElement) {
             stateElement.className = `game-state ${(defaultGame.state || 'unknown').toLowerCase()}`;
-            console.log('Set state class to:', stateElement.className);
         }
 
         // Populate user info
@@ -203,14 +171,10 @@ export class UIManager {
             const user = defaultGame.game_user;
             this.setElementText('[data-field="role"]', user.role || 'player');
             this.setElementText('[data-field="status"]', user.status || 'active');
-            
+
             // Format relative time for last played
             const lastPlayedRelative = this.formatRelativeTime(user.last_played_at);
             this.setElementText('[data-field="last_played_relative"]', lastPlayedRelative || 'hace un tiempo');
-            
-            console.log('Set user role to:', user.role);
-            console.log('Set user status to:', user.status);
-            console.log('Set last played to:', lastPlayedRelative);
         }
 
         // Set button data attributes
@@ -218,13 +182,11 @@ export class UIManager {
         if (continueBtn) {
             continueBtn.setAttribute('data-game-id', defaultGame.id || '');
             continueBtn.setAttribute('data-events-url', defaultGame.events_url || '');
-            console.log('Set continue button attributes');
         }
 
         const shareBtn = document.querySelector('.default-game-section .share-game-btn');
         if (shareBtn) {
             shareBtn.setAttribute('data-invitation-code', defaultGame.invitation_code || '');
-            console.log('Set share button attributes');
         }
     }
 
@@ -250,25 +212,22 @@ export class UIManager {
         try {
             const gameItemTemplate = await this.loadTemplate('open-game-item.html');
             const emptySlotTemplate = await this.loadTemplate('empty-game-slot.html');
-            
+
             if (gamesList) {
                 gamesList.innerHTML = '';
-                
+
                 // Add filled slots
                 for (let i = 0; i < filledSlots; i++) {
                     const game = actualGames[i];
                     const gameElement = this.createGameItemElement(gameItemTemplate, game, i + 1);
                     gamesList.appendChild(gameElement);
                 }
-                
+
                 // Add empty slots
-                console.log(`Adding ${MAX_SLOTS - filledSlots} empty slots`);
                 for (let i = filledSlots; i < MAX_SLOTS; i++) {
                     const emptyElement = this.createEmptySlotElement(emptySlotTemplate, i + 1);
-                    console.log(`Created empty slot ${i + 1}:`, emptyElement);
                     gamesList.appendChild(emptyElement);
                 }
-                console.log(`Total slots in gamesList: ${gamesList.children.length}`);
             }
         } catch (error) {
             console.error('Error loading game templates:', error);
@@ -287,15 +246,15 @@ export class UIManager {
 
         // Populate game data
         gameElement.setAttribute('data-game-id', game.id);
-        
+
         // Set slot number
         this.setElementTextInParent(gameElement, '[data-field="slot"]', slotNumber);
-        
+
         this.setElementTextInParent(gameElement, '[data-field="name"]', game.name);
         this.setElementTextInParent(gameElement, '[data-field="invitationCode"]', game.invitationCode);
         this.setElementTextInParent(gameElement, '[data-field="state"]', game.state);
         this.setElementTextInParent(gameElement, '[data-field="users"]', `👥 ${game.users}`);
-        
+
         // Format relative time for creation date
         const createdRelative = this.formatRelativeTime(game.createdAt);
         this.setElementTextInParent(gameElement, '[data-field="createdAt_relative"]', createdRelative);
@@ -353,7 +312,7 @@ export class UIManager {
 
         const container = document.createElement('div');
         container.className = 'first-screen-fallback';
-        
+
         // Simple fallback rendering
         if (data?.open_games) {
             const gamesList = document.createElement('div');
@@ -398,7 +357,7 @@ export class UIManager {
      */
     formatDate(dateString) {
         if (!dateString) return '';
-        
+
         try {
             const date = new Date(dateString);
             return date.toLocaleDateString('es-ES', {
@@ -418,7 +377,7 @@ export class UIManager {
      */
     formatRelativeTime(dateString) {
         if (!dateString) return '';
-        
+
         try {
             const date = new Date(dateString);
             const now = new Date();
@@ -609,16 +568,16 @@ export class UIManager {
     handleContinueGame(event) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         const button = event.target;
         const gameId = button.getAttribute('data-game-id');
         const eventsUrl = button.getAttribute('data-events-url');
-        
+
         if (gameId) {
             // Disable button to prevent double clicks
             button.disabled = true;
             button.textContent = 'Cargando...';
-            
+
             // Navigate to the game
             this.continueGame(gameId, eventsUrl);
         }
@@ -630,7 +589,7 @@ export class UIManager {
     handleNewGame(event) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         // Navigate to new game creation
         if (this.navigationService?.createNewGame) {
             this.navigationService.createNewGame();
@@ -646,16 +605,16 @@ export class UIManager {
     handleJoinGame(event) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         const button = event.target;
         const gameId = button.getAttribute('data-game-id');
         const invitationCode = button.getAttribute('data-invitation-code');
-        
+
         if (gameId || invitationCode) {
             // Disable button to prevent double clicks
             button.disabled = true;
             button.textContent = 'Uniéndose...';
-            
+
             // Join the game
             this.joinGame(gameId, invitationCode);
         }
@@ -667,10 +626,10 @@ export class UIManager {
     handleShareGame(event) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         const button = event.target;
         const invitationCode = button.getAttribute('data-invitation-code');
-        
+
         if (invitationCode && this.shareService) {
             this.shareService.share(invitationCode);
         }
@@ -682,19 +641,19 @@ export class UIManager {
     handleEndGame(event) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         const button = event.target;
         const gameId = button.getAttribute('data-game-id');
-        
+
         if (gameId) {
             // Show confirmation dialog
             const confirmed = confirm('¿Estás seguro de que quieres terminar esta partida? Esta acción no se puede deshacer.');
-            
+
             if (confirmed) {
                 // Disable button to prevent double clicks
                 button.disabled = true;
                 button.textContent = '⏳';
-                
+
                 // End the game
                 this.endGame(gameId);
             }
@@ -707,7 +666,7 @@ export class UIManager {
     handleGameItemClick(event) {
         // Only handle click if it's not on a button
         if (event.target.closest('button')) return;
-        
+
         const gameItem = event.target.closest('.open-game-item');
         if (gameItem) {
             const gameId = gameItem.getAttribute('data-game-id');
@@ -717,7 +676,7 @@ export class UIManager {
                 setTimeout(() => {
                     gameItem.style.transform = '';
                 }, 150);
-                
+
                 // Navigate to game details or join directly
                 this.showGameDetails(gameId);
             }
@@ -748,8 +707,8 @@ export class UIManager {
             this.navigationService.joinGame(gameId, invitationCode);
         } else {
             // Fallback: construct URL and navigate
-            const joinUrl = invitationCode 
-                ? `/games/join/${invitationCode}` 
+            const joinUrl = invitationCode
+                ? `/games/join/${invitationCode}`
                 : `/games/${gameId}/join`;
             window.location.href = joinUrl;
         }
@@ -782,7 +741,7 @@ export class UIManager {
             const gameItem = document.createElement('div');
             gameItem.className = 'open-game-item simple';
             gameItem.setAttribute('data-game-id', game.id);
-            
+
             gameItem.innerHTML = `
                 <div class="game-item-header">
                     <div class="game-item-info">
@@ -809,7 +768,7 @@ export class UIManager {
                     </div>
                 </div>
             `;
-            
+
             gamesList.appendChild(gameItem);
         });
 
@@ -818,73 +777,12 @@ export class UIManager {
     }
 
     /**
-     * Debug method to test first screen rendering
-     */
-    debugFirstScreen() {
-        console.log('=== DEBUG FIRST SCREEN ===');
-        
-        const canvas = this.getCanvasContainer();
-        console.log('Canvas found:', !!canvas);
-        
-        if (canvas) {
-            console.log('Canvas content:', canvas.innerHTML.substring(0, 200) + '...');
-        }
-        
-        const gamesSection = document.querySelector('.games-selection-section');
-        console.log('Games selection section found:', !!gamesSection);
-        
-        const openGamesList = document.querySelector('.open-games-list');
-        console.log('Open games list found:', !!openGamesList);
-        
-        if (openGamesList) {
-            console.log('Open games list content:', openGamesList.innerHTML);
-        }
-        
-        // Test rendering with mock data
-        const mockData = {
-            first_screen: {
-                game_app: {
-                    name: "Test Game",
-                    width: 800,
-                    height: 600,
-                    min_users_per_instance: 1,
-                    max_users_per_instance: 4
-                },
-                default_game: {
-                    id: 1,
-                    name: "Test Default Game",
-                    invitation_code: "ABC123",
-                    state: "waiting",
-                    game_user: {
-                        role: "host",
-                        status: "active",
-                        last_played_at: new Date().toISOString()
-                    }
-                },
-                open_games: [
-                    {
-                        id: 2,
-                        name: "Open Game 1",
-                        invitationCode: "DEF456",
-                        state: "waiting",
-                        users: 2,
-                        createdAt: new Date(Date.now() - 3600000).toISOString()
-                    }
-                ]
-            }
-        };
-        
-        console.log('Testing with mock data...');
-        this.renderFirstScreen(mockData);
-    }
-
-    /**
      * End a game (terminate/delete)
      */
     endGame(gameId) {
         // This would typically make an API call to end the game
         // For now, we'll use a placeholder implementation
-        
+
         if (this.navigationService?.endGame) {
             this.navigationService.endGame(gameId);
         } else {
@@ -909,7 +807,7 @@ export class UIManager {
             if (response.ok) {
                 // Remove the game item from the UI and replace with empty slot
                 this.removeGameFromUI(gameId);
-                
+
                 // Show success message
                 this.showTemporaryMessage('Partida terminada exitosamente', 'success');
             } else {
@@ -917,14 +815,14 @@ export class UIManager {
             }
         } catch (error) {
             console.error('Error ending game:', error);
-            
+
             // Re-enable button on error
             const endBtn = document.querySelector(`[data-game-id="${gameId}"].end-game-btn`);
             if (endBtn) {
                 endBtn.disabled = false;
                 endBtn.textContent = '🗑️';
             }
-            
+
             this.showTemporaryMessage('Error al terminar la partida', 'error');
         }
     }
@@ -938,21 +836,21 @@ export class UIManager {
             // Get slot number
             const slotNumberElement = gameItem.querySelector('.game-slot-number');
             const slotNumber = slotNumberElement ? slotNumberElement.textContent : '1';
-            
+
             try {
                 // Load empty slot template
                 const emptySlotTemplate = await this.loadTemplate('empty-game-slot.html');
                 const emptyElement = this.createEmptySlotElement(emptySlotTemplate, slotNumber);
-                
+
                 // Replace game item with empty slot
                 gameItem.parentNode.replaceChild(emptyElement, gameItem);
-                
+
                 // Re-setup event listeners for the new empty slot
                 this.setupFirstScreenEventListeners();
-                
+
                 // Update games count
                 this.updateGamesCount();
-                
+
             } catch (error) {
                 console.error('Error replacing with empty slot:', error);
                 // Fallback: just remove the item
@@ -980,7 +878,7 @@ export class UIManager {
         const messageEl = document.createElement('div');
         messageEl.className = `temp-message temp-message-${type}`;
         messageEl.textContent = message;
-        
+
         // Style the message
         Object.assign(messageEl.style, {
             position: 'fixed',
@@ -993,7 +891,7 @@ export class UIManager {
             zIndex: '9999',
             transition: 'all 0.3s ease'
         });
-        
+
         // Set color based on type
         switch (type) {
             case 'success':
@@ -1005,10 +903,10 @@ export class UIManager {
             default:
                 messageEl.style.background = 'linear-gradient(90deg, #ff5722, #e64a19)';
         }
-        
+
         // Add to document
         document.body.appendChild(messageEl);
-        
+
         // Remove after 3 seconds
         setTimeout(() => {
             messageEl.style.opacity = '0';
