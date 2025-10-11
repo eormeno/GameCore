@@ -19,17 +19,7 @@ class GameAppController extends Controller
 
     public function all(GameAppService $gameAppService)
     {
-        $gameApps = $gameAppService->getAllActive([
-            'id',
-            'prefix',
-            'name',
-            'description',
-            'card_image',
-            'prefab_name',
-            'max_instances_per_user',
-            'min_users_per_instance',
-            'max_users_per_instance',
-        ]);
+        $gameApps = $gameAppService->getActiveGameAppsToApiFormat();
         return response()->json(['displaying_games_gallery' => $gameApps]);
     }
 
@@ -39,18 +29,14 @@ class GameAppController extends Controller
             $currentUser = Auth::user();
             $gameApp = $gameAppService->findActiveById($gameAppId);
 
-            $info['game_app'] = $gameAppService->toApiFormat($gameApp);
-
             $gamesService->createFirstTimeGame($currentUser, $gameApp);
 
-            //$defaultGame = $gamesService->getDefaultGame($currentUser, $gameApp);
-
-            //$info['default_game'] = $gamesService->toApiFormat($defaultGame);
-
+            $info['game_app'] = $gameAppService->gameAppToApiFormat($gameApp);
+            $gamesService->createFirstTimeGame($currentUser, $gameApp);
             $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
             $info['open_games'] = $gamesService->toApiFormat($openGames);
-            $ret['first_screen'] = $info;
-            return response()->json($ret);
+
+            return response()->json(['first_screen' => $info]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [

@@ -17,11 +17,6 @@ class GameInstanceService
 
 	public function getDefaultGame($user, GameApp $gameApp): Game
 	{
-		$count = $this->countActiveUserGameInstances($user, $gameApp);
-		if ($count == 0) {
-			$this->newGame($user, $gameApp);
-		}
-
 		// Get the game corresponding to the GameUser with the most recent last_played_at
 		$gameUser = GameUser::where('user_id', $user->id)
 			->whereHas('game', function ($query) use ($gameApp) {
