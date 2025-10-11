@@ -250,33 +250,32 @@ export class UIManager {
         // Set slot number
         this.setElementTextInParent(gameElement, '[data-field="slot"]', slotNumber);
 
-        this.setElementTextInParent(gameElement, '[data-field="name"]', game.name);
-        this.setElementTextInParent(gameElement, '[data-field="invitationCode"]', game.invitationCode);
+        this.setElementTextInParent(gameElement, '[data-field="name"]', game.name || 'Sin nombre');
+        this.setElementTextInParent(gameElement, '[data-field="invitation_code"]', `🎮 ${game.invitation_code || 'N/A'}`);
         this.setElementTextInParent(gameElement, '[data-field="state"]', game.state);
-        this.setElementTextInParent(gameElement, '[data-field="users"]', `👥 ${game.users}`);
 
-        // Format relative time for creation date
-        const createdRelative = this.formatRelativeTime(game.createdAt);
-        this.setElementTextInParent(gameElement, '[data-field="createdAt_relative"]', createdRelative);
+        // Use last_played_at_human from game_user if available
+        const lastPlayedHuman = game.game_user?.last_played_at_human || 'Nunca jugado';
+        this.setElementTextInParent(gameElement, '[data-field="last_played_at_human"]', lastPlayedHuman);
 
         // Set button attributes
-        const continueBtn = gameElement.querySelector('.continue-game-btn');
+        const continueBtn = gameElement.querySelector('.continue-btn');
         if (continueBtn) {
             continueBtn.setAttribute('data-game-id', game.id);
-            continueBtn.setAttribute('data-invitation-code', game.invitationCode);
+            continueBtn.setAttribute('data-invitation-code', game.invitation_code);
             continueBtn.title = 'Continuar partida';
         }
 
-        const shareBtn = gameElement.querySelector('.share-game-btn');
+        const shareBtn = gameElement.querySelector('.share-btn');
         if (shareBtn) {
-            shareBtn.setAttribute('data-invitation-code', game.invitationCode);
+            shareBtn.setAttribute('data-invitation-code', game.invitation_code);
             shareBtn.title = 'Compartir partida';
         }
 
-        const endBtn = gameElement.querySelector('.end-game-btn');
-        if (endBtn) {
-            endBtn.setAttribute('data-game-id', game.id);
-            endBtn.title = 'Terminar partida';
+        const deleteBtn = gameElement.querySelector('.delete-btn');
+        if (deleteBtn) {
+            deleteBtn.setAttribute('data-game-id', game.id);
+            deleteBtn.title = 'Eliminar partida';
         }
 
         return gameElement;

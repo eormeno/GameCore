@@ -40,6 +40,7 @@ function getGameAppPlayResponseStructure(): array
                         'join_method',
                         'joined_at',
                         'last_played_at',
+                        'last_played_at_human',
                         'created_at'
                     ]
                 ]

@@ -72,6 +72,7 @@ class GameInstanceService
 			$gameUserInfo['join_method'] = $gameUser->join_method->value;
 			$gameUserInfo['joined_at'] = $gameUser->joined_at->toDateTimeString();
 			$gameUserInfo['last_played_at'] = $gameUser->last_played_at->toDateTimeString();
+			$gameUserInfo['last_played_at_human'] = $gameUser->last_played_at->diffForHumans();
 			$gameUserInfo['created_at'] = $gameUser->created_at->toDateTimeString();
 
 			$gameInfo['game_user'] = $gameUserInfo;
@@ -124,44 +125,6 @@ class GameInstanceService
 		$query->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING]);
 		return $query->count();
 	}
-
-	/**
-	 * Get open games for a user and game app
-	 * Open games are games that are not finished and can accept more players
-	 */
-	// public function getOpenGames($user, GameApp $gameApp): array
-	// {
-	// 	// Get all games for this game app that the user is part except itself
-	// 	// and that are not finished nor cancelled
-	// 	$userGames = $user->games()
-	// 		->where('game_app_id', $gameApp->id)
-	// 		->whereIn('state', [GameState::RUNNING, GameState::PAUSED, GameState::WAITING])
-	// 		->orderBy('created_at', 'desc')
-	// 		->get();
-
-	// 	// For each game, get its id, name, invitation_code, state, users (id, name, is_owner) and created_at,
-	// 	// excluding current user, and return as array
-	// 	$openGames = $userGames->map(function ($game) use ($user) {
-	// 		return [
-	// 			'id' => $game->id,
-	// 			'name' => $game->name,
-	// 			'invitationCode' => $game->invitation_code,
-	// 			'state' => $game->state->value,
-	// 			'users' => $game->gameUsers->filter(function ($gu) use ($user) {
-	// 				return $gu->user_id !== $user->id;
-	// 			})->map(function ($gu) {
-	// 				return [
-	// 					'id' => $gu->user->id,
-	// 					'name' => $gu->user->name,
-	// 					'is_owner' => $gu->role === 'OWNER',
-	// 				];
-	// 			})->values(),
-	// 			'createdAt' => $game->created_at->toDateTimeString(),
-	// 		];
-	// 	})->values()->toArray();
-
-	// 	return $openGames;
-	// }
 
 	/**
 	 * Create a new game for the user if they have no active games for the given game app
