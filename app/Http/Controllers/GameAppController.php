@@ -77,7 +77,7 @@ class GameAppController extends Controller
         }
     }
 
-    public function newGame(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService)
+    public function newGameUI(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService)
     {
         try {
             $currentUser = Auth::user();
