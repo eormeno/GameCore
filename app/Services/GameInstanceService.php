@@ -113,7 +113,14 @@ class GameInstanceService
 		return $game;
 	}
 
-	private function countActiveUserGameInstances($user, GameApp $gameApp)
+	/**
+	 * Count active game instances for a user and a specific game app
+	 *
+	 * @param User $user
+	 * @param GameApp $gameApp
+	 * @return int
+	 */
+	public function countActiveUserGameInstances($user, GameApp $gameApp)
 	{
 		$query = $user->games();
 		$query->where('game_app_id', $gameApp->id);

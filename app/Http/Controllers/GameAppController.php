@@ -46,10 +46,20 @@ class GameAppController extends Controller
             $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
             $open_games = $gamesService->toApiFormat($openGames);
 
+            $savedGamesCount = $gamesService->countActiveUserGameInstances($currentUser, $gameApp);
+            $userPermissions = [];
+            $canCreateNewGame = false;
+            if ($gameApp->max_instances_per_user > 0) {
+                $canCreateNewGame = $savedGamesCount < $gameApp->max_instances_per_user;
+            } else {
+                $canCreateNewGame = true;
+            }
+            $userPermissions['can_create_new_game'] = $canCreateNewGame;
             return response()->json([
                 'first_screen' => [
                     'game_app' => $game_app,
-                    'open_games' => $open_games
+                    'open_games' => $open_games,
+                    'permissions' => $userPermissions,
                 ]
             ]);
         } catch (ModelNotFoundException $e) {

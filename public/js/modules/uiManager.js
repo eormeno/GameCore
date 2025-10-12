@@ -7,6 +7,7 @@ export class UIManager {
         this.shareService = shareService;
         this.navigationService = navigationService;
         this.gameRenderer = gameRenderer;
+        this.currentGameApp = null; // Store current game app data
     }
 
     /**
@@ -121,6 +122,9 @@ export class UIManager {
             return;
         }
 
+        // Store game app data for later use
+        this.currentGameApp = gameApp;
+
         // Update game name in header
         const nameElement = document.querySelector('[data-field="game-name"]');
         if (nameElement) {
@@ -191,14 +195,15 @@ export class UIManager {
     }
 
     /**
-     * Populate open games list with up to 10 slots
+     * Populate open games list with dynamic number of slots based on max_instances_per_user
      */
     async populateOpenGamesData(openGames) {
         const openGamesSection = document.querySelector('.open-games-section');
         const gamesList = document.querySelector('.open-games-list');
         const gamesCount = document.querySelector('[data-field="count"]');
 
-        const MAX_SLOTS = 10;
+        // Use max_instances_per_user from current game app, fallback to 10 if not available
+        const MAX_SLOTS = this.currentGameApp?.max_instances_per_user || 10;
         const actualGames = openGames || [];
         const filledSlots = Math.min(actualGames.length, MAX_SLOTS);
         const emptySlots = MAX_SLOTS - filledSlots;
