@@ -77,6 +77,32 @@ class GameAppController extends Controller
         }
     }
 
+    public function newGame(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService)
+    {
+        try {
+            $currentUser = Auth::user();
+            $gameApp = $gameAppService->findActiveById($gameAppId);
+            $gamesService->createFirstTimeGame($currentUser, $gameApp);
+            return response()->json([
+                'new_game_screen' => [
+                    'game_app' => $gameAppService->gameAppToApiFormat($gameApp),
+                ]
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'exception' => [
+                    'game_not_found' => ['message' => 'Game not found or is not active.']
+                ]
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'exception' => [
+                    'error' => ['message' => 'An error occurred while trying to create a new game.']
+                ]
+            ], 500);
+        }
+    }
+
     public function playGame(GameApp $game, GameInstanceService $gamesService)
     {
         $currentUser = Auth::user();

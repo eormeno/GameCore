@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/game-app/{gameApp}/play/{invitationCode?}', [GameAppController::class, 'play'])->name('play');
+    Route::post('/game-app/{gameApp}/new', [GameAppController::class, 'newGame'])->name('new');
     Route::get('/game-app/{gameApp}/res/{resourceName?}', [GameAppController::class, 'res'])->name('res');
     Route::post('/game-app/{game}', [GameAppController::class, 'event'])->name('event');
 });
