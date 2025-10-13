@@ -26,7 +26,7 @@ function getGameAppPlayResponseStructure(): array
                 'allow_late_join',
                 'resourcesUrl'
             ],
-            'open_games' => [
+            'saved_games' => [
                 '*' => [
                     'id',
                     'name',

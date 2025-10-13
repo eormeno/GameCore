@@ -62,7 +62,7 @@ Requisitos para funcionalidad de partidas en GameCore
 - `"game"` cuando tras realizar todas las validaciones, la interfaz del jugador ya puede comenzar a renderizar la partida en sí.
 - `"waiting"`. Para el caso de juegos multijugador, va mostrando la cantidad de jugadores requerida y la cantidad de jugadores que se van sumando. Y en caso de que el usuario que está recibiendo la respuesta sea el owner de la partida y que se haya llegado a la cantidad mínima de jugadores para iniciar el juego, se agrega el atributo`start_game_enabled` con el valor`true` para que la UI pueda renderizar el botón "Start Game".
 - `"error"`. Para retornar cualquier excepción.
-- `"open_games"`. Con el listado de las partidas abiertas en caso de que la configuración del GameApp permita más de una partida. Y en caso de que se aún queden partidas disponibles, agregar un atributo para indicar a la UI que renderice el botón "New game".
+- `"saved_games"`. Con el listado de las partidas guardadas en caso de que la configuración del GameApp permita más de una partida. Y en caso de que se aún queden partidas disponibles, agregar un atributo para indicar a la UI que renderice el botón "New game".
 - `resourcesUrl` es la URL donde se pueden obtener los recursos de la apliación de juego, como imágenes, sonidos, etc.
 - `width` y`height` son las dimensiones de la interfaz del juego.
 
@@ -98,11 +98,11 @@ Requisitos para funcionalidad de partidas en GameCore
 - Buscar partidas abiertas (state==0 o 1) asociadas al GameApp.
 - Si no hay partidas abiertas, lanzar excepción.
 - Verificar que el usuario no haya superado el máximo de partidas abiertas.
-- Retornar estructura JSON con key `open_games`:
+- Retornar estructura JSON con key `saved_games`:
 
   ```json
   {
-	"open_games": [
+	"saved_games": [
   	{
   	  "id": 23,
   	  "name": "Partida 1",
@@ -191,7 +191,7 @@ Requisitos para funcionalidad de partidas en GameCore
 ## 6. Resumen de estructura de respuesta
 
 - Si se juega una partida específica: key`"game"`.
-- Si hay partidas abiertas: key`"open_games"` (u opcionalmente`"waiting"` para multijugador con opción de iniciar).
+- Si hay partidas guardadas: key`"saved_games"` (u opcionalmente`"waiting"` para multijugador con opción de iniciar).
 - Siempre incluir width, height y resourcesUrl.
 - En partidas multijugador, incluir`"showStartGameButton": true` solo si el owner puede iniciar la partida.
 

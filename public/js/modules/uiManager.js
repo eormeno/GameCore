@@ -100,7 +100,7 @@ export class UIManager {
         // Try both structures to be safe
         const gameAppData = data.first_screen?.game_app || data.game_app;
         const defaultGameData = data.first_screen?.default_game || data.default_game;
-        const openGamesData = data.first_screen?.open_games || data.open_games;
+        const savedGamesData = data.first_screen?.saved_games || data.saved_games;
 
         // Populate game app data
         this.populateGameAppData(gameAppData);
@@ -108,8 +108,8 @@ export class UIManager {
         // Populate default game data
         this.populateDefaultGameData(defaultGameData);
 
-        // Populate open games data
-        this.populateOpenGamesData(openGamesData);
+        // Populate saved games data
+        this.populateSavedGamesData(savedGamesData);
     }
 
     /**
@@ -195,16 +195,16 @@ export class UIManager {
     }
 
     /**
-     * Populate open games list with dynamic number of slots based on max_instances_per_user
+     * Populate saved games list with dynamic number of slots based on max_instances_per_user
      */
-    async populateOpenGamesData(openGames) {
-        const openGamesSection = document.querySelector('.open-games-section');
-        const gamesList = document.querySelector('.open-games-list');
+    async populateSavedGamesData(savedGames) {
+        const savedGamesSection = document.querySelector('.saved-games-section');
+        const gamesList = document.querySelector('.saved-games-list');
         const gamesCount = document.querySelector('[data-field="count"]');
 
         // Use max_instances_per_user from current game app, fallback to 10 if not available
         const MAX_SLOTS = this.currentGameApp?.max_instances_per_user || 10;
-        const actualGames = openGames || [];
+        const actualGames = savedGames || [];
         const filledSlots = Math.min(actualGames.length, MAX_SLOTS);
         const emptySlots = MAX_SLOTS - filledSlots;
 
@@ -215,7 +215,7 @@ export class UIManager {
 
         // Load templates
         try {
-            const gameItemTemplate = await this.loadTemplate('open-game-item.html');
+            const gameItemTemplate = await this.loadTemplate('saved-game-item.html');
             const emptySlotTemplate = await this.loadTemplate('empty-game-slot.html');
 
             if (gamesList) {
@@ -237,7 +237,7 @@ export class UIManager {
         } catch (error) {
             console.error('Error loading game templates:', error);
             // Fallback to simple rendering
-            this.renderOpenGamesSimple(actualGames);
+            this.renderSavedGamesSimple(actualGames);
         }
     }
 
@@ -318,11 +318,11 @@ export class UIManager {
         container.className = 'first-screen-fallback';
 
         // Simple fallback rendering
-        if (data?.open_games) {
+        if (data?.saved_games) {
             const gamesList = document.createElement('div');
-            gamesList.className = 'open-games-list';
+            gamesList.className = 'saved-games-list';
 
-            data.open_games.forEach(game => {
+            data.saved_games.forEach(game => {
                 const gameItem = document.createElement('div');
                 gameItem.className = 'game-item';
                 gameItem.textContent = `${game.name} - ${game.createdAt} (${game.invitationCode})`;
@@ -441,7 +441,7 @@ export class UIManager {
             newGameBtn.addEventListener('click', (e) => this.handleNewGame(e));
         }
 
-        // Continue game buttons (from open games list)
+        // Continue game buttons (from saved games list)
         const continueBtns = document.querySelectorAll('.continue-game-btn');
         continueBtns.forEach(btn => {
             btn.addEventListener('click', (e) => this.handleContinueGame(e));
@@ -466,7 +466,7 @@ export class UIManager {
         });
 
         // Game item click handlers (only for filled slots)
-        const gameItems = document.querySelectorAll('.open-game-item:not(.empty-slot)');
+        const gameItems = document.querySelectorAll('.saved-game-item:not(.empty-slot)');
         gameItems.forEach(item => {
             item.addEventListener('click', (e) => this.handleGameItemClick(e));
         });
@@ -671,7 +671,7 @@ export class UIManager {
         // Only handle click if it's not on a button
         if (event.target.closest('button')) return;
 
-        const gameItem = event.target.closest('.open-game-item');
+        const gameItem = event.target.closest('.saved-game-item');
         if (gameItem) {
             const gameId = gameItem.getAttribute('data-game-id');
             if (gameId) {
@@ -733,17 +733,17 @@ export class UIManager {
     }
 
     /**
-     * Fallback simple rendering for open games
+     * Fallback simple rendering for saved games
      */
-    renderOpenGamesSimple(openGames) {
-        const gamesList = document.querySelector('.open-games-list');
+    renderSavedGamesSimple(savedGames) {
+        const gamesList = document.querySelector('.saved-games-list');
         if (!gamesList) return;
 
         gamesList.innerHTML = '';
 
-        openGames.forEach(game => {
+        savedGames.forEach(game => {
             const gameItem = document.createElement('div');
-            gameItem.className = 'open-game-item simple';
+            gameItem.className = 'saved-game-item simple';
             gameItem.setAttribute('data-game-id', game.id);
 
             gameItem.innerHTML = `
@@ -835,7 +835,7 @@ export class UIManager {
      * Remove game from UI and replace with empty slot
      */
     async removeGameFromUI(gameId) {
-        const gameItem = document.querySelector(`.open-game-item[data-game-id="${gameId}"]`);
+        const gameItem = document.querySelector(`.saved-game-item[data-game-id="${gameId}"]`);
         if (gameItem) {
             // Get slot number
             const slotNumberElement = gameItem.querySelector('.game-slot-number');
@@ -869,7 +869,7 @@ export class UIManager {
     updateGamesCount() {
         const gamesCount = document.querySelector('[data-field="count"]');
         if (gamesCount) {
-            const filledSlots = document.querySelectorAll('.open-game-item:not(.empty-slot)').length;
+            const filledSlots = document.querySelectorAll('.saved-game-item:not(.empty-slot)').length;
             gamesCount.textContent = `${filledSlots}/10 partidas`;
         }
     }

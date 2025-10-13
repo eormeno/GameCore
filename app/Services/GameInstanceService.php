@@ -143,7 +143,7 @@ class GameInstanceService
 		}
 	}
 
-	public function getOpenGames($user, GameApp $gameApp): array
+	public function getSavedGames($user, GameApp $gameApp): array
 	{
 		// Get all games for this game app that the user is part except itself
 		// and that are not finished nor cancelled
@@ -155,15 +155,15 @@ class GameInstanceService
 			->orderBy('last_played_at', 'desc')
 			->get();
 
-		$openGames = [];
+		$savedGames = [];
 
 		foreach ($gameUser as $gu) {
 			$currentGame = $gu->game;
 			$currentGame->gameObject;
 			$currentGame->currentGameUser = $gu;
-			$openGames[] = $currentGame;
+			$savedGames[] = $currentGame;
 		}
 
-		return $openGames;
+		return $savedGames;
 	}
 }

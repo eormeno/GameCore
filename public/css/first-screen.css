@@ -240,8 +240,8 @@
     margin-top: 8px;
 }
 
-/* Open Games Section */
-.open-games-section {
+/* Saved Games Section */
+.saved-games-section {
     background: linear-gradient(145deg, #252525 0%, #1a1a1a 100%);
     border-radius: 6px;
     padding: 16px;
@@ -249,7 +249,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.open-games-header {
+.saved-games-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -258,7 +258,7 @@
     padding-bottom: 12px;
 }
 
-.open-games-header h4 {
+.saved-games-header h4 {
     font-size: 1.2rem;
     font-weight: 500;
     margin: 0;
@@ -298,7 +298,7 @@
     flex-direction: column !important;
 }
 
-.first-screen-compact .open-games-list {
+.first-screen-compact .saved-games-list {
     display: flex !important;
     flex-direction: column !important;
     gap: 3px !important;
@@ -344,20 +344,20 @@
     border-color: #ff5722 !important;
 }
 
-.open-game-item:hover:not(.empty-slot) {
+.saved-game-item:hover:not(.empty-slot) {
     background: linear-gradient(145deg, #333333 0%, #2a2a2a 100%);
     border-color: #ff5722;
     box-shadow: 0 2px 6px rgba(255, 87, 34, 0.2);
 }
 
-.open-game-item.empty-slot {
+.saved-game-item.empty-slot {
     background: linear-gradient(145deg, #1a1a1a 0%, #151515 100%);
     border: 1px dashed #333;
     cursor: default;
     opacity: 0.6;
 }
 
-.open-game-item.empty-slot:hover {
+.saved-game-item.empty-slot:hover {
     opacity: 0.8;
     border-color: #ff5722;
 }
@@ -742,7 +742,7 @@
         padding: 15px;
     }
     
-    .open-games-section {
+    .saved-games-section {
         padding: 12px;
     }
     
@@ -770,11 +770,11 @@
         flex-direction: column;
     }
     
-    .open-games-list {
+    .saved-games-list {
         max-height: 280px;
     }
     
-    .open-game-item {
+    .saved-game-item {
         min-height: 28px;
         max-height: 28px;
         padding: 6px 8px;
@@ -823,7 +823,7 @@
         padding: 12px;
     }
     
-    .open-games-section {
+    .saved-games-section {
         padding: 10px;
     }
     

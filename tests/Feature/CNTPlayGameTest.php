@@ -2,10 +2,11 @@
 
 const TEST_PREFIX = 'cnt';
 
-test("1. User can play the game app", function () {
+test("1. User receives the 'first_screen' GUI", function () {
 	$gameApp = setupGameApp(TEST_PREFIX);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
+	write($response);
 	assertGameAppPlayResponseStructure($response, true);
 });
 
@@ -14,27 +15,7 @@ test("2. User receives a list of open saved games", function () {
 	$gameApp = setupGameApp(TEST_PREFIX);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
-	// $response->assertJsonStructure([
-	// 	'open_games' => [
-	// 		'*' => [
-	// 			'id',
-	// 			'name',
-	// 			'invitationCode',
-	// 			'state',
-	// 			'users' => [
-	// 				'*' => [
-	// 					'id',
-	// 					'name',
-	// 					'is_owner',
-	// 				]
-	// 			],
-	// 			'createdAt'
-	// 		]
-	// 	],
-	// 	'resourcesUrl',
-	// 	'width',
-	// 	'height'
-	// ]);
+	assertGameAppPlayResponseStructure($response, true);
 });
 
 test("3. Trying to play a deactivated game app returns 404", function () {

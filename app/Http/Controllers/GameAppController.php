@@ -28,7 +28,7 @@ class GameAppController extends Controller
             $currentUser = Auth::user();
             $gameApp = $gameAppService->findActiveById($gameAppId);
             $game_app = $gameAppService->gameAppToApiFormat($gameApp);
-            // $gamesService->createFirstTimeGame($currentUser, $gameApp);
+            $gamesService->createFirstTimeGame($currentUser, $gameApp);
 
             // if ($gameApp->max_instances_per_user == 1) {
             //     $currentGame = $gamesService->getDefaultGame($currentUser, $gameApp);
@@ -43,8 +43,8 @@ class GameAppController extends Controller
             //     ]);
             // }
 
-            $openGames = $gamesService->getOpenGames($currentUser, $gameApp);
-            $open_games = $gamesService->toApiFormat($openGames);
+            $savedGames = $gamesService->getSavedGames($currentUser, $gameApp);
+            $saved_games = $gamesService->toApiFormat($savedGames);
 
             $savedGamesCount = $gamesService->countActiveUserGameInstances($currentUser, $gameApp);
             $userPermissions = [];
@@ -58,7 +58,7 @@ class GameAppController extends Controller
             return response()->json([
                 'first_screen' => [
                     'game_app' => $game_app,
-                    'open_games' => $open_games,
+                    'saved_games' => $saved_games,
                     'permissions' => $userPermissions,
                 ]
             ]);
