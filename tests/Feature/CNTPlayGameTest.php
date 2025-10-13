@@ -1,12 +1,14 @@
 <?php
 
+use Tests\Support\ApiTestHelpers;
+
 const TEST_PREFIX = 'cnt';
 
 test("1. User receives the 'game_lobby_screen' GUI", function () {
 	$gameApp = setupGameApp(TEST_PREFIX);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
-	assertGameLobbyScreenStructure($response, true);
+	ApiTestHelpers::assertGameLobbyScreenStructure($response);
 });
 
 // The client receives a list of still open saved games with their invitation codes because the maxInstancesPerUser is greater than 1
@@ -14,7 +16,7 @@ test("2. User receives a list of open saved games", function () {
 	$gameApp = setupGameApp(TEST_PREFIX);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
-	assertGameLobbyScreenStructure($response, true);
+	ApiTestHelpers::assertGameLobbyScreenStructure($response);
 });
 
 test("3. Trying to play a deactivated game app returns 404", function () {

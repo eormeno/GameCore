@@ -49,6 +49,16 @@ class GameLobbyScreenService
     }
 
     /**
+     * Get the expected response structure (useful for validation/testing)
+     * 
+     * @return array
+     */
+    public static function getResponseStructure(): array
+    {
+        return GameLobbyScreenStructure::response();
+    }
+
+    /**
      * Calculate user permissions for the game app
      *
      * @param User $user

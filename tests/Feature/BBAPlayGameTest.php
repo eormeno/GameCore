@@ -1,10 +1,12 @@
 <?php
 
+use Tests\Support\ApiTestHelpers;
+
 test("User can play the game app", function () {
 	$gameApp = setupGameApp('bba');
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
-	assertGameLobbyScreenStructure($response);
+	ApiTestHelpers::assertGameLobbyScreenStructure($response);
 });
 
 test("Trying to play a deactivated game app returns 404", function () {
