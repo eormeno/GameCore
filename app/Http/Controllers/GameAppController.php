@@ -42,8 +42,8 @@ class GameAppController extends Controller
             //         ]
             //     ]);
             // }
-            
-            return response()->json($gameLobbyScreenService->getGameLobbyScreen($currentUser, $gameApp));
+            $gameLobbyScreen = $gameLobbyScreenService->getGameLobbyScreen($currentUser, $gameApp);
+            return response()->json($gameLobbyScreen);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [
