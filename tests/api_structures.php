@@ -15,7 +15,7 @@
 function getGameAppPlayResponseStructure(): array
 {
     return [
-        'first_screen' => [
+        'game_lobby_screen' => [
             'game_app' => [
                 'name',
                 'width',
@@ -44,6 +44,9 @@ function getGameAppPlayResponseStructure(): array
                         'created_at'
                     ]
                 ]
+            ],
+            'permissions' => [
+                'can_create_new_game'
             ]
         ]
     ];

@@ -2,11 +2,10 @@
 
 const TEST_PREFIX = 'cnt';
 
-test("1. User receives the 'first_screen' GUI", function () {
+test("1. User receives the 'game_lobby_screen' GUI", function () {
 	$gameApp = setupGameApp(TEST_PREFIX);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
 	$response->assertStatus(200);
-	write($response);
 	assertGameAppPlayResponseStructure($response, true);
 });
 

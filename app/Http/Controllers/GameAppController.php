@@ -56,7 +56,7 @@ class GameAppController extends Controller
             }
             $userPermissions['can_create_new_game'] = $canCreateNewGame;
             return response()->json([
-                'first_screen' => [
+                'game_lobby_screen' => [
                     'game_app' => $game_app,
                     'saved_games' => $saved_games,
                     'permissions' => $userPermissions,

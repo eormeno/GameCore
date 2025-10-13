@@ -1,5 +1,5 @@
-/* First Screen Styles */
-.first-screen-container {
+/* Game Lobby Screen Styles */
+.game-lobby-screen-container {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -50,7 +50,7 @@
 }
 
 /* Games Selection Section */
-.first-screen-container .games-selection-section {
+.game-lobby-screen-container .games-selection-section {
     background: linear-gradient(145deg, #2b2b2b 0%, #222222 100%) !important;
     border-radius: 8px !important;
     padding: 24px !important;
@@ -275,7 +275,7 @@
 }
 
 /* Ultra Compact First Screen Layout */
-.first-screen-compact {
+.game-lobby-screen-compact {
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
@@ -285,20 +285,20 @@
     flex-direction: column !important;
 }
 
-.first-screen-compact .saved-games-section {
+.game-lobby-screen-compact .saved-games-section {
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
     min-height: 0 !important;
 }
 
-.first-screen-compact .saved-games-content {
+.game-lobby-screen-compact .saved-games-content {
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
 }
 
-.first-screen-compact .saved-games-list {
+.game-lobby-screen-compact .saved-games-list {
     display: flex !important;
     flex-direction: column !important;
     gap: 3px !important;
@@ -722,7 +722,7 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .first-screen-container {
+    .game-lobby-screen-container {
         padding: 15px;
         gap: 16px;
     }
@@ -808,7 +808,7 @@
 }
 
 @media (max-width: 480px) {
-    .first-screen-container {
+    .game-lobby-screen-container {
         padding: 10px;
         gap: 12px;
     }

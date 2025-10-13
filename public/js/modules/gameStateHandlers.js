@@ -13,7 +13,7 @@ export class GameStateHandlers {
      */
     handle(stateName, data) {
         const handlers = {
-            'first_screen': () => this.handleFirstScreen(data),
+            'game_lobby_screen': () => this.handleGameLobbyScreen(data),
             'game': () => this.handleGameState(data),
             'auth_required': () => this.handleAuthRequired(),
             'game_not_found': () => this.handleGameNotFound(),
@@ -60,12 +60,12 @@ export class GameStateHandlers {
     }
 
     /**
-     * Handle first screen state
+     * Handle game lobby screen state
      */
-    handleFirstScreen(data) {
+    handleGameLobbyScreen(data) {
         this.uiManager.setPageTitle(data.game_app.name);
         this.uiManager.configureCanvas(data.game_app.width, data.game_app.height);
-        this.uiManager.renderFirstScreen(data);
+        this.uiManager.renderGameLobbyScreen(data);
     }
 
     /**

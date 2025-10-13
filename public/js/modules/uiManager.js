@@ -31,7 +31,7 @@ export class UIManager {
         }
     }
 
-    async renderFirstScreen(data) {
+    async renderGameLobbyScreen(data) {
         const canvas = this.getCanvasContainer();
         if (!canvas) {
             console.error('Canvas container not found');
@@ -39,23 +39,23 @@ export class UIManager {
         }
 
         try {
-            // Load the first-screen template
-            const templateHtml = await this.loadTemplate('first-screen.html');
+            // Load the game-lobby-screen template
+            const templateHtml = await this.loadTemplate('game-lobby-screen.html');
 
             canvas.innerHTML = templateHtml;
 
             // Load CSS if not already loaded
-            this.loadCSS('first-screen.css');
+            this.loadCSS('game-lobby-screen.css');
 
             // Populate the template with data
-            this.populateFirstScreenData(data);
+            this.populateGameLobbyScreenData(data);
 
-            // Setup event listeners for the first screen
-            this.setupFirstScreenEventListeners(data);
+            // Setup event listeners for the game lobby screen
+            this.setupGameLobbyScreenEventListeners(data);
 
         } catch (error) {
-            console.error('Error rendering first screen:', error);
-            this.renderFirstScreenFallback(data);
+            console.error('Error rendering game lobby screen:', error);
+            this.renderGameLobbyScreenFallback(data);
         }
     }
 
@@ -88,19 +88,19 @@ export class UIManager {
     }
 
     /**
-     * Populate the first screen template with actual data
+     * Populate the game lobby screen template with actual data
      */
-    populateFirstScreenData(data) {
+    populateGameLobbyScreenData(data) {
         const container = this.getCanvasContainer();
         if (!container) {
-            console.error('Container not found in populateFirstScreenData');
+            console.error('Container not found in populateGameLobbyScreenData');
             return;
         }
 
         // Try both structures to be safe
-        const gameAppData = data.first_screen?.game_app || data.game_app;
-        const defaultGameData = data.first_screen?.default_game || data.default_game;
-        const savedGamesData = data.first_screen?.saved_games || data.saved_games;
+        const gameAppData = data.game_lobby_screen?.game_app || data.game_app;
+        const defaultGameData = data.game_lobby_screen?.default_game || data.default_game;
+        const savedGamesData = data.game_lobby_screen?.saved_games || data.saved_games;
 
         // Populate game app data
         this.populateGameAppData(gameAppData);
@@ -308,14 +308,14 @@ export class UIManager {
     }
 
     /**
-     * Fallback rendering for first screen
+     * Fallback rendering for game lobby screen
      */
-    renderFirstScreenFallback(data) {
+    renderGameLobbyScreenFallback(data) {
         const canvas = this.getCanvasContainer();
         if (!canvas) return;
 
         const container = document.createElement('div');
-        container.className = 'first-screen-fallback';
+        container.className = 'game-lobby-screen-fallback';
 
         // Simple fallback rendering
         if (data?.saved_games) {
@@ -426,9 +426,9 @@ export class UIManager {
     }
 
     /**
-     * Setup first screen specific event listeners
+     * Setup game lobby screen specific event listeners
      */
-    setupFirstScreenEventListeners(data) {
+    setupGameLobbyScreenEventListeners(data) {
         // Continue game button
         const continueBtn = document.querySelector('.continue-game-btn');
         if (continueBtn) {
@@ -564,7 +564,7 @@ export class UIManager {
         return document.querySelector('.close-btn');
     }
 
-    // First Screen Event Handlers
+    // Game Lobby Screen Event Handlers
 
     /**
      * Handle continue game button click
@@ -777,7 +777,7 @@ export class UIManager {
         });
 
         // Re-setup event listeners for the simple rendered elements
-        this.setupFirstScreenEventListeners();
+        this.setupGameLobbyScreenEventListeners();
     }
 
     /**
@@ -850,7 +850,7 @@ export class UIManager {
                 gameItem.parentNode.replaceChild(emptyElement, gameItem);
 
                 // Re-setup event listeners for the new empty slot
-                this.setupFirstScreenEventListeners();
+                this.setupGameLobbyScreenEventListeners();
 
                 // Update games count
                 this.updateGamesCount();
