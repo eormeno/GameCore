@@ -11,6 +11,7 @@ use App\Services\GameAppService;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GameInstanceService;
 use App\Http\Requests\EventRequestFilter;
+use App\Services\Screens\GameLobbyScreenService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class GameAppController extends Controller
@@ -22,12 +23,11 @@ class GameAppController extends Controller
         return response()->json(['displaying_games_gallery' => $gameApps]);
     }
 
-    public function play(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService, ?string $invitationCode = null)
+    public function play(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService, GameLobbyScreenService $gameLobbyScreenService, ?string $invitationCode = null)
     {
         try {
             $currentUser = Auth::user();
             $gameApp = $gameAppService->findActiveById($gameAppId);
-            $game_app = $gameAppService->gameAppToApiFormat($gameApp);
             $gamesService->createFirstTimeGame($currentUser, $gameApp);
 
             // if ($gameApp->max_instances_per_user == 1) {
@@ -42,26 +42,8 @@ class GameAppController extends Controller
             //         ]
             //     ]);
             // }
-
-            $savedGames = $gamesService->getSavedGames($currentUser, $gameApp);
-            $saved_games = $gamesService->toApiFormat($savedGames);
-
-            $savedGamesCount = $gamesService->countActiveUserGameInstances($currentUser, $gameApp);
-            $userPermissions = [];
-            $canCreateNewGame = false;
-            if ($gameApp->max_instances_per_user > 0) {
-                $canCreateNewGame = $savedGamesCount < $gameApp->max_instances_per_user;
-            } else {
-                $canCreateNewGame = true;
-            }
-            $userPermissions['can_create_new_game'] = $canCreateNewGame;
-            return response()->json([
-                'game_lobby_screen' => [
-                    'game_app' => $game_app,
-                    'saved_games' => $saved_games,
-                    'permissions' => $userPermissions,
-                ]
-            ]);
+            
+            return response()->json($gameLobbyScreenService->getGameLobbyScreen($currentUser, $gameApp));
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [
@@ -75,9 +57,7 @@ class GameAppController extends Controller
                 ]
             ], 500);
         }
-    }
-
-    public function newGameUI(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService)
+    }    public function newGameUI(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService)
     {
         try {
             $currentUser = Auth::user();
