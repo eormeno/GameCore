@@ -6,18 +6,22 @@ use App\Models\User;
 use App\Models\GameApp;
 use App\Services\GameAppService;
 use App\Services\GameInstanceService;
+use App\Services\TranslationService;
 
 class GameLobbyScreenService
 {
     private GameAppService $gameAppService;
     private GameInstanceService $gameInstanceService;
+    private TranslationService $translationService;
 
     public function __construct(
         GameAppService $gameAppService,
-        GameInstanceService $gameInstanceService
+        GameInstanceService $gameInstanceService,
+        TranslationService $translationService
     ) {
         $this->gameAppService = $gameAppService;
         $this->gameInstanceService = $gameInstanceService;
+        $this->translationService = $translationService;
     }
 
     /**
@@ -70,14 +74,39 @@ class GameLobbyScreenService
         $savedGamesCount = $this->gameInstanceService->countActiveUserGameInstances($user, $gameApp);
         
         $canCreateNewGame = false;
+        $reason = null;
+        $message = null;
+        
         if ($gameApp->max_instances_per_user > 0) {
             $canCreateNewGame = $savedGamesCount < $gameApp->max_instances_per_user;
+            
+            if ($canCreateNewGame) {
+                $message = $this->translationService->translate('can_create_new_game');
+            } else {
+                $reason = $this->translationService->translate('max_instances_reached');
+                $message = $this->translationService->translate('instances_limit_reached', [
+                    'max' => $gameApp->max_instances_per_user
+                ]);
+            }
         } else {
             $canCreateNewGame = true;
+            $message = $this->translationService->translate('can_create_new_game');
         }
 
         return [
-            'can_create_new_game' => $canCreateNewGame
+            'can_create_new_game' => [
+                'value' => $canCreateNewGame,
+                'reason' => $reason,
+                'message' => $message,
+                'instances_info' => [
+                    'current' => $savedGamesCount,
+                    'max' => $gameApp->max_instances_per_user,
+                    'description' => $this->translationService->translate('instances_count', [
+                        'current' => $savedGamesCount,
+                        'max' => $gameApp->max_instances_per_user ?: '∞'
+                    ])
+                ]
+            ]
         ];
     }
 }

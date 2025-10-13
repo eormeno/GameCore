@@ -8,6 +8,7 @@ use App\Models\GameApp;
 use App\Utils\ImageUtils;
 use App\Contracts\IRenderer;
 use App\Services\GameAppService;
+use App\Services\TranslationService;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GameInstanceService;
 use App\Http\Requests\EventRequestFilter;
@@ -16,6 +17,14 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class GameAppController extends Controller
 {
+    protected TranslationService $translationService;
+    
+    public function __construct(TranslationService $translationService)
+    {
+        $this->translationService = $translationService;
+        // Pre-cargar traducciones que se usan frecuentemente
+        $this->translationService->preloadModules(['games', 'errors']);
+    }
 
     public function all(GameAppService $gameAppService)
     {
@@ -47,13 +56,13 @@ class GameAppController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [
-                    'game_not_found' => ['message' => 'Game not found or is not active.']
+                    'game_not_found' => ['message' => $this->translationService->translate('game_not_found')]
                 ]
             ], 404);
         } catch (Exception $e) {
             return response()->json([
                 'exception' => [
-                    'error' => ['message' => 'An error occurred while trying to play the game.']
+                    'error' => ['message' => $this->translationService->translate('error_occurred')]
                 ]
             ], 500);
         }
@@ -71,13 +80,13 @@ class GameAppController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'exception' => [
-                    'game_not_found' => ['message' => 'Game not found or is not active.']
+                    'game_not_found' => ['message' => $this->translationService->translate('game_not_found')]
                 ]
             ], 404);
         } catch (Exception $e) {
             return response()->json([
                 'exception' => [
-                    'error' => ['message' => 'An error occurred while trying to create a new game.']
+                    'error' => ['message' => $this->translationService->translate('new_game_error')]
                 ]
             ], 500);
         }
@@ -113,7 +122,9 @@ class GameAppController extends Controller
         $basePath = $this->resourceBasePath($gameApp);
         $path = $this->findResource($basePath, $resourceName);
         if ($path === null) {
-            return response()->json(['error' => "Resource $resourceName not found"], 404);
+            return response()->json([
+                'error' => $this->translationService->translate('resource_not_found', ['resource' => $resourceName])
+            ], 404);
         }
         return response()->file(
             $path,
