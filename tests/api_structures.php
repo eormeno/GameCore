@@ -8,11 +8,11 @@
  */
 
 /**
- * Get the JSON structure for the game app play endpoint response
+ * Get the JSON structure for the game lobby screen response
  * 
  * @return array
  */
-function getGameAppPlayResponseStructure(): array
+function getGameLobbyScreenStructure(): array
 {
     return [
         'game_lobby_screen' => [
@@ -58,7 +58,7 @@ function getGameAppPlayResponseStructure(): array
  * @param \Illuminate\Testing\TestResponse $response
  * @return void
  */
-function assertGameAppPlayResponseStructure($response): void
+function assertGameLobbyScreenStructure($response): void
 {
-    $response->assertJsonStructure(getGameAppPlayResponseStructure());
+    $response->assertJsonStructure(getGameLobbyScreenStructure());
 }
