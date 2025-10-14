@@ -6,22 +6,18 @@ use App\Models\User;
 use App\Models\GameApp;
 use App\Services\GameAppService;
 use App\Services\GameInstanceService;
-use App\Services\TranslationService;
 
 class GameLobbyScreenService
 {
     private GameAppService $gameAppService;
     private GameInstanceService $gameInstanceService;
-    private TranslationService $translationService;
 
     public function __construct(
         GameAppService $gameAppService,
-        GameInstanceService $gameInstanceService,
-        TranslationService $translationService
+        GameInstanceService $gameInstanceService
     ) {
         $this->gameAppService = $gameAppService;
         $this->gameInstanceService = $gameInstanceService;
-        $this->translationService = $translationService;
     }
 
     /**
@@ -35,21 +31,76 @@ class GameLobbyScreenService
     {
         // Get game app in API format
         $game_app = $this->gameAppService->gameAppToApiFormat($gameApp);
-        
+
         // Get saved games for the user
         $savedGames = $this->gameInstanceService->getSavedGames($user, $gameApp);
         $saved_games = $this->gameInstanceService->toApiFormat($savedGames);
 
-        // Calculate user permissions
-        $userPermissions = $this->calculateUserPermissions($user, $gameApp);
+        $ui = $this->uiElements($user, $gameApp);
 
         return [
             'game_lobby_screen' => [
                 'game_app' => $game_app,
                 'saved_games' => $saved_games,
-                'permissions' => $userPermissions,
+                'ui' => $ui,
             ]
         ];
+    }
+
+    /**
+     * Define UI elements for the game lobby screen
+     * 
+     * @return array
+     */
+    private function uiElements(User $user, GameApp $gameApp): array
+    {
+        $canCreateNewGame = $this->canCreateNewGame($user, $gameApp);
+        $maxInstances = $gameApp->max_instances_per_user;
+
+        $newGameButtonTooltip = $canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game');
+        $warningMessage = $canCreateNewGame ? null : t('instances_limit_reached', ['max' => $maxInstances]);
+
+        return [
+            'new_game_button' => [
+                'label' => t('new_game_button_label'),
+                'tooltip' => $newGameButtonTooltip,
+                'action' => 'create_new_game',
+                'enabled' => $canCreateNewGame,
+                'icon' => 'plus',
+                'style' => 'primary',
+            ],
+
+            'warning_message_label' => $warningMessage,
+            'saved_games_label' => t('saved_games_description'),
+            'saved_games_list' => [
+                'empty_message' => t('no_saved_games_message'),
+                'item_actions' => [
+                    'load' => [
+                        'label' => t('load_game_action'),
+                        'action' => 'load_game',
+                        'icon' => 'play',
+                        'style' => 'success',
+                    ],
+                    'delete' => [
+                        'label' => t('delete_game_action'),
+                        'action' => 'delete_game',
+                        'icon' => 'trash',
+                        'style' => 'danger',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private function canCreateNewGame(User $user, GameApp $gameApp): bool
+    {
+        $savedGamesCount = $this->gameInstanceService->countActiveUserGameInstances($user, $gameApp);
+
+        if ($gameApp->max_instances_per_user > 0) {
+            return $savedGamesCount < $gameApp->max_instances_per_user;
+        }
+
+        return true; // No limit
     }
 
     /**
@@ -60,53 +111,5 @@ class GameLobbyScreenService
     public static function getResponseStructure(): array
     {
         return GameLobbyScreenStructure::response();
-    }
-
-    /**
-     * Calculate user permissions for the game app
-     *
-     * @param User $user
-     * @param GameApp $gameApp
-     * @return array
-     */
-    private function calculateUserPermissions(User $user, GameApp $gameApp): array
-    {
-        $savedGamesCount = $this->gameInstanceService->countActiveUserGameInstances($user, $gameApp);
-        
-        $canCreateNewGame = false;
-        $reason = null;
-        $message = null;
-        
-        if ($gameApp->max_instances_per_user > 0) {
-            $canCreateNewGame = $savedGamesCount < $gameApp->max_instances_per_user;
-            
-            if ($canCreateNewGame) {
-                $message = $this->translationService->translate('can_create_new_game');
-            } else {
-                $reason = $this->translationService->translate('max_instances_reached');
-                $message = $this->translationService->translate('instances_limit_reached', [
-                    'max' => $gameApp->max_instances_per_user
-                ]);
-            }
-        } else {
-            $canCreateNewGame = true;
-            $message = $this->translationService->translate('can_create_new_game');
-        }
-
-        return [
-            'can_create_new_game' => [
-                'value' => $canCreateNewGame,
-                'reason' => $reason,
-                'message' => $message,
-                'instances_info' => [
-                    'current' => $savedGamesCount,
-                    'max' => $gameApp->max_instances_per_user,
-                    'description' => $this->translationService->translate('instances_count', [
-                        'current' => $savedGamesCount,
-                        'max' => $gameApp->max_instances_per_user ?: '∞'
-                    ])
-                ]
-            ]
-        ];
     }
 }

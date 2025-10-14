@@ -30,41 +30,30 @@ games,new_game_created,games.new_game_created,New game created,Nuevo juego cread
 
 ## Uso Básico
 
-### En Controladores
+### Función Helper Global `t()`
+
+La forma más simple de usar traducciones es con la función helper `t()`:
 
 ```php
 class GameAppController extends Controller
 {
-    protected TranslationService $translationService;
-    
-    public function __construct(TranslationService $translationService)
-    {
-        $this->translationService = $translationService;
-        // Pre-cargar módulos frecuentes
-        $this->translationService->preloadModules(['games', 'errors']);
-    }
-    
     public function someMethod()
     {
         // Traducción simple
-        $message = $this->translationService->translate('game_not_found');
+        $message = t('game_not_found');
         
         // Traducción con parámetros
-        $message = $this->translationService->translate('resource_not_found', [
-            'resource' => 'image.png'
-        ]);
+        $message = t('resource_not_found', ['resource' => 'image.png']);
         
         // Ejemplos más avanzados con parámetros
-        $welcomeMessage = $this->translationService->translate('user_welcome', [
-            'name' => Auth::user()->name
-        ]);
+        $welcomeMessage = t('user_welcome', ['name' => Auth::user()->name]);
         
-        $scoreMessage = $this->translationService->translate('score_achieved', [
+        $scoreMessage = t('score_achieved', [
             'points' => $game->score,
             'time' => $game->duration
         ]);
         
-        $progressMessage = $this->translationService->translate('level_progress', [
+        $progressMessage = t('level_progress', [
             'current' => $user->current_level,
             'total' => $game->total_levels
         ]);
@@ -76,6 +65,25 @@ class GameAppController extends Controller
         ]);
     }
 }
+```
+
+### Funciones Helper Disponibles
+
+```php
+// Traducción simple
+t('welcome_message')
+
+// Traducción con parámetros
+t('user_welcome', ['name' => 'Carlos'])
+
+// Traducción por lotes (más eficiente para múltiples slugs)
+tb(['save', 'cancel', 'delete', 'edit'])
+
+// Limpiar caché de traducciones
+t_clear_cache()
+
+// Ver reporte de traducciones faltantes
+t_missing()
 ```
 
 ### Detección de Idioma
@@ -138,20 +146,71 @@ Los cambios se reflejan **inmediatamente** sin necesidad de comandos adicionales
 | Comando | Descripción |
 |---------|-------------|
 | `translation:init` | Inicializa archivo CSV con traducciones base |
+| `translation:add` | Agrega una nueva traducción al archivo CSV |
+| `translation:sort` | Ordena físicamente el archivo CSV por módulo y clave |
 
-### Opciones de Init
+### Comando `translation:init`
+```bash
+php artisan translation:init [--file=nombre.csv] [--force]
+```
+**Opciones:**
 - `--file=nombre.csv` - Nombre del archivo CSV
 - `--force` - Sobrescribir archivo existente sin preguntar
+
+### Comando `translation:add`
+```bash
+php artisan translation:add {module} {key} {english} [opciones]
+```
+**Argumentos:**
+- `module` - Nombre del módulo (ej: games, errors, common)  
+- `key` - Clave de traducción (ej: new_feature, welcome_back)
+- `english` - Texto en inglés
+
+**Opciones:**
+- `--file=nombre.csv` - Archivo CSV a usar
+- `--slug=custom.slug` - Slug personalizado (por defecto: module.key)
+- `--copy-to-all` - Copiar texto inglés a todos los idiomas
+- `--es="texto"` - Traducción en español (opcional)
+
+**Ejemplos:**
+```bash
+# Agregar con traducción en español
+php artisan translation:add games high_score "New High Score!" --es="¡Nueva Puntuación Máxima!"
+
+# Copiar inglés a todos los idiomas
+php artisan translation:add errors timeout "Request timeout" --copy-to-all
+
+# Usar slug personalizado  
+php artisan translation:add ui submit "Submit" --slug="forms.submit_btn"
+```
+
+### Comando `translation:sort`
+```bash
+php artisan translation:sort [--file=nombre.csv]
+```
+Ordena el archivo CSV alfabéticamente por módulo y luego por clave para mejor organización.
 
 ## Flujo de Trabajo
 
 1. **Inicializar**: `php artisan translation:init`
-2. **Editar**: Abrir `storage/app/translations/translations.csv` en tu editor favorito
-3. **Usar**: Las traducciones están disponibles inmediatamente
+2. **Agregar traducciones**: 
+   - Comando: `php artisan translation:add module key "English text"`
+   - Manual: Editar `storage/app/translations/translations.csv`
+3. **Ordenar** (opcional): `php artisan translation:sort`
+4. **Usar**: Las traducciones están disponibles inmediatamente
 
 ### Agregar nuevas traducciones
 
-Solo añade nuevas filas al CSV:
+**Opción 1: Comando Artisan (Recomendado)**
+```bash
+# Con traducción en español
+php artisan translation:add games victory "You Won!" --es="¡Ganaste!"
+
+# Copiar inglés a otros idiomas
+php artisan translation:add errors timeout "Connection timeout" --copy-to-all
+```
+
+**Opción 2: Edición manual del CSV**
 ```csv
 Module,Key,Slug,EN,ES
 messages,user_login,messages.user_login,User logged in,Usuario inició sesión
@@ -273,6 +332,54 @@ ALTER TABLE users ADD COLUMN locale VARCHAR(5) DEFAULT 'en' AFTER email;
 3. Los cambios se reflejan inmediatamente
 4. Opcional: Comparte el CSV con traductores para colaboración
 
+## Funciones Helper Globales
+
+El sistema incluye funciones helper que simplifican el uso de traducciones:
+
+### `t($slug, $replace = [])`
+Función principal para traducir un slug con parámetros opcionales:
+
+```php
+// Traducción simple
+t('welcome_message')
+// "Welcome!" / "¡Bienvenido!"
+
+// Con parámetros
+t('user_welcome', ['name' => 'Carlos'])
+// "Welcome back, Carlos!" / "¡Bienvenido de vuelta, Carlos!"
+```
+
+### `tb($slugs)`
+Traducción por lotes para mejor performance:
+
+```php
+$translations = tb(['save', 'cancel', 'delete', 'edit']);
+// ['save' => 'Save', 'cancel' => 'Cancel', ...]
+```
+
+### `t_clear_cache()`
+Limpia el caché de traducciones:
+
+```php
+t_clear_cache();
+// Cache cleared
+```
+
+### `t_missing()`
+Muestra reporte de traducciones faltantes:
+
+```php
+t_missing();
+// Missing translations: game_start, level_complete
+```
+
+### Ventajas de las Funciones Helper
+
+- **Código más limpio**: No necesitas inyectar el servicio
+- **Uso universal**: Disponibles en cualquier parte del código
+- **Sintaxis simple**: Similar a otros helpers de Laravel como `__()` o `trans()`
+- **Zero configuration**: Funcionan automáticamente sin setup
+
 ## Ventajas del Sistema
 
 - **Simplicidad**: Un solo archivo para todas las traducciones
@@ -281,3 +388,4 @@ ALTER TABLE users ADD COLUMN locale VARCHAR(5) DEFAULT 'en' AFTER email;
 - **Sin dependencias**: Solo usa funciones nativas de PHP
 - **Performance**: Caché en memoria para acceso rápido
 - **Flexibilidad**: Fácil de versionar y hacer backups
+- **Helpers globales**: Funciones simples disponibles en toda la aplicación
