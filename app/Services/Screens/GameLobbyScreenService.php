@@ -70,8 +70,8 @@ class GameLobbyScreenService
                 'style' => 'primary',
             ],
 
-            'warning_message_label' => $warningMessage,
-            'saved_games_label' => t('saved_games_description'),
+            'warning_message_label' => ['text' => $warningMessage, 'visible' => !is_null($warningMessage)],
+            'saved_games_label' => ['text' => t('saved_games_description'), 'visible' => true],
             'saved_games_list' => [
                 'empty_message' => t('no_saved_games_message'),
                 'item_actions' => [
@@ -92,6 +92,26 @@ class GameLobbyScreenService
         ];
     }
 
+    private function savedGamesTable(User $user, GameApp $gameApp): array
+    {
+         // Get saved games for the user
+        $savedGames = $this->gameInstanceService->getSavedGames($user, $gameApp);
+        $savedGamesCount = count($savedGames);
+        $saved_games = $this->gameInstanceService->toApiFormat($savedGames);
+
+        return [
+            'columns' => [
+                ['header' => t('saved_game_name_column'), 'field' => 'name'],
+                ['header' => t('saved_game_date_column'), 'field' => 'created_at', 'format' => 'datetime'],
+                ['header' => t('saved_game_last_played_column'), 'field' => 'last_played_at', 'format' => 'datetime'],
+                ['header' => t('saved_game_actions_column'), 'field' => 'actions', 'type' => 'actions'],
+            ],
+            'rows' => $this->gameInstanceService->toApiFormat($this->gameInstanceService->getSavedGames($user, $gameApp)),
+            'empty_message' => t('no_saved_games_message'),
+        ];
+    }
+
+    
     private function canCreateNewGame(User $user, GameApp $gameApp): bool
     {
         $savedGamesCount = $this->gameInstanceService->countActiveUserGameInstances($user, $gameApp);
