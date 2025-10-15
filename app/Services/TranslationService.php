@@ -37,7 +37,7 @@ class TranslationService
             return empty($replace) ? $translation : $this->replaceParameters($translation, $replace);
         }
         
-        $translation = $this->findTranslation($slug, $locale);
+        $translation = $this->findTranslation($slug, $replace, $locale);
         $this->translationCache[$cacheKey] = $translation;
         
         return empty($replace) ? $translation : $this->replaceParameters($translation, $replace);
@@ -46,7 +46,7 @@ class TranslationService
     /**
      * Busca la traducción en el CSV
      */
-    private function findTranslation(string $slug, string $locale): string
+    private function findTranslation(string $slug, array $replace, string $locale): string
     {
         $this->loadCsvData();
         
@@ -68,7 +68,7 @@ class TranslationService
         }
         
         // 3. Si no encuentra traducción, devuelve el slug formateado
-        return $this->formatSlug($slug);
+        return $this->formatSlug($slug, $replace);
     }
     
     /**
@@ -147,8 +147,11 @@ class TranslationService
     /**
      * Formatea un slug cuando no hay traducción disponible
      */
-    private function formatSlug(string $slug): string
+    private function formatSlug(string $slug, array $replace): string
     {
+        // muestra por consola
+        $conParametros = empty($replace) ? '.' : ', con parámetros: ' . implode(', ', array_keys($replace));
+        error_log("Agregar el slug '$slug' al archivo de traducciones$conParametros");
         // Remueve el módulo si existe
         $cleanSlug = str_contains($slug, '.') ? 
             substr($slug, strrpos($slug, '.') + 1) : $slug;

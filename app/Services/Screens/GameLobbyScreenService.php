@@ -39,7 +39,7 @@ class GameLobbyScreenService
         return [
             'game_lobby_screen:container' => [
                 'layout' => 'vertical',
-                'title' => t('game_lobby_title', ['game_app' => $gameApp->name]),
+                'title' => t('games.game_lobby_title', ['name' => $gameApp->name]),
                 'elements' => $ui,
             ]
         ];
@@ -73,15 +73,17 @@ class GameLobbyScreenService
     private function savedGamesTable(array $saved_games, int $maxInstances): array
     {
         $headers = [
-            ['header' => t('saved_game_number_column')],
-            ['header' => t('saved_game_name_column')],
-            ['header' => t('saved_game_role_column')],
-            ['header' => t('saved_game_status_column')],
-            ['header' => t('saved_game_last_played_column')],
-            ['header' => t('saved_game_actions_column')],
+            ['header' => t('games.saved_game_number_column')],
+            ['header' => t('games.saved_game_name_column')],
+            ['header' => t('games.saved_game_state_column')],
+            ['header' => t('games.saved_game_role_column')],
+            ['header' => t('games.saved_game_status_column')],
+            ['header' => t('games.saved_game_join_method_column')],
+            ['header' => t('games.saved_game_last_played_column')],
+            ['header' => t('games.saved_game_actions_column')],
         ];
         $title = count($saved_games) > 0 ?
-            t('saved_games_title') :
+            t('games.saved_games_title') :
             t('no_saved_games_title');
         $rows = [];
         $gameNumber = 1;
@@ -89,7 +91,7 @@ class GameLobbyScreenService
             $savedGameId = $game['id'] ?? null;
             $rows[] = [
                 $gameNumber++,
-                $game['name'] ?? t('default_game_name'),
+                $game['name'] ?? t('games.default_game_name'),
                 $game['state'],
                 $game['game_user']['role'],
                 $game['game_user']['status'],
@@ -132,7 +134,7 @@ class GameLobbyScreenService
     {
         return [
             "play_{$gameId}_game:button" => [
-                'label' => t('play_game_action'),
+                'label' => t('games.play_game_action'),
                 'action' => 'play_game',
                 'parameters' => ['game_id' => $gameId],
                 'icon' => 'play',
