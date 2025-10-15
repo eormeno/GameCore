@@ -29,20 +29,18 @@ class GameLobbyScreenService
      */
     public function getGameLobbyScreen(User $user, GameApp $gameApp): array
     {
-        // Get game app in API format
-        $game_app = $this->gameAppService->gameAppToApiFormat($gameApp);
-
-        // Get saved games for the user
         $savedGames = $this->gameInstanceService->getSavedGames($user, $gameApp);
         $saved_games = $this->gameInstanceService->toApiFormat($savedGames);
+        $canCreateNewGame = $this->canCreateNewGame($user, $gameApp);
+        $maxInstances = $gameApp->max_instances_per_user;
 
-        $ui = $this->uiElements($user, $gameApp);
+        $ui = $this->uiElements($canCreateNewGame, $maxInstances, $saved_games);
 
         return [
-            'game_lobby_screen' => [
-                'game_app' => $game_app,
-                'saved_games' => $saved_games,
-                'ui' => $ui,
+            'game_lobby_screen:container' => [
+                'layout' => 'vertical',
+                'title' => t('game_lobby_title', ['game_app' => $gameApp->name]),
+                'elements' => $ui,
             ]
         ];
     }
@@ -52,16 +50,13 @@ class GameLobbyScreenService
      * 
      * @return array
      */
-    private function uiElements(User $user, GameApp $gameApp): array
+    private function uiElements(bool $canCreateNewGame, int $maxInstances, array $saved_games): array
     {
-        $canCreateNewGame = $this->canCreateNewGame($user, $gameApp);
-        $maxInstances = $gameApp->max_instances_per_user;
-
         $newGameButtonTooltip = $canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game');
         $warningMessage = $canCreateNewGame ? null : t('instances_limit_reached', ['max' => $maxInstances]);
 
         return [
-            'new_game_button' => [
+            'new_game:button' => [
                 'label' => t('new_game_button_label'),
                 'tooltip' => $newGameButtonTooltip,
                 'action' => 'create_new_game',
@@ -70,48 +65,95 @@ class GameLobbyScreenService
                 'style' => 'primary',
             ],
 
-            'warning_message_label' => ['text' => $warningMessage, 'visible' => !is_null($warningMessage)],
-            'saved_games_label' => ['text' => t('saved_games_description'), 'visible' => true],
-            'saved_games_list' => [
-                'empty_message' => t('no_saved_games_message'),
-                'item_actions' => [
-                    'load' => [
-                        'label' => t('load_game_action'),
-                        'action' => 'load_game',
-                        'icon' => 'play',
-                        'style' => 'success',
-                    ],
-                    'delete' => [
-                        'label' => t('delete_game_action'),
-                        'action' => 'delete_game',
-                        'icon' => 'trash',
-                        'style' => 'danger',
+            'warning_message:label' => ['text' => $warningMessage, 'visible' => !is_null($warningMessage)],
+            'saved_games:table' => $this->savedGamesTable($saved_games, $maxInstances),
+        ];
+    }
+
+    private function savedGamesTable(array $saved_games, int $maxInstances): array
+    {
+        $headers = [
+            ['header' => t('saved_game_number_column')],
+            ['header' => t('saved_game_name_column')],
+            ['header' => t('saved_game_role_column')],
+            ['header' => t('saved_game_status_column')],
+            ['header' => t('saved_game_last_played_column')],
+            ['header' => t('saved_game_actions_column')],
+        ];
+        $title = count($saved_games) > 0 ?
+            t('saved_games_title') :
+            t('no_saved_games_title');
+        $rows = [];
+        $gameNumber = 1;
+        foreach ($saved_games as $game) {
+            $savedGameId = $game['id'] ?? null;
+            $rows[] = [
+                $gameNumber++,
+                $game['name'] ?? t('default_game_name'),
+                $game['state'],
+                $game['game_user']['role'],
+                $game['game_user']['status'],
+                $game['game_user']['join_method'],
+                $game['game_user']['last_played_at_human'],
+                "saved_game_{$savedGameId}_actions:container" => [
+                    'layout' => 'horizontal',
+                    'elements' => [
+                        $this->playGameButton($savedGameId),
+                        $this->deleteGameButton($savedGameId),
                     ],
                 ],
-            ],
-        ];
-    }
+            ];
+        }
 
-    private function savedGamesTable(User $user, GameApp $gameApp): array
-    {
-         // Get saved games for the user
-        $savedGames = $this->gameInstanceService->getSavedGames($user, $gameApp);
-        $savedGamesCount = count($savedGames);
-        $saved_games = $this->gameInstanceService->toApiFormat($savedGames);
+        // Fill empty rows until we reach max instances per user
+        $emptyRowsCount = $maxInstances - count($saved_games);
+        for ($i = 0; $i < $emptyRowsCount; $i++) {
+            $rows[] = [
+                $gameNumber++,
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                'actions' => [],
+            ];
+        }
 
         return [
-            'columns' => [
-                ['header' => t('saved_game_name_column'), 'field' => 'name'],
-                ['header' => t('saved_game_date_column'), 'field' => 'created_at', 'format' => 'datetime'],
-                ['header' => t('saved_game_last_played_column'), 'field' => 'last_played_at', 'format' => 'datetime'],
-                ['header' => t('saved_game_actions_column'), 'field' => 'actions', 'type' => 'actions'],
-            ],
-            'rows' => $this->gameInstanceService->toApiFormat($this->gameInstanceService->getSavedGames($user, $gameApp)),
-            'empty_message' => t('no_saved_games_message'),
+            'title' => $title,
+            'headers' => $headers,
+            'rows' => $rows,
         ];
     }
 
-    
+    private function playGameButton(int $gameId): array
+    {
+        return [
+            "play_{$gameId}_game:button" => [
+                'label' => t('play_game_action'),
+                'action' => 'play_game',
+                'parameters' => ['game_id' => $gameId],
+                'icon' => 'play',
+                'style' => 'success',
+            ],
+        ];
+    }
+
+    private function deleteGameButton(int $gameId): array
+    {
+        return [
+            "delete_{$gameId}_game:button" => [
+                'label' => t('delete_game_action'),
+                'action' => 'delete_game',
+                'parameters' => ['game_id' => $gameId],
+                'icon' => 'trash',
+                'style' => 'danger',
+            ],
+        ];
+    }
+
     private function canCreateNewGame(User $user, GameApp $gameApp): bool
     {
         $savedGamesCount = $this->gameInstanceService->countActiveUserGameInstances($user, $gameApp);
