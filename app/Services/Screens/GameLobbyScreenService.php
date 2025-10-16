@@ -52,7 +52,7 @@ class GameLobbyScreenService
         $elements = [];
 
         // New Game Button
-        $newGameButton = UIBuilder::button('new_game')
+        $elements += UIBuilder::button('new_game')
             ->label(t('new_game_button_label'))
             ->action('create_new_game')
             ->icon('plus')
@@ -61,21 +61,15 @@ class GameLobbyScreenService
             ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
             ->build();
 
-        $elements = array_merge($elements, $newGameButton);
-
-        // Warning Message
-        if (!$canCreateNewGame) {
-            $warningLabel = UIBuilder::label('warning_message')
-                ->text(t('instances_limit_reached', ['max' => $maxInstances]))
-                ->style('warning')
-                ->build();
-            
-            $elements = array_merge($elements, $warningLabel);
-        }
+        // Warning Message (only if needed)
+        $elements += UIBuilder::label('warning_message')
+            ->text(t('instances_limit_reached', ['max' => $maxInstances]))
+            ->style('warning')
+            ->visible(!$canCreateNewGame)
+            ->build();
 
         // Saved Games Table
-        $savedGamesTable = $this->buildSavedGamesTable($saved_games, $maxInstances);
-        $elements = array_merge($elements, $savedGamesTable);
+        $elements += $this->buildSavedGamesTable($saved_games, $maxInstances);
 
         return $elements;
     }
@@ -124,7 +118,7 @@ class GameLobbyScreenService
     private function buildGameRow(array $game, int $gameNumber): array
     {
         $savedGameId = $game['id'] ?? null;
-        
+
         $actionsContainer = UIBuilder::container("saved_game_{$savedGameId}_actions")
             ->layout(LayoutType::HORIZONTAL)
             ->elements([
