@@ -76,22 +76,18 @@ class GameLobbyScreenService
 
     private function buildSavedGamesTable(array $saved_games, int $maxInstances): array
     {
-        $headers = [
-            ['header' => t('games.saved_game_number_column')],
-            ['header' => t('games.saved_game_name_column')],
-            ['header' => t('games.saved_game_state_column')],
-            ['header' => t('games.saved_game_role_column')],
-            ['header' => t('games.saved_game_status_column')],
-            ['header' => t('games.saved_game_join_method_column')],
-            ['header' => t('games.saved_game_last_played_column')],
-            ['header' => t('games.saved_game_actions_column')],
-        ];
-
         $rows = $this->buildTableRows($saved_games, $maxInstances);
 
         return UIBuilder::table('saved_games')
             ->title(count($saved_games) > 0 ? t('games.saved_games_title') : t('no_saved_games_title'))
-            ->headers($headers)
+            ->addHeader(t('games.saved_game_number_column'))
+            ->addHeader(t('games.saved_game_name_column'))
+            ->addHeader(t('games.saved_game_state_column'))
+            ->addHeader(t('games.saved_game_role_column'))
+            ->addHeader(t('games.saved_game_status_column'))
+            ->addHeader(t('games.saved_game_join_method_column'))
+            ->addHeader(t('games.saved_game_last_played_column'))
+            ->addHeader(t('games.saved_game_actions_column'), 'game_actions', width: '200px')
             ->rows($rows)
             ->build();
     }

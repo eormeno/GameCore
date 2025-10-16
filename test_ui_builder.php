@@ -6,6 +6,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use App\Services\UI\UIBuilder;
 use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\Enums\TextAlign;
+use App\Services\UI\Enums\FontWeight;
 
 // Simulamos el uso del sistema
 echo "Ejemplo de uso del sistema UI Builder refactorizado:\n\n";
@@ -32,14 +34,12 @@ $label = UIBuilder::label('test_label')
 echo "Label creado:\n";
 echo json_encode($label, JSON_PRETTY_PRINT) . "\n\n";
 
-// Crear una tabla
+// Crear una tabla con headers integrados - API más elegante
 $table = UIBuilder::table('test_table')
     ->title('Mi tabla de prueba')
-    ->headers([
-        ['header' => 'Columna 1'],
-        ['header' => 'Columna 2'],
-        ['header' => 'Acciones']
-    ])
+    ->addHeader('Nombre', 'col1', sortable: true, align: TextAlign::LEFT, width: '150px', color: '#333', tooltip: 'Haz clic para ordenar por nombre', sortDirection: 'asc')
+    ->addHeader('Estado', 'col2', width: '200px', backgroundColor: '#f5f5f5')
+    ->addHeader('Acciones', width: '120px', tooltip: 'Acciones disponibles para cada fila')
     ->rows([
         ['Dato 1', 'Dato 2', 'Editar'],
         ['Dato 3', 'Dato 4', 'Eliminar']
