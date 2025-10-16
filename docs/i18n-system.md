@@ -2,9 +2,21 @@
 
 Este proyecto implementa un sistema simple y eficiente de internacionalización usando un **único archivo CSV** como fuente de verdad.
 
+## 📍 Ubicación del Archivo
+
+**Archivo principal**: `resources/lang/translations.csv`
+
+Esta ubicación fue elegida porque:
+- ✅ Es semánticamente correcta (recursos de idioma)
+- ✅ Está fuera de `.gitignore` y puede ser trackeada por Git
+- ✅ Sigue las convenciones de Laravel para recursos de idioma
+- ✅ Es fácil de compartir entre desarrolladores y traductores
+- ✅ Permite versionado completo de las traducciones
+
 ## Características
 
 - ✅ **CSV como única fuente de verdad** - No más sincronización entre archivos
+- ✅ **Trackeado por Git** - Control de versiones completo para traducciones
 - ✅ **Servicio de traducción optimizado** con caché en memoria
 - ✅ **Middleware de detección automática** de idioma del usuario
 - ✅ **Edición directa del CSV** - Los cambios se reflejan inmediatamente
@@ -16,8 +28,9 @@ Este proyecto implementa un sistema simple y eficiente de internacionalización 
 ## Estructura de Archivos
 
 ```
-storage/app/translations/
-└── translations.csv   # Única fuente de verdad para todas las traducciones
+resources/
+└── lang/
+    └── translations.csv   # Única fuente de verdad para todas las traducciones
 ```
 
 ### Estructura del CSV

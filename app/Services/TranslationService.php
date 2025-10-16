@@ -15,7 +15,7 @@ class TranslationService
     public function __construct()
     {
         $this->currentLocale = App::getLocale();
-        $this->csvPath = storage_path('app/translations/' . config('translation.csv.default_filename', 'translations.csv'));
+        $this->csvPath = resource_path('lang/' . config('translation.csv.default_filename', 'translations.csv'));
     }
     
     /**

@@ -23,7 +23,7 @@ class TranslationAddCommand extends Command
         $key = $this->argument('key');
         $english = $this->argument('english');
         $filename = $this->option('file');
-        $filePath = storage_path("app/translations/$filename");
+        $filePath = resource_path("lang/$filename");
         
         // Generate slug
         $slug = $this->option('slug') ?: "$module.$key";

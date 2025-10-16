@@ -1,0 +1,84 @@
+Module,Key,Slug,EN,ES
+common,back,common.back,Back,Atrás
+common,cancel,common.cancel,Cancel,Cancelar
+common,close,common.close,Close,Cerrar
+common,create,common.create,Create,Crear
+common,delete,common.delete,Delete,Eliminar
+common,edit,common.edit,Edit,Editar
+common,error,common.error,Error,Error
+common,info,common.info,Information,Información
+common,loading,common.loading,Loading...,Cargando...
+common,next,common.next,Next,Siguiente
+common,no,common.no,No,No
+common,ok,common.ok,OK,OK
+common,previous,common.previous,Previous,Anterior
+common,save,common.save,Save,Guardar
+common,success,common.success,Success,Éxito
+common,update,common.update,Update,Actualizar
+common,warning,common.warning,Warning,Advertencia
+common,welcome,common.welcome,Welcome,Bienvenido
+common,welcome_message,common.welcome_message,"Welcome to our amazing game!","¡Bienvenido a nuestro increíble juego!"
+common,yes,common.yes,Yes,Sí
+common,you_are_logged_in,common.you_are_logged_in,"You are logged in as :name","Has iniciado sesión como :name"
+errors,database_connection,errors.database_connection,"Database connection failed","Database connection failed"
+errors,error_occurred,errors.error_occurred,"An error occurred while trying to play the game.","Ocurrió un error al intentar jugar el juego."
+errors,file_size_error,errors.file_size_error,"File :filename is too large (:size MB). Maximum allowed: :max MB","El archivo :filename es muy grande (:size MB). Máximo permitido: :max MB"
+errors,forbidden,errors.forbidden,"Access forbidden.","Acceso prohibido."
+errors,game_not_found,errors.game_not_found,"Game not found or is not active.","Juego no encontrado o no está activo."
+errors,max_instances_reached,errors.max_instances_reached,"The maximum number of saved games is :max","La cantidad máxima de partidas guardadas es :max"
+errors,new_game_error,errors.new_game_error,"An error occurred while trying to create a new game.","Ocurrió un error al intentar crear un nuevo juego."
+errors,resource_not_found,errors.resource_not_found,"Resource :resource not found","Recurso :resource no encontrado"
+errors,server_error,errors.server_error,"An internal server error occurred.","Ocurrió un error interno del servidor."
+errors,unauthorized,errors.unauthorized,"Unauthorized access.","Acceso no autorizado."
+errors,validation_failed,errors.validation_failed,"Validation failed.","Falló la validación."
+games,default_game_name,games.default_game_name,"Untitled Game","Juego Sin Título"
+games,fullscreen,games.fullscreen,Fullscreen,"Pantalla completa"
+games,game_finished,games.game_finished,"Game finished","Juego terminado"
+games,game_lobby_title,games.game_lobby_title,":name - Game Lobby",":name - Lobby del Juego"
+games,game_over,games.game_over,"Game Over","Fin del Juego"
+games,game_started,games.game_started,"Game started","Juego iniciado"
+games,high_score,games.high_score,"New High Score!","¡Nueva Puntuación Máxima!"
+games,level,games.level,Level,Nivel
+games,level_completed,games.level_completed,"Level completed","Nivel completado"
+games,lives,games.lives,Lives,Vidas
+games,music,games.music,Music,Música
+games,new_game_button_label,games.new_game_button_label,"New Game","Nueva Partida"
+games,new_game_created,games.new_game_created,"New game created successfully","Nuevo juego creado exitosamente"
+games,pause,games.pause,Pause,Pausar
+games,play_game_action,games.play_game_action,Play,Jugar
+games,player_joined,games.player_joined,"Player joined the game","Jugador se unió al juego"
+games,player_left,games.player_left,"Player left the game","Jugador abandonó el juego"
+games,quit,games.quit,Quit,Salir
+games,restart,games.restart,Restart,Reiniciar
+games,resume,games.resume,Resume,Continuar
+games,saved_game_actions_column,games.saved_game_actions_column,Actions,Acciones
+games,saved_game_join_method_column,games.saved_game_join_method_column,"Join Method","Método de Unión"
+games,saved_game_last_played_column,games.saved_game_last_played_column,"Last Played","Última Partida"
+games,saved_game_name_column,games.saved_game_name_column,"Game Name","Nombre del Juego"
+games,saved_game_number_column,games.saved_game_number_column,#,#
+games,saved_game_role_column,games.saved_game_role_column,Role,Rol
+games,saved_game_state_column,games.saved_game_state_column,State,Estado
+games,saved_game_status_column,games.saved_game_status_column,Status,Estatus
+games,saved_games_title,games.saved_games_title,"Saved Games","Juegos Guardados"
+games,score,games.score,Score,Puntuación
+games,settings,games.settings,Settings,Configuración
+games,sound,games.sound,Sound,Sonido
+games,time,games.time,Time,Tiempo
+games,you_win,games.you_win,"You Win!","¡Has Ganado!"
+messages,can_create_new_game,messages.can_create_new_game,"You can create a new game","Puedes iniciar una nueva partida"
+messages,cannot_create_new_game,messages.cannot_create_new_game,"You cannot create more games","No puedes crear más partidas"
+messages,delete_game_action,messages.delete_game_action,Delete,Eliminar
+messages,instances_count,messages.instances_count,"Active games: :current of :max","Cantidad de partidas: :current de :max"
+messages,instances_limit_reached,messages.instances_limit_reached,"You have reached the limit of :max active games","Has alcanzado el límite de :max partidas guardadas"
+messages,items_found,messages.items_found,"Found :count items in :location","Encontraste :count objetos en :location"
+messages,level_progress,messages.level_progress,"Level :current of :total completed","Nivel :current de :total completado"
+messages,load_game_action,messages.load_game_action,Load,Cargar
+messages,new_game_button_label,messages.new_game_button_label,"New Game","Nuevo Juego"
+messages,new_game_button_tooltip,messages.new_game_button_tooltip,"Create a new game","Crear un nuevo juego"
+messages,no_saved_games_message,messages.no_saved_games_message,"No saved games found","No se encontraron juegos guardados"
+messages,player_vs_player,messages.player_vs_player,":player1 vs :player2",":player1 vs :player2"
+messages,saved_games_description,messages.saved_games_description,"Your saved games","Tus juegos guardados"
+messages,score_achieved,messages.score_achieved,"You scored :points points in :time seconds","Obtuviste :points puntos en :time segundos"
+messages,test_message,messages.test_message,"This is a test message","Este es un mensaje de prueba"
+messages,user_welcome,messages.user_welcome,"Welcome back, :name!","¡Bienvenido de vuelta, :name!"
+ui,button_submit,ui.submit_btn,"Submit Form","Enviar Formulario"
