@@ -2,12 +2,14 @@
 
 namespace App\Services\UI\Components;
 
+use App\Services\UI\Enums\LayoutType;
+
 class ContainerBuilder extends BaseUIBuilder
 {
     protected function getDefaultConfig(): array
     {
         return [
-            'layout' => 'vertical',
+            'layout' => LayoutType::VERTICAL->value,
             'elements' => [],
             'slot' => null,
             'title' => null,
@@ -20,9 +22,9 @@ class ContainerBuilder extends BaseUIBuilder
         return $this;
     }
 
-    public function layout(string $layout): self
+    public function layout(LayoutType $layout): self
     {
-        $this->config['layout'] = $layout;
+        $this->config['layout'] = $layout->value;
         return $this;
     }
 

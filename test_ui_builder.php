@@ -5,6 +5,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 use App\Services\UI\UIBuilder;
+use App\Services\UI\Enums\LayoutType;
 
 // Simulamos el uso del sistema
 echo "Ejemplo de uso del sistema UI Builder refactorizado:\n\n";
@@ -51,7 +52,7 @@ echo json_encode($table, JSON_PRETTY_PRINT) . "\n\n";
 // Crear un contenedor
 $container = UIBuilder::container('test_container')
     ->slot('main')
-    ->layout('vertical')
+    ->layout(LayoutType::VERTICAL)
     ->title('Mi contenedor')
     ->elements(array_merge($button, $label, $table))
     ->build();

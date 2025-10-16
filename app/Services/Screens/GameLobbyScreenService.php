@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\GameApp;
 use App\Services\GameInstanceService;
 use App\Services\UI\UIBuilder;
+use App\Services\UI\Enums\LayoutType;
 
 class GameLobbyScreenService
 {
@@ -35,7 +36,7 @@ class GameLobbyScreenService
 
         return UIBuilder::container('game_lobby_screen')
             ->slot('canvas')
-            ->layout('vertical')
+            ->layout(LayoutType::VERTICAL)
             ->title(t('games.game_lobby_title', ['name' => $gameApp->name]))
             ->elements($ui)
             ->build();
@@ -125,7 +126,7 @@ class GameLobbyScreenService
         $savedGameId = $game['id'] ?? null;
         
         $actionsContainer = UIBuilder::container("saved_game_{$savedGameId}_actions")
-            ->layout('horizontal')
+            ->layout(LayoutType::HORIZONTAL)
             ->elements([
                 ...$this->buildPlayButton($savedGameId),
                 ...$this->buildDeleteButton($savedGameId),
