@@ -129,6 +129,24 @@ class GameInstanceService
 	}
 
 	/**
+	 * Check if a user can create a new game for the specified game app
+	 *
+	 * @param User $user
+	 * @param GameApp $gameApp
+	 * @return bool
+	 */
+	public function canCreateNewGame(User $user, GameApp $gameApp): bool
+	{
+		$savedGamesCount = $this->countActiveUserGameInstances($user, $gameApp);
+
+		if ($gameApp->max_instances_per_user > 0) {
+			return $savedGamesCount < $gameApp->max_instances_per_user;
+		}
+
+		return true; // No limit
+	}
+
+	/**
 	 * Create a new game for the user if they have no active games for the given game app
 	 *
 	 * @param User $user

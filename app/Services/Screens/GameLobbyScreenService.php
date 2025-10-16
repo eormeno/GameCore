@@ -4,19 +4,15 @@ namespace App\Services\Screens;
 
 use App\Models\User;
 use App\Models\GameApp;
-use App\Services\GameAppService;
 use App\Services\GameInstanceService;
 
 class GameLobbyScreenService
 {
-    private GameAppService $gameAppService;
     private GameInstanceService $gameInstanceService;
 
     public function __construct(
-        GameAppService $gameAppService,
         GameInstanceService $gameInstanceService
     ) {
-        $this->gameAppService = $gameAppService;
         $this->gameInstanceService = $gameInstanceService;
     }
 
@@ -31,13 +27,14 @@ class GameLobbyScreenService
     {
         $savedGames = $this->gameInstanceService->getSavedGames($user, $gameApp);
         $saved_games = $this->gameInstanceService->toApiFormat($savedGames);
-        $canCreateNewGame = $this->canCreateNewGame($user, $gameApp);
+        $canCreateNewGame = $this->gameInstanceService->canCreateNewGame($user, $gameApp);
         $maxInstances = $gameApp->max_instances_per_user;
 
         $ui = $this->uiElements($canCreateNewGame, $maxInstances, $saved_games);
 
         return [
             'game_lobby_screen:container' => [
+                'slot' => 'canvas',
                 'layout' => 'vertical',
                 'title' => t('games.game_lobby_title', ['name' => $gameApp->name]),
                 'elements' => $ui,
@@ -154,17 +151,6 @@ class GameLobbyScreenService
                 'style' => 'danger',
             ],
         ];
-    }
-
-    private function canCreateNewGame(User $user, GameApp $gameApp): bool
-    {
-        $savedGamesCount = $this->gameInstanceService->countActiveUserGameInstances($user, $gameApp);
-
-        if ($gameApp->max_instances_per_user > 0) {
-            return $savedGamesCount < $gameApp->max_instances_per_user;
-        }
-
-        return true; // No limit
     }
 
     /**
