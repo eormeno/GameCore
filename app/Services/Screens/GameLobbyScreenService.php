@@ -5,6 +5,7 @@ namespace App\Services\Screens;
 use App\Models\User;
 use App\Models\GameApp;
 use App\Services\GameInstanceService;
+use App\Services\UI\UIBuilder;
 
 class GameLobbyScreenService
 {
@@ -30,16 +31,14 @@ class GameLobbyScreenService
         $canCreateNewGame = $this->gameInstanceService->canCreateNewGame($user, $gameApp);
         $maxInstances = $gameApp->max_instances_per_user;
 
-        $ui = $this->uiElements($canCreateNewGame, $maxInstances, $saved_games);
+        $ui = $this->buildUIElements($canCreateNewGame, $maxInstances, $saved_games);
 
-        return [
-            'game_lobby_screen:container' => [
-                'slot' => 'canvas',
-                'layout' => 'vertical',
-                'title' => t('games.game_lobby_title', ['name' => $gameApp->name]),
-                'elements' => $ui,
-            ]
-        ];
+        return UIBuilder::container('game_lobby_screen')
+            ->slot('canvas')
+            ->layout('vertical')
+            ->title(t('games.game_lobby_title', ['name' => $gameApp->name]))
+            ->elements($ui)
+            ->build();
     }
 
     /**
@@ -47,27 +46,40 @@ class GameLobbyScreenService
      * 
      * @return array
      */
-    private function uiElements(bool $canCreateNewGame, int $maxInstances, array $saved_games): array
+    private function buildUIElements(bool $canCreateNewGame, int $maxInstances, array $saved_games): array
     {
-        $newGameButtonTooltip = $canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game');
-        $warningMessage = $canCreateNewGame ? null : t('instances_limit_reached', ['max' => $maxInstances]);
+        $elements = [];
 
-        return [
-            'new_game:button' => [
-                'label' => t('new_game_button_label'),
-                'tooltip' => $newGameButtonTooltip,
-                'action' => 'create_new_game',
-                'enabled' => $canCreateNewGame,
-                'icon' => 'plus',
-                'style' => 'primary',
-            ],
+        // New Game Button
+        $newGameButton = UIBuilder::button('new_game')
+            ->label(t('new_game_button_label'))
+            ->action('create_new_game')
+            ->icon('plus')
+            ->style('primary')
+            ->enabled($canCreateNewGame)
+            ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
+            ->build();
 
-            'warning_message:label' => ['text' => $warningMessage, 'visible' => !is_null($warningMessage)],
-            'saved_games:table' => $this->savedGamesTable($saved_games, $maxInstances),
-        ];
+        $elements = array_merge($elements, $newGameButton);
+
+        // Warning Message
+        if (!$canCreateNewGame) {
+            $warningLabel = UIBuilder::label('warning_message')
+                ->text(t('instances_limit_reached', ['max' => $maxInstances]))
+                ->style('warning')
+                ->build();
+            
+            $elements = array_merge($elements, $warningLabel);
+        }
+
+        // Saved Games Table
+        $savedGamesTable = $this->buildSavedGamesTable($saved_games, $maxInstances);
+        $elements = array_merge($elements, $savedGamesTable);
+
+        return $elements;
     }
 
-    private function savedGamesTable(array $saved_games, int $maxInstances): array
+    private function buildSavedGamesTable(array $saved_games, int $maxInstances): array
     {
         $headers = [
             ['header' => t('games.saved_game_number_column')],
@@ -79,78 +91,91 @@ class GameLobbyScreenService
             ['header' => t('games.saved_game_last_played_column')],
             ['header' => t('games.saved_game_actions_column')],
         ];
-        $title = count($saved_games) > 0 ?
-            t('games.saved_games_title') :
-            t('no_saved_games_title');
+
+        $rows = $this->buildTableRows($saved_games, $maxInstances);
+
+        return UIBuilder::table('saved_games')
+            ->title(count($saved_games) > 0 ? t('games.saved_games_title') : t('no_saved_games_title'))
+            ->headers($headers)
+            ->rows($rows)
+            ->build();
+    }
+
+    private function buildTableRows(array $saved_games, int $maxInstances): array
+    {
         $rows = [];
         $gameNumber = 1;
+
+        // Rows with saved games
         foreach ($saved_games as $game) {
-            $savedGameId = $game['id'] ?? null;
-            $rows[] = [
-                $gameNumber++,
-                $game['name'] ?? t('games.default_game_name'),
-                $game['state'],
-                $game['game_user']['role'],
-                $game['game_user']['status'],
-                $game['game_user']['join_method'],
-                $game['game_user']['last_played_at_human'],
-                "saved_game_{$savedGameId}_actions:container" => [
-                    'layout' => 'horizontal',
-                    'elements' => [
-                        $this->playGameButton($savedGameId),
-                        $this->deleteGameButton($savedGameId),
-                    ],
-                ],
-            ];
+            $rows[] = $this->buildGameRow($game, $gameNumber++);
         }
 
-        // Fill empty rows until we reach max instances per user
+        // Empty rows
         $emptyRowsCount = $maxInstances - count($saved_games);
         for ($i = 0; $i < $emptyRowsCount; $i++) {
-            $rows[] = [
-                $gameNumber++,
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                'actions' => [],
-            ];
+            $rows[] = $this->buildEmptyRow($gameNumber++);
         }
 
+        return $rows;
+    }
+
+    private function buildGameRow(array $game, int $gameNumber): array
+    {
+        $savedGameId = $game['id'] ?? null;
+        
+        $actionsContainer = UIBuilder::container("saved_game_{$savedGameId}_actions")
+            ->layout('horizontal')
+            ->elements([
+                ...$this->buildPlayButton($savedGameId),
+                ...$this->buildDeleteButton($savedGameId),
+            ])
+            ->build();
+
         return [
-            'title' => $title,
-            'headers' => $headers,
-            'rows' => $rows,
+            $gameNumber,
+            $game['name'] ?? t('games.default_game_name'),
+            $game['state'],
+            $game['game_user']['role'],
+            $game['game_user']['status'],
+            $game['game_user']['join_method'],
+            $game['game_user']['last_played_at_human'],
+            $actionsContainer,
         ];
     }
 
-    private function playGameButton(int $gameId): array
+    private function buildEmptyRow(int $gameNumber): array
     {
         return [
-            "play_{$gameId}_game:button" => [
-                'label' => t('games.play_game_action'),
-                'action' => 'play_game',
-                'parameters' => ['game_id' => $gameId],
-                'icon' => 'play',
-                'style' => 'success',
-            ],
+            $gameNumber,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
         ];
     }
 
-    private function deleteGameButton(int $gameId): array
+    private function buildPlayButton(int $gameId): array
     {
-        return [
-            "delete_{$gameId}_game:button" => [
-                'label' => t('delete_game_action'),
-                'action' => 'delete_game',
-                'parameters' => ['game_id' => $gameId],
-                'icon' => 'trash',
-                'style' => 'danger',
-            ],
-        ];
+        return UIBuilder::button("play_{$gameId}_game")
+            ->label(t('games.play_game_action'))
+            ->action('play_game', ['game_id' => $gameId])
+            ->icon('play')
+            ->style('success')
+            ->build();
+    }
+
+    private function buildDeleteButton(int $gameId): array
+    {
+        return UIBuilder::button("delete_{$gameId}_game")
+            ->label(t('delete_game_action'))
+            ->action('delete_game', ['game_id' => $gameId])
+            ->icon('trash')
+            ->style('danger')
+            ->build();
     }
 
     /**
