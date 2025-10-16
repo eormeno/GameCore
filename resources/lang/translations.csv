@@ -20,6 +20,29 @@ common,welcome,common.welcome,Welcome,Bienvenido
 common,welcome_message,common.welcome_message,"Welcome to our amazing game!","¡Bienvenido a nuestro increíble juego!"
 common,yes,common.yes,Yes,Sí
 common,you_are_logged_in,common.you_are_logged_in,"You are logged in as :name","Has iniciado sesión como :name"
+enum,game_state.cancelled,enum.game_state.cancelled,Cancelled,Cancelado
+enum,game_state.cancelled_description,enum.game_state.cancelled_description,"Game was cancelled","El juego fue cancelado"
+enum,game_state.finished,enum.game_state.finished,Finished,Finalizado
+enum,game_state.finished_description,enum.game_state.finished_description,"Game has been completed","El juego ha sido completado"
+enum,game_state.paused,enum.game_state.paused,Paused,Pausado
+enum,game_state.paused_description,enum.game_state.paused_description,"Game is temporarily paused","El juego está temporalmente pausado"
+enum,game_state.running,enum.game_state.running,Running,"En Curso"
+enum,game_state.running_description,enum.game_state.running_description,"Game is currently in progress","El juego está actualmente en progreso"
+enum,game_state.waiting,enum.game_state.waiting,Waiting,Esperando
+enum,game_state.waiting_description,enum.game_state.waiting_description,"Game is waiting for players to join","El juego está esperando que se unan jugadores"
+enum,game_user_join_method.auto,enum.game_user_join_method.auto,Auto,Automático
+enum,game_user_join_method.invitation,enum.game_user_join_method.invitation,Invitation,Invitación
+enum,game_user_join_method.request,enum.game_user_join_method.request,Request,Solicitud
+enum,game_user_role.administrator,enum.game_user_role.administrator,Administrator,Administrador
+enum,game_user_role.owner,enum.game_user_role.owner,Owner,Propietario
+enum,game_user_role.player,enum.game_user_role.player,Player,Jugador
+enum,game_user_role.tester,enum.game_user_role.tester,Tester,Probador
+enum,game_user_status.active,enum.game_user_status.active,Active,Activo
+enum,game_user_status.banned,enum.game_user_status.banned,Banned,Baneado
+enum,game_user_status.invited,enum.game_user_status.invited,Invited,Invitado
+enum,game_user_status.kicked,enum.game_user_status.kicked,Kicked,Expulsado
+enum,game_user_status.left,enum.game_user_status.left,Left,Abandonó
+enum,game_user_status.requested,enum.game_user_status.requested,Requested,Solicitado
 errors,database_connection,errors.database_connection,"Database connection failed","Database connection failed"
 errors,error_occurred,errors.error_occurred,"An error occurred while trying to play the game.","Ocurrió un error al intentar jugar el juego."
 errors,file_size_error,errors.file_size_error,"File :filename is too large (:size MB). Maximum allowed: :max MB","El archivo :filename es muy grande (:size MB). Máximo permitido: :max MB"
