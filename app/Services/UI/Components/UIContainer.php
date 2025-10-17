@@ -4,6 +4,7 @@ namespace App\Services\UI\Components;
 
 use App\Services\UI\Contracts\UIElement;
 use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\Support\UIIdGenerator;
 
 /**
  * Composite UI Container that can hold and manage child UI elements
@@ -14,19 +15,27 @@ use App\Services\UI\Enums\LayoutType;
  */
 class UIContainer implements UIElement
 {
-    protected string $id;
+    protected int $id;
     protected string $type = 'container';
+    protected ?string $name = null;
     protected array $config = [];
-    
+
     /** @var array<string, UIElement> Map of element ID to UIElement instance */
     protected array $children = [];
-    
+
     /** @var array|null Legacy elements array for backward compatibility */
     public ?array $legacyElements = null;
 
-    public function __construct(string $id)
+    public function __construct(?string $name = null)
     {
-        $this->id = $id;
+        $this->name = $name;
+
+        // Detectar automáticamente el contexto desde la clase que invoca
+        $context = $this->detectCallingContext();
+
+        // Usar el generador centralizado de IDs
+        $this->id = UIIdGenerator::generate($context);
+
         $this->config = [
             'type' => $this->type,
             'visible' => true,
@@ -39,7 +48,7 @@ class UIContainer implements UIElement
     /**
      * {@inheritDoc}
      */
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }
@@ -75,6 +84,30 @@ class UIContainer implements UIElement
     public function visible(bool $visible = true): self
     {
         return $this->setVisible($visible);
+    }
+
+    /**
+     * Set the name for this container
+     * 
+     * @param string|null $name The container name
+     * @return self For method chaining
+     */
+    public function name(?string $name): self
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * Set the title for this container
+     * 
+     * @param string|null $title The container title
+     * @return self For method chaining
+     */
+    public function setName(string|null $name): self
+    {
+        $this->name = $name;
+        return $this;
     }
 
     /**
@@ -123,13 +156,13 @@ class UIContainer implements UIElement
     public function add(UIElement $element): self
     {
         $elementId = $element->getId();
-        
+
         if (isset($this->children[$elementId])) {
             throw new \InvalidArgumentException(
                 "Element with ID '{$elementId}' already exists in container '{$this->id}'"
             );
         }
-        
+
         $this->children[$elementId] = $element;
         return $this;
     }
@@ -164,7 +197,7 @@ class UIContainer implements UIElement
                 "Element with ID '{$elementId}' not found in container '{$this->id}'"
             );
         }
-        
+
         unset($this->children[$elementId]);
         return $this;
     }
@@ -200,13 +233,13 @@ class UIContainer implements UIElement
                 "Element with ID '{$elementId}' not found in container '{$this->id}'"
             );
         }
-        
+
         if ($newElement->getId() !== $elementId) {
             throw new \InvalidArgumentException(
                 "New element ID '{$newElement->getId()}' does not match target ID '{$elementId}'"
             );
         }
-        
+
         $this->children[$elementId] = $newElement;
         return $this;
     }
@@ -223,7 +256,7 @@ class UIContainer implements UIElement
         if (isset($this->children[$elementId])) {
             return $this->children[$elementId];
         }
-        
+
         // Search recursively in child containers
         foreach ($this->children as $child) {
             if ($child instanceof UIContainer) {
@@ -233,7 +266,7 @@ class UIContainer implements UIElement
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -291,15 +324,15 @@ class UIContainer implements UIElement
         $elements = [];
         foreach ($this->children as $child) {
             $childJson = $child->toJson();
-            // Merge the child's JSON into the elements array
-            $elements = array_merge($elements, $childJson);
+            // Use the + operator to preserve numeric keys (IDs)
+            $elements = $elements + $childJson;
         }
-        
+
         // Build the final configuration with children
         $config = array_merge($this->config, [
             'elements' => $elements,
         ]);
-        
+
         return [$this->id => $config];
     }
 
@@ -311,5 +344,28 @@ class UIContainer implements UIElement
     public function build(): array
     {
         return $this->toJson();
+    }
+
+    /**
+     * Detecta automáticamente la clase que está invocando el builder
+     * Busca en el stack trace la primera clase fuera del namespace UI
+     * 
+     * @return string El nombre base de la clase invocante
+     */
+    private function detectCallingContext(): string
+    {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+
+        // Buscar en el stack trace la primera clase que NO sea del namespace UI
+        foreach ($trace as $frame) {
+            if (
+                isset($frame['class']) &&
+                !str_starts_with($frame['class'], 'App\\Services\\UI\\')
+            ) {
+                return class_basename($frame['class']);
+            }
+        }
+
+        return 'default';
     }
 }

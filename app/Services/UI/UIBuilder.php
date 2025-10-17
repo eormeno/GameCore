@@ -21,9 +21,9 @@ class UIBuilder
      * @param string $id The unique identifier for the button
      * @return ButtonBuilder
      */
-    public static function button(string $id): ButtonBuilder
+    public static function button(?string $name): ButtonBuilder
     {
-        return new ButtonBuilder($id);
+        return new ButtonBuilder($name);
     }
 
     /**
@@ -32,9 +32,9 @@ class UIBuilder
      * @param string $id The unique identifier for the label
      * @return LabelBuilder
      */
-    public static function label(string $id): LabelBuilder
+    public static function label(?string $name): LabelBuilder
     {
-        return new LabelBuilder($id);
+        return new LabelBuilder($name);
     }
 
     /**
@@ -43,9 +43,9 @@ class UIBuilder
      * @param string $id The unique identifier for the container
      * @return ContainerBuilder
      */
-    public static function container(string $id): ContainerBuilder
+    public static function container(?string $name): ContainerBuilder
     {
-        return new ContainerBuilder($id);
+        return new ContainerBuilder($name);
     }
 
     /**
@@ -54,8 +54,8 @@ class UIBuilder
      * @param string $id The unique identifier for the table
      * @return TableBuilder
      */
-    public static function table(string $id): TableBuilder
+    public static function table(?string $name): TableBuilder
     {
-        return new TableBuilder($id);
+        return new TableBuilder($name);
     }
 }

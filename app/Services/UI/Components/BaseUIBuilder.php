@@ -2,32 +2,29 @@
 
 namespace App\Services\UI\Components;
 
+use App\Services\UI\Support\UIIdGenerator;
+
 abstract class BaseUIBuilder
 {
-    private static array $autoIncPerContext = [];
-    
-    private int $_id;
-    protected string $id;
+    protected int $id;
+    protected ?string $name;
     protected array $config = [];
     protected string $type;
 
-    public function __construct(string $id)
+    public function __construct(?string $name = null)
     {
+        $this->name = $name;
+
         // Detectar automáticamente el contexto desde la clase que invoca
         $context = $this->detectCallingContext();
         
-        if (!isset(self::$autoIncPerContext[$context])) {
-            self::$autoIncPerContext[$context] = 0;
-        }
+        // Usar el generador centralizado de IDs
+        $this->id = UIIdGenerator::generate($context);
         
-        $localId = ++self::$autoIncPerContext[$context];
-        $offset = self::getContextOffset($context);
-        
-        $this->_id = $offset + $localId;
         $this->type = $this->getTypeFromClassName();
-        $this->id = $id;
         $this->config = array_merge([
             'type' => $this->type,
+            'name' => $this->name,
             'visible' => true,
         ], $this->getDefaultConfig());
     }
@@ -53,39 +50,6 @@ abstract class BaseUIBuilder
         return 'default';
     }
 
-    /**
-     * Convierte el nombre de clase en un número único usando hash CRC32
-     * Genera offsets en múltiplos de 10000 para evitar colisiones
-     * 
-     * @param string $context Nombre del contexto (clase invocante)
-     * @return int Offset único para el contexto
-     */
-    private static function getContextOffset(string $context): int
-    {
-        if ($context === 'default') {
-            return 0;
-        }
-        
-        // Generar un hash numérico único del nombre de la clase usando CRC32
-        $hash = crc32($context);
-        
-        // Convertir a positivo si es negativo y escalar al rango deseado
-        // Múltiplos de 10000, máximo 9999 contextos diferentes
-        $offset = (abs($hash) % 9999) * 10000;
-        
-        return $offset;
-    }
-
-    /**
-     * Get the internal auto-incremental ID
-     * 
-     * @return int El ID interno único
-     */
-    public function getInternalId(): int
-    {
-        return $this->_id;
-    }
-
     private function getTypeFromClassName(): string
     {
         $className = (new \ReflectionClass($this))->getShortName();
@@ -102,6 +66,12 @@ abstract class BaseUIBuilder
         return $this;
     }
 
+    public function name(?string $name): self
+    {
+        $this->config['name'] = $name;
+        return $this;
+    }
+
     public function build(): array
     {
         return [$this->id => $this->config];
@@ -115,10 +85,6 @@ abstract class BaseUIBuilder
      */
     public static function getContextInfo(string $context): array
     {
-        return [
-            'context' => $context,
-            'offset' => self::getContextOffset($context),
-            'current_count' => self::$autoIncPerContext[$context] ?? 0,
-        ];
+        return UIIdGenerator::getContextInfo($context);
     }
 }

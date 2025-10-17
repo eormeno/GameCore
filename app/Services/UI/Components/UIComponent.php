@@ -3,6 +3,7 @@
 namespace App\Services\UI\Components;
 
 use App\Services\UI\Contracts\UIElement;
+use App\Services\UI\Support\UIIdGenerator;
 
 /**
  * Abstract base class for all leaf UI components (Button, Label, Table, etc.)
@@ -12,30 +13,25 @@ use App\Services\UI\Contracts\UIElement;
  */
 abstract class UIComponent implements UIElement
 {
-    private static array $autoIncPerContext = [];
-    
-    private int $_id;
-    protected string $id;
+    protected int $id;
     protected string $type;
+    protected ?string $name = null;
     protected array $config = [];
 
-    public function __construct(string $id)
+    public function __construct(?string $name = null)
     {
+        $this->name = $name;
+
         // Detectar automáticamente el contexto desde la clase que invoca
         $context = $this->detectCallingContext();
-        
-        if (!isset(self::$autoIncPerContext[$context])) {
-            self::$autoIncPerContext[$context] = 0;
-        }
-        
-        $localId = ++self::$autoIncPerContext[$context];
-        $offset = self::getContextOffset($context);
-        
-        $this->_id = $offset + $localId;
+
+        // Usar el generador centralizado de IDs
+        $this->id = UIIdGenerator::generate($context);
+
         $this->type = $this->getTypeFromClassName();
-        $this->id = $id;
         $this->config = array_merge([
             'type' => $this->type,
+            'name' => $this->name,
             'visible' => true,
         ], $this->getDefaultConfig());
     }
@@ -49,49 +45,18 @@ abstract class UIComponent implements UIElement
     private function detectCallingContext(): string
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
-        
+
         // Buscar en el stack trace la primera clase que NO sea del namespace UI
         foreach ($trace as $frame) {
-            if (isset($frame['class']) && 
-                !str_starts_with($frame['class'], 'App\\Services\\UI\\')) {
+            if (
+                isset($frame['class']) &&
+                !str_starts_with($frame['class'], 'App\\Services\\UI\\')
+            ) {
                 return class_basename($frame['class']);
             }
         }
-        
+
         return 'default';
-    }
-
-    /**
-     * Convierte el nombre de clase en un número único usando hash CRC32
-     * Genera offsets en múltiplos de 10000 para evitar colisiones
-     * 
-     * @param string $context Nombre del contexto (clase invocante)
-     * @return int Offset único para el contexto
-     */
-    private static function getContextOffset(string $context): int
-    {
-        if ($context === 'default') {
-            return 0;
-        }
-        
-        // Generar un hash numérico único del nombre de la clase usando CRC32
-        $hash = crc32($context);
-        
-        // Convertir a positivo si es negativo y escalar al rango deseado
-        // Múltiplos de 10000, máximo 9999 contextos diferentes
-        $offset = (abs($hash) % 9999) * 10000;
-        
-        return $offset;
-    }
-
-    /**
-     * Get the internal auto-incremental ID
-     * 
-     * @return int El ID interno único
-     */
-    public function getInternalId(): int
-    {
-        return $this->_id;
     }
 
     /**
@@ -115,7 +80,7 @@ abstract class UIComponent implements UIElement
     /**
      * {@inheritDoc}
      */
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }
@@ -151,6 +116,24 @@ abstract class UIComponent implements UIElement
     public function visible(bool $visible = true): self
     {
         return $this->setVisible($visible);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function name(?string $name): self
+    {
+        $this->config['name'] = $name;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setName(?string $name): self
+    {
+        $this->config['name'] = $name;
+        return $this;
     }
 
     /**
@@ -195,10 +178,6 @@ abstract class UIComponent implements UIElement
      */
     public static function getContextInfo(string $context): array
     {
-        return [
-            'context' => $context,
-            'offset' => self::getContextOffset($context),
-            'current_count' => self::$autoIncPerContext[$context] ?? 0,
-        ];
+        return UIIdGenerator::getContextInfo($context);
     }
 }

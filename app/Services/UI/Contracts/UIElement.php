@@ -15,7 +15,7 @@ interface UIElement
      * 
      * @return string The element ID (format: "id:type")
      */
-    public function getId(): string;
+    public function getId(): int;
 
     /**
      * Get the type of UI element (button, label, container, table, etc.)
@@ -48,4 +48,6 @@ interface UIElement
      * @return self For method chaining
      */
     public function setVisible(bool $visible): self;
+
+    public function setName(?string $name): self;
 }

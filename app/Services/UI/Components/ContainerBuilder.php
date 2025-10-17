@@ -19,9 +19,9 @@ class ContainerBuilder
 {
     private UIContainer $container;
 
-    public function __construct(string $id)
+    public function __construct(?string $name = null)
     {
-        $this->container = new UIContainer($id);
+        $this->container = new UIContainer($name);
     }
 
     /**
