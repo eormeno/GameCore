@@ -11,8 +11,9 @@ abstract class BaseUIBuilder
     public function __construct(string $id)
     {
         $this->type = $this->getTypeFromClassName();
-        $this->id = $id . ':' . $this->type;
+        $this->id = $id;
         $this->config = array_merge([
+            'type' => $this->type,
             'visible' => true,
         ], $this->getDefaultConfig());
     }

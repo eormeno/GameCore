@@ -32,49 +32,61 @@ class GameLobbyScreenService
         $canCreateNewGame = $this->gameInstanceService->canCreateNewGame($user, $gameApp);
         $maxInstances = $gameApp->max_instances_per_user;
 
-        $ui = $this->buildUIElements($canCreateNewGame, $maxInstances, $saved_games);
-
-        return UIBuilder::container('game_lobby_screen')
+        $container = UIBuilder::container('game_lobby_screen')
             ->slot('canvas')
             ->layout(LayoutType::VERTICAL)
-            ->title(t('games.game_lobby_title', ['name' => $gameApp->name]))
-            ->elements($ui)
-            ->build();
+            ->title(t('games.game_lobby_title', ['name' => $gameApp->name]));
+
+        // Build and add UI elements to the container using the tree structure
+        $this->buildUIElements($container, $canCreateNewGame, $maxInstances, $saved_games);
+
+        return $container->build();
     }
 
     /**
-     * Define UI elements for the game lobby screen
+     * Build and add UI elements to the container
      * 
-     * @return array
+     * @param \App\Services\UI\Components\ContainerBuilder $container The container to add elements to
+     * @param bool $canCreateNewGame Whether user can create a new game
+     * @param int $maxInstances Maximum instances per user
+     * @param array $saved_games Array of saved games
+     * @return void
      */
-    private function buildUIElements(bool $canCreateNewGame, int $maxInstances, array $saved_games): array
+    private function buildUIElements($container, bool $canCreateNewGame, int $maxInstances, array $saved_games): void
     {
-        $elements = [];
-
         // New Game Button
-        $elements += UIBuilder::button('new_game')
-            ->label(t('new_game_button_label'))
-            ->action('create_new_game')
-            ->icon('plus')
-            ->style('primary')
-            ->enabled($canCreateNewGame)
-            ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
-            ->build();
+        $container->add(
+            UIBuilder::button('new_game')
+                ->label(t('new_game_button_label'))
+                ->action('create_new_game')
+                ->icon('plus')
+                ->style('primary')
+                ->enabled($canCreateNewGame)
+                ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
+        );
 
         // Warning Message (only if needed)
-        $elements += UIBuilder::label('warning_message')
-            ->text(t('instances_limit_reached', ['max' => $maxInstances]))
-            ->style('warning')
-            ->visible(!$canCreateNewGame)
-            ->build();
+        $container->add(
+            UIBuilder::label('warning_message')
+                ->text(t('instances_limit_reached', ['max' => $maxInstances]))
+                ->style('warning')
+                ->visible(!$canCreateNewGame)
+        );
 
         // Saved Games Table
-        $elements += $this->buildSavedGamesTable($saved_games, $maxInstances);
-
-        return $elements;
+        $container->add(
+            $this->buildSavedGamesTable($saved_games, $maxInstances)
+        );
     }
 
-    private function buildSavedGamesTable(array $saved_games, int $maxInstances): array
+    /**
+     * Build the saved games table
+     * 
+     * @param array $saved_games Array of saved games
+     * @param int $maxInstances Maximum instances per user
+     * @return \App\Services\UI\Components\TableBuilder The table component
+     */
+    private function buildSavedGamesTable(array $saved_games, int $maxInstances)
     {
         $rows = $this->buildTableRows($saved_games, $maxInstances);
 
@@ -88,8 +100,7 @@ class GameLobbyScreenService
             ->addHeader(t('games.saved_game_join_method_column'))
             ->addHeader(t('games.saved_game_last_played_column'))
             ->addHeader(t('games.saved_game_actions_column'), 'game_actions', width: '200px')
-            ->rows($rows)
-            ->build();
+            ->rows($rows);
     }
 
     private function buildTableRows(array $saved_games, int $maxInstances): array
@@ -111,17 +122,24 @@ class GameLobbyScreenService
         return $rows;
     }
 
+    /**
+     * Build a row for a saved game
+     * 
+     * @param array $game Game data
+     * @param int $gameNumber Row number
+     * @return array Row data with cells
+     */
     private function buildGameRow(array $game, int $gameNumber): array
     {
         $savedGameId = $game['id'] ?? null;
 
+        // Build actions container using the new tree API
         $actionsContainer = UIBuilder::container("saved_game_{$savedGameId}_actions")
-            ->layout(LayoutType::HORIZONTAL)
-            ->elements([
-                ...$this->buildPlayButton($savedGameId),
-                ...$this->buildDeleteButton($savedGameId),
-            ])
-            ->build();
+            ->layout(LayoutType::HORIZONTAL);
+        
+        // Add buttons to the container
+        $actionsContainer->add($this->buildPlayButton($savedGameId));
+        $actionsContainer->add($this->buildDeleteButton($savedGameId));
 
         return [
             $gameNumber,
@@ -131,10 +149,16 @@ class GameLobbyScreenService
             $game['game_user']['status'],
             $game['game_user']['join_method'],
             $game['game_user']['last_played_at_human'],
-            $actionsContainer,
+            $actionsContainer->build(), // Convert to array for table cell
         ];
     }
 
+    /**
+     * Build an empty row
+     * 
+     * @param int $gameNumber Row number
+     * @return array Empty row data
+     */
     private function buildEmptyRow(int $gameNumber): array
     {
         return [
@@ -149,24 +173,34 @@ class GameLobbyScreenService
         ];
     }
 
-    private function buildPlayButton(int $gameId): array
+    /**
+     * Build a play button for a game
+     * 
+     * @param int $gameId Game ID
+     * @return \App\Services\UI\Components\ButtonBuilder Button component
+     */
+    private function buildPlayButton(int $gameId)
     {
         return UIBuilder::button("play_{$gameId}_game")
             ->label(t('games.play_game_action'))
             ->action('play_game', ['game_id' => $gameId])
             ->icon('play')
-            ->style('success')
-            ->build();
+            ->style('success');
     }
 
-    private function buildDeleteButton(int $gameId): array
+    /**
+     * Build a delete button for a game
+     * 
+     * @param int $gameId Game ID
+     * @return \App\Services\UI\Components\ButtonBuilder Button component
+     */
+    private function buildDeleteButton(int $gameId)
     {
         return UIBuilder::button("delete_{$gameId}_game")
             ->label(t('delete_game_action'))
             ->action('delete_game', ['game_id' => $gameId])
             ->icon('trash')
-            ->style('danger')
-            ->build();
+            ->style('danger');
     }
 
     /**

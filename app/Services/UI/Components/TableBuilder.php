@@ -5,7 +5,13 @@ namespace App\Services\UI\Components;
 use App\Services\UI\Enums\TextAlign;
 use App\Services\UI\Enums\FontWeight;
 
-class TableBuilder extends BaseUIBuilder
+/**
+ * Builder for Table UI components
+ * 
+ * Tables are structured data display elements with headers and rows.
+ * They support sorting, pagination, and custom styling.
+ */
+class TableBuilder extends UIComponent
 {
     protected function getDefaultConfig(): array
     {
@@ -19,6 +25,18 @@ class TableBuilder extends BaseUIBuilder
 
     /**
      * Add a header to the table with optional configuration
+     * 
+     * @param string $text The header text
+     * @param string|null $id Optional custom ID for the header
+     * @param bool $sortable Whether the column is sortable
+     * @param TextAlign $align Text alignment
+     * @param string|null $width Column width (e.g., '200px')
+     * @param FontWeight $fontWeight Font weight
+     * @param string|null $color Text color
+     * @param string|null $backgroundColor Background color
+     * @param string|null $tooltip Tooltip text
+     * @param string|null $sortDirection Initial sort direction
+     * @return self For method chaining
      */
     public function addHeader(
         string $text,
@@ -54,27 +72,59 @@ class TableBuilder extends BaseUIBuilder
         return $this;
     }
 
+    /**
+     * Set the table title
+     * 
+     * @param string $title The table title
+     * @return self For method chaining
+     */
     public function title(string $title): self
     {
-        $this->config['title'] = $title;
-        return $this;
+        return $this->setConfig('title', $title);
     }
 
+    /**
+     * Set all headers at once
+     * 
+     * @param array $headers Array of header configurations
+     * @return self For method chaining
+     */
     public function headers(array $headers): self
     {
-        $this->config['headers'] = $headers;
-        return $this;
+        return $this->setConfig('headers', $headers);
     }
 
+    /**
+     * Set the table rows
+     * 
+     * @param array $rows Array of row data
+     * @return self For method chaining
+     */
     public function rows(array $rows): self
     {
-        $this->config['rows'] = $rows;
-        return $this;
+        return $this->setConfig('rows', $rows);
     }
 
+    /**
+     * Enable or disable pagination
+     * 
+     * @param bool $pagination True to enable pagination
+     * @return self For method chaining
+     */
     public function pagination(bool $pagination = true): self
     {
-        $this->config['pagination'] = $pagination;
-        return $this;
+        return $this->setConfig('pagination', $pagination);
+    }
+
+    /**
+     * Legacy build method for backward compatibility
+     * Returns array format instead of object
+     * 
+     * @return array
+     * @deprecated Use toJson() instead
+     */
+    public function build(): array
+    {
+        return $this->toJson();
     }
 }
