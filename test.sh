@@ -18,6 +18,7 @@ declare -A testClasses=(
     ["gtn"]="GTNPlayGameTest"
     ["bba"]="BBAPlayGameTest"
     ["mtq"]="MTQPlayGameTest"
+    ["ui"]="UIBuilderTest"
 )
 
 # Find the filter in prefix and get the test class name
