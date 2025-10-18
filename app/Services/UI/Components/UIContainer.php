@@ -18,6 +18,7 @@ class UIContainer implements UIElement
     protected int $id;
     protected string $type = 'container';
     protected ?string $name = null;
+    protected int|string|null $slot = null;
     protected array $config = [];
 
     /** @var array<string, UIElement> Map of element ID to UIElement instance */
@@ -111,15 +112,32 @@ class UIContainer implements UIElement
     }
 
     /**
-     * Set the slot name for this container
-     * 
-     * @param string $slot The slot name (e.g., 'canvas', 'sidebar')
-     * @return self For method chaining
+     * {@inheritDoc}
      */
-    public function slot(string $slot): self
+    public function getSlot(): int|string|null
     {
+        return $this->slot;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setSlot(int|string|null $slot): self
+    {
+        $this->slot = $slot;
         $this->config['slot'] = $slot;
         return $this;
+    }
+
+    /**
+     * Set the slot name for this container
+     * 
+     * @param int|string|null $slot The slot (int = parent ID, string = parent name, null = delete)
+     * @return self For method chaining
+     */
+    public function slot(int|string|null $slot): self
+    {
+        return $this->setSlot($slot);
     }
 
     /**
@@ -163,6 +181,9 @@ class UIContainer implements UIElement
             );
         }
 
+        // Automatically set the child's slot to this container's ID
+        $element->setSlot($this->id);
+
         $this->children[$elementId] = $element;
         return $this;
     }
@@ -198,6 +219,9 @@ class UIContainer implements UIElement
             );
         }
 
+        // Mark the element for deletion by setting slot to null
+        $this->children[$elementId]->setSlot(null);
+
         unset($this->children[$elementId]);
         return $this;
     }
@@ -212,6 +236,9 @@ class UIContainer implements UIElement
     public function tryRemove(string $elementId): bool
     {
         if (isset($this->children[$elementId])) {
+            // Mark the element for deletion by setting slot to null
+            $this->children[$elementId]->setSlot(null);
+            
             unset($this->children[$elementId]);
             return true;
         }

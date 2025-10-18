@@ -50,4 +50,19 @@ interface UIElement
     public function setVisible(bool $visible): self;
 
     public function setName(?string $name): self;
+
+    /**
+     * Get the slot where this element should be rendered
+     * 
+     * @return int|string|null The slot (int = parent ID, string = parent name, null = delete)
+     */
+    public function getSlot(): int|string|null;
+
+    /**
+     * Set the slot where this element should be rendered
+     * 
+     * @param int|string|null $slot The slot (int = parent ID, string = parent name, null = delete)
+     * @return self For method chaining
+     */
+    public function setSlot(int|string|null $slot): self;
 }

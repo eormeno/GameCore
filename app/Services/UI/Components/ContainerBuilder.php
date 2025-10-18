@@ -27,10 +27,10 @@ class ContainerBuilder
     /**
      * Set the slot name for this container
      * 
-     * @param string $slot The slot name
+     * @param int|string|null $slot The slot (int = parent ID, string = parent name, null = delete)
      * @return self For method chaining
      */
-    public function slot(string $slot): self
+    public function slot(int|string|null $slot): self
     {
         $this->container->slot($slot);
         return $this;
@@ -75,11 +75,16 @@ class ContainerBuilder
     /**
      * Add a child element to this container
      * 
-     * @param UIElement|UIContainer $element The element to add
+     * @param UIElement|UIContainer|ContainerBuilder $element The element to add
      * @return self For method chaining
      */
     public function add($element): self
     {
+        // If it's a ContainerBuilder, unwrap it to get the UIContainer
+        if ($element instanceof ContainerBuilder) {
+            $element = $element->getContainer();
+        }
+        
         $this->container->add($element);
         return $this;
     }
@@ -92,7 +97,13 @@ class ContainerBuilder
      */
     public function addMany(array $elements): self
     {
-        $this->container->addMany($elements);
+        foreach ($elements as $element) {
+            // If it's a ContainerBuilder, unwrap it
+            if ($element instanceof ContainerBuilder) {
+                $element = $element->getContainer();
+            }
+            $this->container->addMany([$element]);
+        }
         return $this;
     }
 
@@ -160,5 +171,90 @@ class ContainerBuilder
     public function getContainer(): UIContainer
     {
         return $this->container;
+    }
+
+    /**
+     * Get the container's unique ID
+     * 
+     * @return int The container ID
+     */
+    public function getId(): int
+    {
+        return $this->container->getId();
+    }
+
+    /**
+     * Remove a child element from this container by ID
+     * 
+     * @param int $elementId The ID of the element to remove
+     * @return self For method chaining
+     */
+    public function remove(int $elementId): self
+    {
+        $this->container->remove($elementId);
+        return $this;
+    }
+
+    /**
+     * Remove a child element (silent version)
+     * 
+     * @param int $elementId The ID of the element to remove
+     * @return bool True if removed, false if not found
+     */
+    public function tryRemove(int $elementId): bool
+    {
+        return $this->container->tryRemove($elementId);
+    }
+
+    /**
+     * Convert to JSON representation
+     * 
+     * @return array The JSON representation
+     */
+    public function toJson(): array
+    {
+        return $this->container->toJson();
+    }
+
+    /**
+     * Find a child element by ID
+     * 
+     * @param int $elementId The ID to search for
+     * @return UIElement|null The found element or null
+     */
+    public function find(int $elementId): ?UIElement
+    {
+        return $this->container->find($elementId);
+    }
+
+    /**
+     * Get all direct child elements
+     * 
+     * @return array<UIElement> Array of child elements
+     */
+    public function getChildren(): array
+    {
+        return $this->container->getChildren();
+    }
+
+    /**
+     * Get the number of direct children
+     * 
+     * @return int The number of children
+     */
+    public function count(): int
+    {
+        return $this->container->count();
+    }
+
+    /**
+     * Clear all children
+     * 
+     * @return self For method chaining
+     */
+    public function clear(): self
+    {
+        $this->container->clear();
+        return $this;
     }
 }
