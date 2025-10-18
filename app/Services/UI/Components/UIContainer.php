@@ -329,7 +329,9 @@ class UIContainer implements UIElement
         }
 
         // Build the final configuration with children
+        // Include 'name' attribute for client-side referencing
         $config = array_merge($this->config, [
+            'name' => $this->name,
             'elements' => $elements,
         ]);
 
