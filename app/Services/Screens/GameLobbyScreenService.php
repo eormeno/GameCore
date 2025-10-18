@@ -65,6 +65,13 @@ class GameLobbyScreenService
                 ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
         );
 
+        $container->add(
+            UIBuilder::input()
+                ->type('hidden')
+                ->name('max_instances_per_user')
+                ->value($maxInstances)
+        );
+
         // Warning Message (only if needed)
         $container->add(
             UIBuilder::label()
@@ -144,7 +151,7 @@ class GameLobbyScreenService
         // Build actions container using the new tree API
         $actionsContainer = UIBuilder::container("saved_game_{$savedGameId}_actions")
             ->layout(LayoutType::HORIZONTAL);
-        
+
         // Add buttons to the container
         $actionsContainer->add($this->buildPlayButton($savedGameId));
         $actionsContainer->add($this->buildDeleteButton($savedGameId));

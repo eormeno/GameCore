@@ -126,6 +126,7 @@ abstract class UIComponent implements UIElement
 
     /**
      * {@inheritDoc}
+     * @return $this
      */
     public function name(?string $name): self
     {

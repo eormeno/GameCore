@@ -7,6 +7,7 @@ use App\Services\UI\Components\LabelBuilder;
 use App\Services\UI\Components\ContainerBuilder;
 use App\Services\UI\Components\TableBuilder;
 use App\Services\UI\Components\TableRowBuilder;
+use App\Services\UI\Components\InputBuilder;
 
 /**
  * Factory class for creating UI components
@@ -70,5 +71,10 @@ class UIBuilder
     public static function tableRow(TableBuilder $table, ?string $name = null): TableRowBuilder
     {
         return new TableRowBuilder($table, $name);
+    }
+
+    public static function input(?string $name = null): InputBuilder
+    {
+        return new InputBuilder($name);
     }
 }
