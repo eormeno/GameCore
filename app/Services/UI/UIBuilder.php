@@ -9,6 +9,7 @@ use App\Services\UI\Components\TableBuilder;
 use App\Services\UI\Components\TableRowBuilder;
 use App\Services\UI\Components\InputBuilder;
 use App\Services\UI\Components\SelectBuilder;
+use App\Services\UI\Components\CheckboxBuilder;
 
 /**
  * Factory class for creating UI components
@@ -94,5 +95,16 @@ class UIBuilder
     public static function select(?string $name = null): SelectBuilder
     {
         return new SelectBuilder($name);
+    }
+
+    /**
+     * Create a new checkbox component
+     * 
+     * @param string|null $name The optional semantic name for the checkbox
+     * @return CheckboxBuilder
+     */
+    public static function checkbox(?string $name = null): CheckboxBuilder
+    {
+        return new CheckboxBuilder($name);
     }
 }
