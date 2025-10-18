@@ -8,6 +8,7 @@ use App\Services\UI\Components\ContainerBuilder;
 use App\Services\UI\Components\TableBuilder;
 use App\Services\UI\Components\TableRowBuilder;
 use App\Services\UI\Components\InputBuilder;
+use App\Services\UI\Components\SelectBuilder;
 
 /**
  * Factory class for creating UI components
@@ -20,7 +21,7 @@ class UIBuilder
     /**
      * Create a new button component
      * 
-     * @param string $name an optional semantic name for the button
+     * @param string|null $name an optional semantic name for the button
      * @return ButtonBuilder
      */
     public static function button(?string $name = null): ButtonBuilder
@@ -31,7 +32,7 @@ class UIBuilder
     /**
      * Create a new label component
      * 
-     * @param string $name an optional semantic name for the label
+     * @param string|null $name an optional semantic name for the label
      * @return LabelBuilder
      */
     public static function label(?string $name = null): LabelBuilder
@@ -42,7 +43,7 @@ class UIBuilder
     /**
      * Create a new container component
      * 
-     * @param string $name The optional semantic name for the container
+     * @param string|null $name The optional semantic name for the container
      * @return ContainerBuilder
      */
     public static function container(?string $name = null): ContainerBuilder
@@ -53,7 +54,7 @@ class UIBuilder
     /**
      * Create a new table component
      * 
-     * @param string $name The optional semantic name for the table
+     * @param string|null $name The optional semantic name for the table
      * @return TableBuilder
      */
     public static function table(?string $name = null): TableBuilder
@@ -73,8 +74,25 @@ class UIBuilder
         return new TableRowBuilder($table, $name);
     }
 
+    /**
+     * Create a new input component
+     * 
+     * @param string|null $name The optional semantic name for the input
+     * @return InputBuilder
+     */
     public static function input(?string $name = null): InputBuilder
     {
         return new InputBuilder($name);
+    }
+
+    /**
+     * Create a new select component
+     * 
+     * @param string|null $name The optional semantic name for the select
+     * @return SelectBuilder
+     */
+    public static function select(?string $name = null): SelectBuilder
+    {
+        return new SelectBuilder($name);
     }
 }
