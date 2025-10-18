@@ -88,9 +88,7 @@ class GameLobbyScreenService
      */
     private function buildSavedGamesTable(array $saved_games, int $maxInstances)
     {
-        $rows = $this->buildTableRows($saved_games, $maxInstances);
-
-        return UIBuilder::table()
+        $table = UIBuilder::table()
             ->title(count($saved_games) > 0 ? t('games.saved_games_title') : t('no_saved_games_title'))
             ->addHeader(t('games.saved_game_number_column'))
             ->addHeader(t('games.saved_game_name_column'))
@@ -99,37 +97,47 @@ class GameLobbyScreenService
             ->addHeader(t('games.saved_game_status_column'))
             ->addHeader(t('games.saved_game_join_method_column'))
             ->addHeader(t('games.saved_game_last_played_column'))
-            ->addHeader(t('games.saved_game_actions_column'), 'game_actions', width: '200px')
-            ->rows($rows);
+            ->addHeader(t('games.saved_game_actions_column'), 'game_actions', width: '200px');
+
+        // Add rows using the new TableRow components
+        $this->addTableRows($table, $saved_games, $maxInstances);
+
+        return $table;
     }
 
-    private function buildTableRows(array $saved_games, int $maxInstances): array
+    /**
+     * Add rows to the table using TableRow components
+     * 
+     * @param \App\Services\UI\Components\TableBuilder $table The table to add rows to
+     * @param array $saved_games Array of saved games
+     * @param int $maxInstances Maximum instances per user
+     * @return void
+     */
+    private function addTableRows($table, array $saved_games, int $maxInstances): void
     {
-        $rows = [];
         $gameNumber = 1;
 
-        // Rows with saved games
+        // Add rows with saved games
         foreach ($saved_games as $game) {
-            $rows[] = $this->buildGameRow($game, $gameNumber++);
+            $table->addRow($this->buildGameRow($table, $game, $gameNumber++));
         }
 
-        // Empty rows
+        // Add empty rows
         $emptyRowsCount = $maxInstances - count($saved_games);
         for ($i = 0; $i < $emptyRowsCount; $i++) {
-            $rows[] = $this->buildEmptyRow($gameNumber++);
+            $table->addRow($this->buildEmptyRow($table, $gameNumber++));
         }
-
-        return $rows;
     }
 
     /**
      * Build a row for a saved game
      * 
+     * @param \App\Services\UI\Components\TableBuilder $table The parent table
      * @param array $game Game data
      * @param int $gameNumber Row number
-     * @return array Row data with cells
+     * @return \App\Services\UI\Components\TableRowBuilder Row component
      */
-    private function buildGameRow(array $game, int $gameNumber): array
+    private function buildGameRow($table, array $game, int $gameNumber)
     {
         $savedGameId = $game['id'] ?? null;
 
@@ -141,36 +149,40 @@ class GameLobbyScreenService
         $actionsContainer->add($this->buildPlayButton($savedGameId));
         $actionsContainer->add($this->buildDeleteButton($savedGameId));
 
-        return [
-            $gameNumber,
-            $game['name'] ?? t('games.default_game_name'),
-            $game['state'],
-            $game['game_user']['role'],
-            $game['game_user']['status'],
-            $game['game_user']['join_method'],
-            $game['game_user']['last_played_at_human'],
-            $actionsContainer->build(), // Convert to array for table cell
-        ];
+        // Create a TableRow component
+        return $table->createRow("saved_game_{$savedGameId}_row")
+            ->cells([
+                $gameNumber,
+                $game['name'] ?? t('games.default_game_name'),
+                $game['state'],
+                $game['game_user']['role'],
+                $game['game_user']['status'],
+                $game['game_user']['join_method'],
+                $game['game_user']['last_played_at_human'],
+                $actionsContainer->build(), // Convert to array for table cell
+            ]);
     }
 
     /**
      * Build an empty row
      * 
+     * @param \App\Services\UI\Components\TableBuilder $table The parent table
      * @param int $gameNumber Row number
-     * @return array Empty row data
+     * @return \App\Services\UI\Components\TableRowBuilder Empty row component
      */
-    private function buildEmptyRow(int $gameNumber): array
+    private function buildEmptyRow($table, int $gameNumber)
     {
-        return [
-            $gameNumber,
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-        ];
+        return $table->createRow("empty_row_{$gameNumber}")
+            ->cells([
+                $gameNumber,
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+            ]);
     }
 
     /**

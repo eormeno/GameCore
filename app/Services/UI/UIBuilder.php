@@ -6,6 +6,7 @@ use App\Services\UI\Components\ButtonBuilder;
 use App\Services\UI\Components\LabelBuilder;
 use App\Services\UI\Components\ContainerBuilder;
 use App\Services\UI\Components\TableBuilder;
+use App\Services\UI\Components\TableRowBuilder;
 
 /**
  * Factory class for creating UI components
@@ -57,5 +58,17 @@ class UIBuilder
     public static function table(?string $name = null): TableBuilder
     {
         return new TableBuilder($name);
+    }
+
+    /**
+     * Create a new table row component
+     * 
+     * @param TableBuilder $table The parent table this row belongs to
+     * @param string|null $name The optional semantic name for the row
+     * @return TableRowBuilder
+     */
+    public static function tableRow(TableBuilder $table, ?string $name = null): TableRowBuilder
+    {
+        return new TableRowBuilder($table, $name);
     }
 }

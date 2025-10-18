@@ -4,6 +4,7 @@ namespace App\Services\UI\Components;
 
 use App\Services\UI\Enums\TextAlign;
 use App\Services\UI\Enums\FontWeight;
+use App\Services\UI\Support\UIIdGenerator;
 
 /**
  * Builder for Table UI components
@@ -13,6 +14,23 @@ use App\Services\UI\Enums\FontWeight;
  */
 class TableBuilder extends UIComponent
 {
+    /** @var UIContainer The rows container */
+    private UIContainer $rowsContainer;
+
+    public function __construct(?string $name = null)
+    {
+        parent::__construct($name);
+        
+        // Create the rows container
+        $this->rowsContainer = new UIContainer('rows');
+        
+        // Set the rows container's slot to this table's ID (parent-child relationship)
+        $this->rowsContainer->setSlot($this->id);
+        
+        // Set the rows_container attribute to reference the container's ID
+        $this->config['rows_container'] = $this->rowsContainer->getId();
+    }
+
     protected function getDefaultConfig(): array
     {
         return [
@@ -114,6 +132,73 @@ class TableBuilder extends UIComponent
     public function pagination(bool $pagination = true): self
     {
         return $this->setConfig('pagination', $pagination);
+    }
+
+    /**
+     * Create a new table row associated with this table
+     * 
+     * @param string|null $name Optional name for the row
+     * @return TableRowBuilder The new row builder
+     */
+    public function createRow(?string $name = null): TableRowBuilder
+    {
+        return new TableRowBuilder($this, $name);
+    }
+
+    /**
+     * Add a row component to this table
+     * 
+     * @param TableRowBuilder $row The row to add
+     * @return self For method chaining
+     */
+    public function addRow(TableRowBuilder $row): self
+    {
+        // Add the row to the rows container
+        $this->rowsContainer->add($row);
+        return $this;
+    }
+
+    /**
+     * Add multiple row components to this table
+     * 
+     * @param array<TableRowBuilder> $rows Array of rows to add
+     * @return self For method chaining
+     */
+    public function addRows(array $rows): self
+    {
+        foreach ($rows as $row) {
+            if ($row instanceof TableRowBuilder) {
+                $this->addRow($row);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Get the rows container
+     * 
+     * @return UIContainer
+     */
+    public function getRowsContainer(): UIContainer
+    {
+        return $this->rowsContainer;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * Override toJson to include the rows container in flat structure
+     */
+    public function toJson(): array
+    {
+        // Get the table's JSON (without the rows container)
+        $tableJson = parent::toJson();
+        
+        // Get the rows container's JSON
+        $rowsContainerJson = $this->rowsContainer->toJson();
+        
+        // Merge both at the same level (flat structure)
+        return $tableJson + $rowsContainerJson;
     }
 
     /**
