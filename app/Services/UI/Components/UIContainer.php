@@ -207,12 +207,13 @@ class UIContainer implements UIElement
     /**
      * Remove a child element from this container by ID
      * 
-     * @param string $elementId The ID of the element to remove
+     * @param int|string $elementId The ID of the element to remove
      * @return self For method chaining
      * @throws \InvalidArgumentException If element not found
      */
-    public function remove(string $elementId): self
+    public function remove(int|string $elementId): self
     {
+        $elementId = (string)$elementId;
         if (!isset($this->children[$elementId])) {
             throw new \InvalidArgumentException(
                 "Element with ID '{$elementId}' not found in container '{$this->id}'"
@@ -230,11 +231,12 @@ class UIContainer implements UIElement
      * Remove a child element from this container by ID (silent version)
      * Returns true if element was removed, false if not found
      * 
-     * @param string $elementId The ID of the element to remove
+     * @param int|string $elementId The ID of the element to remove
      * @return bool True if removed, false if not found
      */
-    public function tryRemove(string $elementId): bool
+    public function tryRemove(int|string $elementId): bool
     {
+        $elementId = (string)$elementId;
         if (isset($this->children[$elementId])) {
             // Mark the element for deletion by setting slot to null
             $this->children[$elementId]->setSlot(null);
@@ -248,20 +250,21 @@ class UIContainer implements UIElement
     /**
      * Update a child element by replacing it with a new element
      * 
-     * @param string $elementId The ID of the element to update
+     * @param int|string $elementId The ID of the element to update
      * @param UIElement $newElement The new element to replace with
      * @return self For method chaining
      * @throws \InvalidArgumentException If element not found or IDs don't match
      */
-    public function update(string $elementId, UIElement $newElement): self
+    public function update(int|string $elementId, UIElement $newElement): self
     {
+        $elementId = (string)$elementId;
         if (!isset($this->children[$elementId])) {
             throw new \InvalidArgumentException(
                 "Element with ID '{$elementId}' not found in container '{$this->id}'"
             );
         }
 
-        if ($newElement->getId() !== $elementId) {
+        if ((string)$newElement->getId() !== $elementId) {
             throw new \InvalidArgumentException(
                 "New element ID '{$newElement->getId()}' does not match target ID '{$elementId}'"
             );
@@ -274,11 +277,12 @@ class UIContainer implements UIElement
     /**
      * Find a child element by ID (searches recursively through the tree)
      * 
-     * @param string $elementId The ID of the element to find
+     * @param int|string $elementId The ID of the element to find
      * @return UIElement|null The found element, or null if not found
      */
-    public function find(string $elementId): ?UIElement
+    public function find(int|string $elementId): ?UIElement
     {
+        $elementId = (string)$elementId;
         // Check direct children first
         if (isset($this->children[$elementId])) {
             return $this->children[$elementId];
@@ -300,11 +304,12 @@ class UIContainer implements UIElement
     /**
      * Check if this container has a specific child element
      * 
-     * @param string $elementId The ID of the element to check
+     * @param int|string $elementId The ID of the element to check
      * @return bool True if element exists as direct child, false otherwise
      */
-    public function has(string $elementId): bool
+    public function has(int|string $elementId): bool
     {
+        $elementId = (string)$elementId;
         return isset($this->children[$elementId]);
     }
 
