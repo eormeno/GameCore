@@ -43,6 +43,93 @@ class UIContainer implements UIElement
             'layout' => LayoutType::VERTICAL->value,
             'slot' => null,
             'title' => null,
+            
+            // Flexbox properties
+            'flex_direction' => null,
+            'justify_content' => null,
+            'align_items' => null,
+            'align_content' => null,
+            'flex_wrap' => null,
+            'flex_grow' => null,
+            'flex_shrink' => null,
+            'flex_basis' => null,
+            'order' => null,
+            
+            // Grid properties
+            'grid_template_columns' => null,
+            'grid_template_rows' => null,
+            'grid_template_areas' => null,
+            'grid_auto_columns' => null,
+            'grid_auto_rows' => null,
+            'grid_auto_flow' => null,
+            'grid_column' => null,
+            'grid_row' => null,
+            'grid_area' => null,
+            
+            // Gap/Spacing
+            'gap' => null,
+            'row_gap' => null,
+            'column_gap' => null,
+            
+            // Padding
+            'padding' => null,
+            'padding_top' => null,
+            'padding_right' => null,
+            'padding_bottom' => null,
+            'padding_left' => null,
+            
+            // Margin
+            'margin' => null,
+            'margin_top' => null,
+            'margin_right' => null,
+            'margin_bottom' => null,
+            'margin_left' => null,
+            
+            // Sizing
+            'width' => null,
+            'height' => null,
+            'min_width' => null,
+            'min_height' => null,
+            'max_width' => null,
+            'max_height' => null,
+            
+            // Visual styling
+            'background_color' => null,
+            'background_image' => null,
+            'background_size' => null,
+            'background_position' => null,
+            'border' => null,
+            'border_radius' => null,
+            'box_shadow' => null,
+            'opacity' => null,
+            
+            // Position
+            'position' => null,
+            'top' => null,
+            'right' => null,
+            'bottom' => null,
+            'left' => null,
+            'z_index' => null,
+            
+            // Overflow & Scroll
+            'overflow' => null,
+            'overflow_x' => null,
+            'overflow_y' => null,
+            'scroll_behavior' => null,
+            
+            // Display
+            'display' => null,
+            
+            // Responsive
+            'responsive' => [],
+            'breakpoints' => [],
+            'hide_on' => [],
+            'show_on' => [],
+            
+            // Custom
+            'custom_class' => null,
+            'custom_style' => null,
+            'data_attributes' => [],
         ];
     }
 
@@ -342,6 +429,995 @@ class UIContainer implements UIElement
     {
         $this->children = [];
         return $this;
+    }
+
+    // ========================================================================
+    // FLEXBOX METHODS
+    // ========================================================================
+
+    /**
+     * Set flex direction
+     * 
+     * @param string $direction Direction: row, row-reverse, column, column-reverse
+     * @return self For method chaining
+     */
+    public function flexDirection(string $direction): self
+    {
+        $this->config['flex_direction'] = $direction;
+        return $this;
+    }
+
+    /**
+     * Set justify content (main axis alignment)
+     * 
+     * @param string $justify Values: flex-start, flex-end, center, space-between, space-around, space-evenly
+     * @return self For method chaining
+     */
+    public function justifyContent(string $justify): self
+    {
+        $this->config['justify_content'] = $justify;
+        return $this;
+    }
+
+    /**
+     * Set align items (cross axis alignment)
+     * 
+     * @param string $align Values: flex-start, flex-end, center, baseline, stretch
+     * @return self For method chaining
+     */
+    public function alignItems(string $align): self
+    {
+        $this->config['align_items'] = $align;
+        return $this;
+    }
+
+    /**
+     * Set align content (multi-line alignment)
+     * 
+     * @param string $align Values: flex-start, flex-end, center, space-between, space-around, stretch
+     * @return self For method chaining
+     */
+    public function alignContent(string $align): self
+    {
+        $this->config['align_content'] = $align;
+        return $this;
+    }
+
+    /**
+     * Set flex wrap
+     * 
+     * @param string $wrap Values: nowrap, wrap, wrap-reverse
+     * @return self For method chaining
+     */
+    public function flexWrap(string $wrap): self
+    {
+        $this->config['flex_wrap'] = $wrap;
+        return $this;
+    }
+
+    /**
+     * Set flex grow factor
+     * 
+     * @param int|float $grow Grow factor (typically 0-1)
+     * @return self For method chaining
+     */
+    public function flexGrow(int|float $grow): self
+    {
+        $this->config['flex_grow'] = $grow;
+        return $this;
+    }
+
+    /**
+     * Set flex shrink factor
+     * 
+     * @param int|float $shrink Shrink factor (typically 0-1)
+     * @return self For method chaining
+     */
+    public function flexShrink(int|float $shrink): self
+    {
+        $this->config['flex_shrink'] = $shrink;
+        return $this;
+    }
+
+    /**
+     * Set flex basis (initial size)
+     * 
+     * @param string $basis Size value (px, %, auto, etc)
+     * @return self For method chaining
+     */
+    public function flexBasis(string $basis): self
+    {
+        $this->config['flex_basis'] = $basis;
+        return $this;
+    }
+
+    /**
+     * Set order for flex item
+     * 
+     * @param int $order Order value
+     * @return self For method chaining
+     */
+    public function order(int $order): self
+    {
+        $this->config['order'] = $order;
+        return $this;
+    }
+
+    // ========================================================================
+    // GRID METHODS
+    // ========================================================================
+
+    /**
+     * Set grid template columns
+     * 
+     * @param string $template Template string (e.g., '1fr 2fr', 'repeat(3, 1fr)', '100px auto')
+     * @return self For method chaining
+     */
+    public function gridTemplateColumns(string $template): self
+    {
+        $this->config['grid_template_columns'] = $template;
+        return $this;
+    }
+
+    /**
+     * Set grid template rows
+     * 
+     * @param string $template Template string
+     * @return self For method chaining
+     */
+    public function gridTemplateRows(string $template): self
+    {
+        $this->config['grid_template_rows'] = $template;
+        return $this;
+    }
+
+    /**
+     * Set grid template areas
+     * 
+     * @param array|string $areas Area names or array of area strings
+     * @return self For method chaining
+     */
+    public function gridTemplateAreas(array|string $areas): self
+    {
+        if (is_array($areas)) {
+            $areas = implode(' ', array_map(fn($a) => '"' . $a . '"', $areas));
+        }
+        $this->config['grid_template_areas'] = $areas;
+        return $this;
+    }
+
+    /**
+     * Set grid auto columns
+     * 
+     * @param string $size Size value (auto, minmax(), etc)
+     * @return self For method chaining
+     */
+    public function gridAutoColumns(string $size): self
+    {
+        $this->config['grid_auto_columns'] = $size;
+        return $this;
+    }
+
+    /**
+     * Set grid auto rows
+     * 
+     * @param string $size Size value
+     * @return self For method chaining
+     */
+    public function gridAutoRows(string $size): self
+    {
+        $this->config['grid_auto_rows'] = $size;
+        return $this;
+    }
+
+    /**
+     * Set grid auto flow
+     * 
+     * @param string $flow Values: row, column, row dense, column dense
+     * @return self For method chaining
+     */
+    public function gridAutoFlow(string $flow): self
+    {
+        $this->config['grid_auto_flow'] = $flow;
+        return $this;
+    }
+
+    /**
+     * Set grid column span/position
+     * 
+     * @param string $column Column value (e.g., '1 / 3', 'span 2')
+     * @return self For method chaining
+     */
+    public function gridColumn(string $column): self
+    {
+        $this->config['grid_column'] = $column;
+        return $this;
+    }
+
+    /**
+     * Set grid row span/position
+     * 
+     * @param string $row Row value
+     * @return self For method chaining
+     */
+    public function gridRow(string $row): self
+    {
+        $this->config['grid_row'] = $row;
+        return $this;
+    }
+
+    /**
+     * Set grid area name
+     * 
+     * @param string $area Area name
+     * @return self For method chaining
+     */
+    public function gridArea(string $area): self
+    {
+        $this->config['grid_area'] = $area;
+        return $this;
+    }
+
+    // ========================================================================
+    // GAP/SPACING METHODS
+    // ========================================================================
+
+    /**
+     * Set gap (spacing between children)
+     * 
+     * @param string $gap Gap value (px, rem, etc)
+     * @return self For method chaining
+     */
+    public function gap(string $gap): self
+    {
+        $this->config['gap'] = $gap;
+        return $this;
+    }
+
+    /**
+     * Set row gap
+     * 
+     * @param string $gap Row gap value
+     * @return self For method chaining
+     */
+    public function rowGap(string $gap): self
+    {
+        $this->config['row_gap'] = $gap;
+        return $this;
+    }
+
+    /**
+     * Set column gap
+     * 
+     * @param string $gap Column gap value
+     * @return self For method chaining
+     */
+    public function columnGap(string $gap): self
+    {
+        $this->config['column_gap'] = $gap;
+        return $this;
+    }
+
+    // ========================================================================
+    // PADDING METHODS
+    // ========================================================================
+
+    /**
+     * Set padding (all sides)
+     * 
+     * @param string $padding Padding value
+     * @return self For method chaining
+     */
+    public function padding(string $padding): self
+    {
+        $this->config['padding'] = $padding;
+        return $this;
+    }
+
+    /**
+     * Set padding for individual sides
+     * 
+     * @param string|null $top Top padding
+     * @param string|null $right Right padding
+     * @param string|null $bottom Bottom padding
+     * @param string|null $left Left padding
+     * @return self For method chaining
+     */
+    public function paddingEach(?string $top = null, ?string $right = null, ?string $bottom = null, ?string $left = null): self
+    {
+        if ($top !== null) $this->config['padding_top'] = $top;
+        if ($right !== null) $this->config['padding_right'] = $right;
+        if ($bottom !== null) $this->config['padding_bottom'] = $bottom;
+        if ($left !== null) $this->config['padding_left'] = $left;
+        return $this;
+    }
+
+    /**
+     * Set top padding
+     * 
+     * @param string $padding Padding value
+     * @return self For method chaining
+     */
+    public function paddingTop(string $padding): self
+    {
+        $this->config['padding_top'] = $padding;
+        return $this;
+    }
+
+    /**
+     * Set right padding
+     * 
+     * @param string $padding Padding value
+     * @return self For method chaining
+     */
+    public function paddingRight(string $padding): self
+    {
+        $this->config['padding_right'] = $padding;
+        return $this;
+    }
+
+    /**
+     * Set bottom padding
+     * 
+     * @param string $padding Padding value
+     * @return self For method chaining
+     */
+    public function paddingBottom(string $padding): self
+    {
+        $this->config['padding_bottom'] = $padding;
+        return $this;
+    }
+
+    /**
+     * Set left padding
+     * 
+     * @param string $padding Padding value
+     * @return self For method chaining
+     */
+    public function paddingLeft(string $padding): self
+    {
+        $this->config['padding_left'] = $padding;
+        return $this;
+    }
+
+    // ========================================================================
+    // MARGIN METHODS
+    // ========================================================================
+
+    /**
+     * Set margin (all sides)
+     * 
+     * @param string $margin Margin value
+     * @return self For method chaining
+     */
+    public function margin(string $margin): self
+    {
+        $this->config['margin'] = $margin;
+        return $this;
+    }
+
+    /**
+     * Set margin for individual sides
+     * 
+     * @param string|null $top Top margin
+     * @param string|null $right Right margin
+     * @param string|null $bottom Bottom margin
+     * @param string|null $left Left margin
+     * @return self For method chaining
+     */
+    public function marginEach(?string $top = null, ?string $right = null, ?string $bottom = null, ?string $left = null): self
+    {
+        if ($top !== null) $this->config['margin_top'] = $top;
+        if ($right !== null) $this->config['margin_right'] = $right;
+        if ($bottom !== null) $this->config['margin_bottom'] = $bottom;
+        if ($left !== null) $this->config['margin_left'] = $left;
+        return $this;
+    }
+
+    /**
+     * Set top margin
+     * 
+     * @param string $margin Margin value
+     * @return self For method chaining
+     */
+    public function marginTop(string $margin): self
+    {
+        $this->config['margin_top'] = $margin;
+        return $this;
+    }
+
+    /**
+     * Set right margin
+     * 
+     * @param string $margin Margin value
+     * @return self For method chaining
+     */
+    public function marginRight(string $margin): self
+    {
+        $this->config['margin_right'] = $margin;
+        return $this;
+    }
+
+    /**
+     * Set bottom margin
+     * 
+     * @param string $margin Margin value
+     * @return self For method chaining
+     */
+    public function marginBottom(string $margin): self
+    {
+        $this->config['margin_bottom'] = $margin;
+        return $this;
+    }
+
+    /**
+     * Set left margin
+     * 
+     * @param string $margin Margin value
+     * @return self For method chaining
+     */
+    public function marginLeft(string $margin): self
+    {
+        $this->config['margin_left'] = $margin;
+        return $this;
+    }
+
+    // ========================================================================
+    // SIZING METHODS
+    // ========================================================================
+
+    /**
+     * Set width
+     * 
+     * @param string $width Width value (px, %, vh, auto, etc)
+     * @return self For method chaining
+     */
+    public function width(string $width): self
+    {
+        $this->config['width'] = $width;
+        return $this;
+    }
+
+    /**
+     * Set height
+     * 
+     * @param string $height Height value
+     * @return self For method chaining
+     */
+    public function height(string $height): self
+    {
+        $this->config['height'] = $height;
+        return $this;
+    }
+
+    /**
+     * Set minimum width
+     * 
+     * @param string $width Min width value
+     * @return self For method chaining
+     */
+    public function minWidth(string $width): self
+    {
+        $this->config['min_width'] = $width;
+        return $this;
+    }
+
+    /**
+     * Set minimum height
+     * 
+     * @param string $height Min height value
+     * @return self For method chaining
+     */
+    public function minHeight(string $height): self
+    {
+        $this->config['min_height'] = $height;
+        return $this;
+    }
+
+    /**
+     * Set maximum width
+     * 
+     * @param string $width Max width value
+     * @return self For method chaining
+     */
+    public function maxWidth(string $width): self
+    {
+        $this->config['max_width'] = $width;
+        return $this;
+    }
+
+    /**
+     * Set maximum height
+     * 
+     * @param string $height Max height value
+     * @return self For method chaining
+     */
+    public function maxHeight(string $height): self
+    {
+        $this->config['max_height'] = $height;
+        return $this;
+    }
+
+    // ========================================================================
+    // VISUAL STYLING METHODS
+    // ========================================================================
+
+    /**
+     * Set background color
+     * 
+     * @param string $color Color value (hex, rgb, named)
+     * @return self For method chaining
+     */
+    public function backgroundColor(string $color): self
+    {
+        $this->config['background_color'] = $color;
+        return $this;
+    }
+
+    /**
+     * Set background image
+     * 
+     * @param string $url Image URL
+     * @return self For method chaining
+     */
+    public function backgroundImage(string $url): self
+    {
+        $this->config['background_image'] = $url;
+        return $this;
+    }
+
+    /**
+     * Set background size
+     * 
+     * @param string $size Size value (cover, contain, auto, etc)
+     * @return self For method chaining
+     */
+    public function backgroundSize(string $size): self
+    {
+        $this->config['background_size'] = $size;
+        return $this;
+    }
+
+    /**
+     * Set background position
+     * 
+     * @param string $position Position value (center, top, bottom, etc)
+     * @return self For method chaining
+     */
+    public function backgroundPosition(string $position): self
+    {
+        $this->config['background_position'] = $position;
+        return $this;
+    }
+
+    /**
+     * Set border
+     * 
+     * @param string $border Border value (e.g., '1px solid #ccc')
+     * @return self For method chaining
+     */
+    public function border(string $border): self
+    {
+        $this->config['border'] = $border;
+        return $this;
+    }
+
+    /**
+     * Set border radius
+     * 
+     * @param string $radius Radius value
+     * @return self For method chaining
+     */
+    public function borderRadius(string $radius): self
+    {
+        $this->config['border_radius'] = $radius;
+        return $this;
+    }
+
+    /**
+     * Set box shadow
+     * 
+     * @param string $shadow Shadow value
+     * @return self For method chaining
+     */
+    public function boxShadow(string $shadow): self
+    {
+        $this->config['box_shadow'] = $shadow;
+        return $this;
+    }
+
+    /**
+     * Set opacity
+     * 
+     * @param float $opacity Opacity value (0-1)
+     * @return self For method chaining
+     */
+    public function opacity(float $opacity): self
+    {
+        $this->config['opacity'] = $opacity;
+        return $this;
+    }
+
+    // ========================================================================
+    // POSITION METHODS
+    // ========================================================================
+
+    /**
+     * Set position type
+     * 
+     * @param string $position Position value (static, relative, absolute, fixed, sticky)
+     * @return self For method chaining
+     */
+    public function position(string $position): self
+    {
+        $this->config['position'] = $position;
+        return $this;
+    }
+
+    /**
+     * Set top position
+     * 
+     * @param string $top Top value
+     * @return self For method chaining
+     */
+    public function top(string $top): self
+    {
+        $this->config['top'] = $top;
+        return $this;
+    }
+
+    /**
+     * Set right position
+     * 
+     * @param string $right Right value
+     * @return self For method chaining
+     */
+    public function right(string $right): self
+    {
+        $this->config['right'] = $right;
+        return $this;
+    }
+
+    /**
+     * Set bottom position
+     * 
+     * @param string $bottom Bottom value
+     * @return self For method chaining
+     */
+    public function bottom(string $bottom): self
+    {
+        $this->config['bottom'] = $bottom;
+        return $this;
+    }
+
+    /**
+     * Set left position
+     * 
+     * @param string $left Left value
+     * @return self For method chaining
+     */
+    public function left(string $left): self
+    {
+        $this->config['left'] = $left;
+        return $this;
+    }
+
+    /**
+     * Set z-index
+     * 
+     * @param int $zIndex Z-index value
+     * @return self For method chaining
+     */
+    public function zIndex(int $zIndex): self
+    {
+        $this->config['z_index'] = $zIndex;
+        return $this;
+    }
+
+    // ========================================================================
+    // OVERFLOW & SCROLL METHODS
+    // ========================================================================
+
+    /**
+     * Set overflow behavior
+     * 
+     * @param string $overflow Overflow value (visible, hidden, scroll, auto)
+     * @return self For method chaining
+     */
+    public function overflow(string $overflow): self
+    {
+        $this->config['overflow'] = $overflow;
+        return $this;
+    }
+
+    /**
+     * Set horizontal overflow
+     * 
+     * @param string $overflow Overflow value
+     * @return self For method chaining
+     */
+    public function overflowX(string $overflow): self
+    {
+        $this->config['overflow_x'] = $overflow;
+        return $this;
+    }
+
+    /**
+     * Set vertical overflow
+     * 
+     * @param string $overflow Overflow value
+     * @return self For method chaining
+     */
+    public function overflowY(string $overflow): self
+    {
+        $this->config['overflow_y'] = $overflow;
+        return $this;
+    }
+
+    /**
+     * Set scroll behavior
+     * 
+     * @param string $behavior Scroll behavior (auto, smooth)
+     * @return self For method chaining
+     */
+    public function scrollBehavior(string $behavior): self
+    {
+        $this->config['scroll_behavior'] = $behavior;
+        return $this;
+    }
+
+    // ========================================================================
+    // DISPLAY METHOD
+    // ========================================================================
+
+    /**
+     * Set display property
+     * 
+     * @param string $display Display value (block, inline, inline-block, flex, grid, none)
+     * @return self For method chaining
+     */
+    public function display(string $display): self
+    {
+        $this->config['display'] = $display;
+        return $this;
+    }
+
+    // ========================================================================
+    // RESPONSIVE METHODS
+    // ========================================================================
+
+    /**
+     * Set responsive configuration for different breakpoints
+     * 
+     * @param array $config Responsive configuration [breakpoint => config]
+     * @return self For method chaining
+     */
+    public function responsive(array $config): self
+    {
+        $this->config['responsive'] = $config;
+        return $this;
+    }
+
+    /**
+     * Hide container on specific breakpoints
+     * 
+     * @param array $breakpoints Breakpoints to hide on (mobile, tablet, desktop)
+     * @return self For method chaining
+     */
+    public function hideOn(array $breakpoints): self
+    {
+        $this->config['hide_on'] = $breakpoints;
+        return $this;
+    }
+
+    /**
+     * Show container only on specific breakpoints
+     * 
+     * @param array $breakpoints Breakpoints to show on
+     * @return self For method chaining
+     */
+    public function showOn(array $breakpoints): self
+    {
+        $this->config['show_on'] = $breakpoints;
+        return $this;
+    }
+
+    // ========================================================================
+    // CUSTOM STYLING METHODS
+    // ========================================================================
+
+    /**
+     * Add custom CSS class
+     * 
+     * @param string $class CSS class name
+     * @return self For method chaining
+     */
+    public function customClass(string $class): self
+    {
+        $this->config['custom_class'] = $class;
+        return $this;
+    }
+
+    /**
+     * Add custom inline style
+     * 
+     * @param string $style CSS style string
+     * @return self For method chaining
+     */
+    public function customStyle(string $style): self
+    {
+        $this->config['custom_style'] = $style;
+        return $this;
+    }
+
+    /**
+     * Add custom data attributes
+     * 
+     * @param array $attributes Key-value pairs of data attributes
+     * @return self For method chaining
+     */
+    public function dataAttributes(array $attributes): self
+    {
+        $this->config['data_attributes'] = $attributes;
+        return $this;
+    }
+
+    // ========================================================================
+    // HELPER METHODS (SHORTCUTS FOR COMMON PATTERNS)
+    // ========================================================================
+
+    /**
+     * Configure as flex row layout
+     * 
+     * @return self For method chaining
+     */
+    public function flexRow(): self
+    {
+        return $this->layout(LayoutType::FLEX)->flexDirection('row');
+    }
+
+    /**
+     * Configure as flex column layout
+     * 
+     * @return self For method chaining
+     */
+    public function flexColumn(): self
+    {
+        return $this->layout(LayoutType::FLEX)->flexDirection('column');
+    }
+
+    /**
+     * Center content (flex justify-content and align-items center)
+     * 
+     * @return self For method chaining
+     */
+    public function centerContent(): self
+    {
+        return $this->justifyContent('center')->alignItems('center');
+    }
+
+    /**
+     * Quick grid setup
+     * 
+     * @param string $columns Grid columns template
+     * @param string|null $rows Grid rows template
+     * @return self For method chaining
+     */
+    public function grid(string $columns, ?string $rows = null): self
+    {
+        $this->layout(LayoutType::GRID)->gridTemplateColumns($columns);
+        if ($rows !== null) {
+            $this->gridTemplateRows($rows);
+        }
+        return $this;
+    }
+
+    /**
+     * Create equal column grid
+     * 
+     * @param int $columns Number of columns
+     * @return self For method chaining
+     */
+    public function gridColumns(int $columns): self
+    {
+        return $this->grid("repeat($columns, 1fr)");
+    }
+
+    /**
+     * Set all spacing (gap and padding) at once
+     * 
+     * @param string $value Spacing value
+     * @return self For method chaining
+     */
+    public function spacing(string $value): self
+    {
+        return $this->gap($value)->padding($value);
+    }
+
+    /**
+     * Make container full width
+     * 
+     * @return self For method chaining
+     */
+    public function fullWidth(): self
+    {
+        return $this->width('100%');
+    }
+
+    /**
+     * Make container full height
+     * 
+     * @return self For method chaining
+     */
+    public function fullHeight(): self
+    {
+        return $this->height('100%');
+    }
+
+    /**
+     * Make container scrollable
+     * 
+     * @param string $direction Direction (both, x, y)
+     * @return self For method chaining
+     */
+    public function scrollable(string $direction = 'both'): self
+    {
+        if ($direction === 'both') {
+            return $this->overflow('auto');
+        } elseif ($direction === 'x') {
+            return $this->overflowX('auto');
+        } else {
+            return $this->overflowY('auto');
+        }
+    }
+
+    /**
+     * Apply rounded corners
+     * 
+     * @param string $radius Radius value (default: 8px)
+     * @return self For method chaining
+     */
+    public function rounded(string $radius = '8px'): self
+    {
+        return $this->borderRadius($radius);
+    }
+
+    /**
+     * Apply shadow effect
+     * 
+     * @param string $intensity Shadow intensity (light, medium, heavy, or custom CSS)
+     * @return self For method chaining
+     */
+    public function shadow(string $intensity = 'medium'): self
+    {
+        $shadows = [
+            'light' => '0 1px 3px rgba(0,0,0,0.1)',
+            'medium' => '0 4px 6px rgba(0,0,0,0.1)',
+            'heavy' => '0 10px 15px rgba(0,0,0,0.2)'
+        ];
+
+        $shadow = $shadows[$intensity] ?? $intensity;
+        return $this->boxShadow($shadow);
+    }
+
+    /**
+     * Hide container (display: none)
+     * 
+     * @return self For method chaining
+     */
+    public function hide(): self
+    {
+        return $this->display('none');
+    }
+
+    /**
+     * Show container (display: block)
+     * 
+     * @return self For method chaining
+     */
+    public function show(): self
+    {
+        return $this->display('block');
     }
 
     /**

@@ -930,41 +930,51 @@ class FormBuilder extends UIContainer
 
     /**
      * Add shadow to form
+     * Uses parent UIContainer shadow method with predefined intensity
      * 
-     * @param bool $shadow Whether to add shadow
+     * @param string $intensity Shadow intensity (light, medium, heavy, or custom CSS)
      * @return self For method chaining
      */
-    public function shadow(bool $shadow = true): self
+    public function shadow(string $intensity = 'medium'): self
     {
-        $this->config['shadow'] = $shadow;
+        // Call parent method which sets box_shadow in config
+        parent::shadow($intensity);
+        
+        // Also set legacy 'shadow' flag for backward compatibility
+        $this->config['shadow'] = true;
         return $this;
     }
 
     /**
      * Add rounded corners to form
+     * Uses parent UIContainer rounded method
      * 
-     * @param bool $rounded Whether to add rounded corners
+     * @param string $radius Radius value (default: 8px)
      * @return self For method chaining
      */
-    public function rounded(bool $rounded = true): self
+    public function rounded(string $radius = '8px'): self
     {
-        $this->config['rounded'] = $rounded;
+        // Call parent method which sets border_radius in config
+        parent::rounded($radius);
+        
+        // Also set legacy 'rounded' flag for backward compatibility
+        $this->config['rounded'] = true;
         return $this;
     }
 
     /**
-     * Set form padding
+     * Set form padding (semantic sizes)
      * 
-     * @param string $padding Padding size (xs, small, medium, large, xl, none)
+     * @param string $paddingSize Padding size (xs, small, medium, large, xl, none)
      * @return self For method chaining
      */
-    public function padding(string $padding): self
+    public function formPadding(string $paddingSize): self
     {
-        if (!in_array($padding, ['xs', 'small', 'medium', 'large', 'xl', 'none'])) {
-            throw new \InvalidArgumentException("Invalid padding: {$padding}");
+        if (!in_array($paddingSize, ['xs', 'small', 'medium', 'large', 'xl', 'none'])) {
+            throw new \InvalidArgumentException("Invalid padding: {$paddingSize}");
         }
         
-        $this->config['padding'] = $padding;
+        $this->config['padding'] = $paddingSize;
         return $this;
     }
 
