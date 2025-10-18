@@ -342,30 +342,30 @@ class UIContainer implements UIElement
     /**
      * {@inheritDoc}
      * 
-     * Recursively converts this container and all its children to JSON format
-     * Children are serialized in the 'elements' array within the configuration
+     * Converts this container and all its children to a flat JSON structure
+     * All components are returned at the same level, with 'slot' indicating parent-child relationships
      */
     public function toJson(): array
     {
-        // Build the elements array by recursively calling toJson() on all children
-        $elements = [];
-        foreach ($this->children as $child) {
-            $childJson = $child->toJson();
-            // Use the + operator to preserve numeric keys (IDs)
-            $elements = $elements + $childJson;
-        }
-
-        // Build the final configuration with children
-        // Include 'name' attribute only if it's not null (for client-side referencing)
-        $config = array_merge($this->config, [
-            'elements' => $elements,
-        ]);
+        // Start with this container's configuration
+        $config = $this->config;
         
+        // Include 'name' attribute only if it's not null (for client-side referencing)
         if ($this->name !== null) {
             $config['name'] = $this->name;
         }
 
-        return [$this->id => $config];
+        // Start with this container
+        $result = [$this->id => $config];
+
+        // Add all children at the same level (flat structure)
+        foreach ($this->children as $child) {
+            $childJson = $child->toJson();
+            // Use the + operator to preserve numeric keys (IDs)
+            $result = $result + $childJson;
+        }
+
+        return $result;
     }
 
     /**
