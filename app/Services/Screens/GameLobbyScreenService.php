@@ -46,7 +46,7 @@ class GameLobbyScreenService
     /**
      * Build and add UI elements to the container
      * 
-     * @param \App\Services\UI\Components\ContainerBuilder $container The container to add elements to
+     * @param \App\Services\UI\Components\UIContainer $container The container to add elements to
      * @param bool $canCreateNewGame Whether user can create a new game
      * @param int $maxInstances Maximum instances per user
      * @param array $saved_games Array of saved games
