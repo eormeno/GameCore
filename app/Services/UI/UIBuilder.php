@@ -18,10 +18,10 @@ class UIBuilder
     /**
      * Create a new button component
      * 
-     * @param string $id The unique identifier for the button
+     * @param string $name an optional semantic name for the button
      * @return ButtonBuilder
      */
-    public static function button(?string $name): ButtonBuilder
+    public static function button(?string $name = null): ButtonBuilder
     {
         return new ButtonBuilder($name);
     }
@@ -29,10 +29,10 @@ class UIBuilder
     /**
      * Create a new label component
      * 
-     * @param string $id The unique identifier for the label
+     * @param string $name an optional semantic name for the label
      * @return LabelBuilder
      */
-    public static function label(?string $name): LabelBuilder
+    public static function label(?string $name = null): LabelBuilder
     {
         return new LabelBuilder($name);
     }
@@ -40,10 +40,10 @@ class UIBuilder
     /**
      * Create a new container component
      * 
-     * @param string $id The unique identifier for the container
+     * @param string $name The optional semantic name for the container
      * @return ContainerBuilder
      */
-    public static function container(?string $name): ContainerBuilder
+    public static function container(?string $name = null): ContainerBuilder
     {
         return new ContainerBuilder($name);
     }
@@ -51,10 +51,10 @@ class UIBuilder
     /**
      * Create a new table component
      * 
-     * @param string $id The unique identifier for the table
+     * @param string $name The optional semantic name for the table
      * @return TableBuilder
      */
-    public static function table(?string $name): TableBuilder
+    public static function table(?string $name = null): TableBuilder
     {
         return new TableBuilder($name);
     }

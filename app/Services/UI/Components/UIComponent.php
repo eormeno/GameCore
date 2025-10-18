@@ -31,9 +31,13 @@ abstract class UIComponent implements UIElement
         $this->type = $this->getTypeFromClassName();
         $this->config = array_merge([
             'type' => $this->type,
-            'name' => $this->name,
             'visible' => true,
         ], $this->getDefaultConfig());
+        
+        // Only include 'name' if it's not null
+        if ($this->name !== null) {
+            $this->config['name'] = $this->name;
+        }
     }
 
     /**
@@ -123,7 +127,12 @@ abstract class UIComponent implements UIElement
      */
     public function name(?string $name): self
     {
-        $this->config['name'] = $name;
+        $this->name = $name;
+        if ($name !== null) {
+            $this->config['name'] = $name;
+        } else {
+            unset($this->config['name']);
+        }
         return $this;
     }
 
@@ -132,7 +141,12 @@ abstract class UIComponent implements UIElement
      */
     public function setName(?string $name): self
     {
-        $this->config['name'] = $name;
+        $this->name = $name;
+        if ($name !== null) {
+            $this->config['name'] = $name;
+        } else {
+            unset($this->config['name']);
+        }
         return $this;
     }
 

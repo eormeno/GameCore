@@ -32,7 +32,7 @@ class GameLobbyScreenService
         $canCreateNewGame = $this->gameInstanceService->canCreateNewGame($user, $gameApp);
         $maxInstances = $gameApp->max_instances_per_user;
 
-        $container = UIBuilder::container('game_lobby_screen')
+        $container = UIBuilder::container()
             ->slot('canvas')
             ->layout(LayoutType::VERTICAL)
             ->title(t('games.game_lobby_title', ['name' => $gameApp->name]));
@@ -56,7 +56,7 @@ class GameLobbyScreenService
     {
         // New Game Button
         $container->add(
-            UIBuilder::button('new_game')
+            UIBuilder::button()
                 ->label(t('new_game_button_label'))
                 ->action('create_new_game')
                 ->icon('plus')
@@ -67,7 +67,7 @@ class GameLobbyScreenService
 
         // Warning Message (only if needed)
         $container->add(
-            UIBuilder::label('warning_message')
+            UIBuilder::label()
                 ->text(t('instances_limit_reached', ['max' => $maxInstances]))
                 ->style('warning')
                 ->visible(!$canCreateNewGame)
@@ -90,7 +90,7 @@ class GameLobbyScreenService
     {
         $rows = $this->buildTableRows($saved_games, $maxInstances);
 
-        return UIBuilder::table('saved_games')
+        return UIBuilder::table()
             ->title(count($saved_games) > 0 ? t('games.saved_games_title') : t('no_saved_games_title'))
             ->addHeader(t('games.saved_game_number_column'))
             ->addHeader(t('games.saved_game_name_column'))
