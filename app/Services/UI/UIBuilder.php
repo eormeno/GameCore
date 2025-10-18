@@ -4,7 +4,7 @@ namespace App\Services\UI;
 
 use App\Services\UI\Components\ButtonBuilder;
 use App\Services\UI\Components\LabelBuilder;
-use App\Services\UI\Components\ContainerBuilder;
+use App\Services\UI\Components\UIContainer;
 use App\Services\UI\Components\TableBuilder;
 use App\Services\UI\Components\TableRowBuilder;
 use App\Services\UI\Components\InputBuilder;
@@ -39,17 +39,6 @@ class UIBuilder
     public static function label(?string $name = null): LabelBuilder
     {
         return new LabelBuilder($name);
-    }
-
-    /**
-     * Create a new container component
-     * 
-     * @param string|null $name The optional semantic name for the container
-     * @return ContainerBuilder
-     */
-    public static function container(?string $name = null): ContainerBuilder
-    {
-        return new ContainerBuilder($name);
     }
 
     /**
@@ -106,5 +95,16 @@ class UIBuilder
     public static function checkbox(?string $name = null): CheckboxBuilder
     {
         return new CheckboxBuilder($name);
+    }
+
+    /**
+     * Create a new container component
+     * 
+     * @param string|null $name The optional semantic name for the container
+     * @return UIContainer
+     */
+    public static function container(?string $name = null): UIContainer
+    {
+        return new UIContainer($name);
     }
 }
