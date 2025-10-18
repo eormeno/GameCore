@@ -61,6 +61,7 @@ class GameLobbyScreenService
                 ->action('create_new_game')
                 ->icon('plus')
                 ->style('primary')
+                ->variant('filled')
                 ->enabled($canCreateNewGame)
                 ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
         );
