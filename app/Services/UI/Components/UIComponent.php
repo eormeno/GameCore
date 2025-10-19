@@ -186,10 +186,14 @@ abstract class UIComponent implements UIElement
      * {@inheritDoc}
      * 
      * For leaf components, returns the configuration wrapped in the component ID
+     * Null values are filtered out from the configuration
      */
     public function toJson(): array
     {
-        return [$this->id => $this->config];
+        // Filter out null values from config
+        $config = array_filter($this->config, fn($value) => $value !== null);
+        
+        return [$this->id => $config];
     }
 
     /**

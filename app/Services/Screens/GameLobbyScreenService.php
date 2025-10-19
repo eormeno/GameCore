@@ -55,31 +55,31 @@ class GameLobbyScreenService
     private function buildUIElements($container, bool $canCreateNewGame, int $maxInstances, array $saved_games): void
     {
         // New Game Button
-        $container->add(
-            UIBuilder::button()
-                ->label(t('new_game_button_label'))
-                ->action('create_new_game')
-                ->icon('plus')
-                ->style('primary')
-                ->variant('filled')
-                ->enabled($canCreateNewGame)
-                ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
-        );
+        // $container->add(
+        //     UIBuilder::button()
+        //         ->label(t('new_game_button_label'))
+        //         ->action('create_new_game')
+        //         ->icon('plus')
+        //         ->style('primary')
+        //         ->variant('filled')
+        //         ->enabled($canCreateNewGame)
+        //         ->tooltip($canCreateNewGame ? t('new_game_button_tooltip') : t('cannot_create_new_game'))
+        // );
 
-        $container->add(
-            UIBuilder::input()
-                ->type('hidden')
-                ->name('max_instances_per_user')
-                ->value($maxInstances)
-        );
+        // $container->add(
+        //     UIBuilder::input()
+        //         ->type('hidden')
+        //         ->name('max_instances_per_user')
+        //         ->value($maxInstances)
+        // );
 
-        // Warning Message (only if needed)
-        $container->add(
-            UIBuilder::label()
-                ->text(t('instances_limit_reached', ['max' => $maxInstances]))
-                ->style('warning')
-                ->visible(!$canCreateNewGame)
-        );
+        // // Warning Message (only if needed)
+        // $container->add(
+        //     UIBuilder::label()
+        //         ->text(t('instances_limit_reached', ['max' => $maxInstances]))
+        //         ->style('warning')
+        //         ->visible(!$canCreateNewGame)
+        // );
 
         // Saved Games Table
         $container->add(

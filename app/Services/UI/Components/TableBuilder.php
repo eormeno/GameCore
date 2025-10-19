@@ -71,19 +71,25 @@ class TableBuilder extends UIComponent
         // Generate automatic ID if not provided
         $headerId = $id ?? strtolower(str_replace([' ', '(', ')', '-'], ['_', '', '', '_'], $text)) . '_header';
         
+        // Build header config and filter out null values
+        $headerData = [
+            'visible' => true,
+            'text' => $text,
+            'sortable' => $sortable,
+            'sort_direction' => $sortDirection,
+            'width' => $width,
+            'align' => $align->value,
+            'color' => $color,
+            'background_color' => $backgroundColor,
+            'font_weight' => $fontWeight->value,
+            'tooltip' => $tooltip,
+        ];
+        
+        // Filter out null values
+        $headerData = array_filter($headerData, fn($value) => $value !== null);
+        
         $headerConfig = [
-            $headerId . ':tableheader' => [
-                'visible' => true,
-                'text' => $text,
-                'sortable' => $sortable,
-                'sort_direction' => $sortDirection,
-                'width' => $width,
-                'align' => $align->value,
-                'color' => $color,
-                'background_color' => $backgroundColor,
-                'font_weight' => $fontWeight->value,
-                'tooltip' => $tooltip,
-            ]
+            $headerId . ':tableheader' => $headerData
         ];
 
         $this->config['headers'] = array_merge($this->config['headers'], $headerConfig);

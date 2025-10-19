@@ -1425,11 +1425,12 @@ class UIContainer implements UIElement
      * 
      * Converts this container and all its children to a flat JSON structure
      * All components are returned at the same level, with 'slot' indicating parent-child relationships
+     * Null values are filtered out from the configuration
      */
     public function toJson(): array
     {
-        // Start with this container's configuration
-        $config = $this->config;
+        // Start with this container's configuration and filter out null values
+        $config = array_filter($this->config, fn($value) => $value !== null);
         
         // Include 'name' attribute only if it's not null (for client-side referencing)
         if ($this->name !== null) {
