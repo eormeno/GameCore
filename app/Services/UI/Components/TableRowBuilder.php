@@ -31,6 +31,7 @@ class TableRowBuilder extends UIComponent
             'cells' => [],
             'selected' => false,
             'style' => 'default',
+            'empty' => null,
         ];
     }
 
@@ -81,6 +82,18 @@ class TableRowBuilder extends UIComponent
     }
 
     /**
+     * Mark this row as empty
+     * Useful for placeholder rows or rows filled to meet minRows requirement
+     * 
+     * @param bool $empty True if the row is empty, false otherwise
+     * @return self For method chaining
+     */
+    public function empty(bool $empty = true): self
+    {
+        return $this->setConfig('empty', $empty);
+    }
+
+    /**
      * Get the parent table
      * 
      * @return TableBuilder
@@ -88,5 +101,15 @@ class TableRowBuilder extends UIComponent
     public function getTable(): TableBuilder
     {
         return $this->table;
+    }
+
+    /**
+     * Exclude 'name' and 'cells' from JSON output
+     * 
+     * @return array List of keys to exclude
+     */
+    protected function getExcludedJsonKeys(): array
+    {
+        return ['name', 'cells'];
     }
 }

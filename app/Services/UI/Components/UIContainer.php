@@ -1432,6 +1432,11 @@ class UIContainer implements UIElement
         // Start with this container's configuration and filter out null values
         $config = array_filter($this->config, fn($value) => $value !== null);
         
+        // Remove 'visible' if it's true (default value)
+        if (isset($config['visible']) && $config['visible'] === true) {
+            unset($config['visible']);
+        }
+        
         // Include 'name' attribute only if it's not null (for client-side referencing)
         if ($this->name !== null) {
             $config['name'] = $this->name;

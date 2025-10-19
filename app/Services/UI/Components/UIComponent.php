@@ -193,7 +193,29 @@ abstract class UIComponent implements UIElement
         // Filter out null values from config
         $config = array_filter($this->config, fn($value) => $value !== null);
         
+        // Remove 'visible' if it's true (default value)
+        if (isset($config['visible']) && $config['visible'] === true) {
+            unset($config['visible']);
+        }
+        
+        // Allow subclasses to exclude additional keys
+        $excludeKeys = $this->getExcludedJsonKeys();
+        if (!empty($excludeKeys)) {
+            $config = array_diff_key($config, array_flip($excludeKeys));
+        }
+        
         return [$this->id => $config];
+    }
+
+    /**
+     * Get list of config keys to exclude from JSON output
+     * Override in subclasses to customize
+     * 
+     * @return array List of keys to exclude
+     */
+    protected function getExcludedJsonKeys(): array
+    {
+        return [];
     }
 
     /**

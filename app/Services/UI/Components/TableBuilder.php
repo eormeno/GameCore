@@ -38,6 +38,7 @@ class TableBuilder extends UIComponent
             'headers' => [],
             'rows' => [],
             'pagination' => false,
+            'min_rows' => null,
         ];
     }
 
@@ -87,6 +88,11 @@ class TableBuilder extends UIComponent
         
         // Filter out null values
         $headerData = array_filter($headerData, fn($value) => $value !== null);
+        
+        // Remove 'visible' if it's true (default value)
+        if (isset($headerData['visible']) && $headerData['visible'] === true) {
+            unset($headerData['visible']);
+        }
         
         $headerConfig = [
             $headerId . ':tableheader' => $headerData
@@ -138,6 +144,17 @@ class TableBuilder extends UIComponent
     public function pagination(bool $pagination = true): self
     {
         return $this->setConfig('pagination', $pagination);
+    }
+
+    /**
+     * Set minimum number of rows to display (fills with empty rows if needed)
+     * 
+     * @param int $minRows Minimum number of rows
+     * @return self For method chaining
+     */
+    public function minRows(int $minRows): self
+    {
+        return $this->setConfig('min_rows', $minRows);
     }
 
     /**
@@ -194,9 +211,13 @@ class TableBuilder extends UIComponent
      * {@inheritDoc}
      * 
      * Override toJson to include the rows container in flat structure
+     * and automatically fill with empty rows if minRows is set
      */
     public function toJson(): array
     {
+        // Auto-fill empty rows if minRows is set
+        $this->autoFillEmptyRows();
+        
         // Get the table's JSON (without the rows container)
         $tableJson = parent::toJson();
         
@@ -205,6 +226,48 @@ class TableBuilder extends UIComponent
         
         // Merge both at the same level (flat structure)
         return $tableJson + $rowsContainerJson;
+    }
+
+    /**
+     * Automatically fill the table with empty rows if current row count is less than minRows
+     * 
+     * @return void
+     */
+    private function autoFillEmptyRows(): void
+    {
+        // Check if minRows is set
+        $minRows = $this->config['min_rows'] ?? null;
+        
+        if ($minRows === null || $minRows <= 0) {
+            return; // No minRows set, nothing to do
+        }
+        
+        // Count current rows in the rows container
+        $currentRowCount = count($this->rowsContainer->getChildren());
+        
+        // If we already have enough rows, do nothing
+        if ($currentRowCount >= $minRows) {
+            return;
+        }
+        
+        // Calculate how many empty rows we need to add
+        $emptyRowsNeeded = $minRows - $currentRowCount;
+        
+        // Count headers to determine how many cells per row
+        $headerCount = count($this->config['headers'] ?? []);
+        
+        // Create empty cells array
+        $emptyCells = array_fill(0, $headerCount, '');
+        
+        // Add empty rows
+        for ($i = 0; $i < $emptyRowsNeeded; $i++) {
+            $rowNumber = $currentRowCount + $i + 1;
+            $emptyRow = new TableRowBuilder($this, "empty_row_$rowNumber");
+            $emptyRow->cells($emptyCells)
+                ->empty(true);
+            
+            $this->addRow($emptyRow);
+        }
     }
 
     /**
