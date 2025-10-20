@@ -71,14 +71,19 @@ gitGraph
 #### **ui-builder** ⭐ (ACTUAL)
 - Sistema de construcción de UI con arquitectura de árbol
 - Sistema de slots implementado
-- Componentes: Input, Select, Checkbox, Label, Button, Table, TableRow, TableCell
+- Componentes completos: Input, Select, Checkbox, Label, Button, Table, TableRow, TableCell, TableHeaderRow, TableHeaderCell
 - IDs auto-incrementales contextuales
 - Gestión de contenedores y formularios
-- **Recientemente integrado:**
-  - TableCellBuilder con auto-fill functionality
-  - Mejoras en TableBuilder y TableRowBuilder
-  - Refactorización de GameLobbyScreenService
-  - Enum Align para alineación de contenido
+- **Integraciones recientes:**
+  - **table-header (2025-10-20):** Sistema completo de headers para tablas
+    - TableHeaderCellBuilder y TableHeaderRowBuilder
+    - Refactorización del sistema de headers con IDs auto-incrementales
+    - Tests unitarios y documentación completa
+  - **table-cell (2025-10-20):** Sistema de celdas para tablas
+    - TableCellBuilder con auto-fill functionality
+    - Mejoras en TableBuilder y TableRowBuilder
+    - Refactorización de GameLobbyScreenService
+    - Enum Align para alineación de contenido
 
 #### **servicio-de-traduccion**
 - Servicio de traducción/internacionalización
@@ -151,22 +156,24 @@ main (producción)
 **Rama Activa:** `ui-builder` ⭐
 
 **Última Actividad:**
-- ✅ Merge exitoso de `table-cell` en `ui-builder` (e386d35)
-- ✅ Implementación completa de TableCellBuilder
-- ✅ Mejoras en TableBuilder y TableRowBuilder
-- ✅ Refactorización de GameLobbyScreenService
-- ✅ Auto-fill functionality para celdas de tabla
-- ✅ Nuevo Enum Align para alineación
-- ✅ Rama `table-cell` eliminada (local y remota)
+- ✅ Merge exitoso de `table-header` en `ui-builder` (ddfcd56)
+- ✅ Sistema completo de headers para tablas
+- ✅ TableHeaderCellBuilder y TableHeaderRowBuilder implementados
+- ✅ Refactorización del sistema de headers con IDs auto-incrementales
+- ✅ Tests unitarios completos (193 líneas)
+- ✅ Documentación exhaustiva (318 líneas)
+- ✅ Rama `table-header` eliminada (local y remota)
 
 **Ramas Base:**
 - `main`: Rama principal estable
-- `ui-builder`: Sistema UI completo con componentes de tabla integrados (e386d35)
+- `ui-builder`: Sistema UI completo con componentes de tabla y headers integrados (ddfcd56)
 
 ## Notas
 
+- ✅ `table-header` fue mergeada exitosamente en `ui-builder` y eliminada
 - ✅ `table-cell` fue mergeada exitosamente en `ui-builder` y eliminada
-- `ui-builder` contiene el sistema completo de UI con todos los componentes
+- `ui-builder` contiene el sistema completo de UI con todos los componentes de tabla
+- Sistema de tablas completo: TableBuilder, TableRowBuilder, TableCellBuilder, TableHeaderRowBuilder, TableHeaderCellBuilder
 - Múltiples ramas de features independientes desde `main`
 - Sistema modular permite desarrollo en paralelo
 
@@ -174,10 +181,12 @@ main (producción)
 
 | Fecha | Merge | Descripción |
 |-------|-------|-------------|
+| 2025-10-20 | `table-header` → `ui-builder` | TableHeaderCellBuilder, TableHeaderRowBuilder, sistema de headers refactorizado |
 | 2025-10-20 | `table-cell` → `ui-builder` | TableCellBuilder, mejoras en TableBuilder/TableRowBuilder, Enum Align |
 
 ---
 
 **Fecha de actualización:** 20 de octubre de 2025  
 **Repository:** GameCore (eormeno)  
-**Última acción:** Merge y eliminación de rama `table-cell`
+**Última acción:** Merge y eliminación de rama `table-header`  
+**Componentes de tabla completados:** ✅ Table, TableRow, TableCell, TableHeaderRow, TableHeaderCell
