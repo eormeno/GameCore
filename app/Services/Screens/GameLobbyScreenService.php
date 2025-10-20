@@ -40,7 +40,7 @@ class GameLobbyScreenService
         // Build and add UI elements to the container using the tree structure
         $this->buildUIElements($container, $canCreateNewGame, $maxInstances, $saved_games);
 
-        return $container->build();
+        return $container->toJson();
     }
 
     /**
