@@ -4,8 +4,7 @@
 
 ### Ramas Locales Activas
 - **main** (rama principal - default)
-- **table-cell** (rama actual)
-- **ui-builder**
+- **ui-builder** (rama actual) ⭐
 - **servicio-de-traduccion**
 
 ### Ramas Remotas en origin
@@ -22,12 +21,8 @@ gitGraph
     commit id: "Slot System Implementation"
     commit id: "Forms & Components"
     commit id: "minRows feature"
-    
-    branch table-cell
-    checkout table-cell
-    commit id: "TableCellBuilder implementation"
+    commit id: "TableCellBuilder merged"
     commit id: "Enhanced TableBuilder"
-    commit id: "GameLobbyScreen refactor"
     
     checkout main
     branch servicio-de-traduccion
@@ -63,9 +58,6 @@ gitGraph
     branch pantalla-seleccion-de-partida
     checkout pantalla-seleccion-de-partida
     commit id: "Save selection screen"
-    
-    checkout main
-    merge ui-builder tag: "UI System"
 ```
 
 ## Descripción de Ramas
@@ -76,18 +68,17 @@ gitGraph
 - Rama principal de producción
 - Contiene código estable y probado
 
-#### **table-cell** ⭐ (ACTUAL)
-- Implementación de TableCellBuilder
-- Mejoras en TableBuilder y TableRowBuilder
-- Auto-fill functionality para tablas
-- Refactorización de GameLobbyScreenService
-
-#### **ui-builder**
+#### **ui-builder** ⭐ (ACTUAL)
 - Sistema de construcción de UI con arquitectura de árbol
 - Sistema de slots implementado
-- Componentes: Input, Select, Checkbox, Label, Button
+- Componentes: Input, Select, Checkbox, Label, Button, Table, TableRow, TableCell
 - IDs auto-incrementales contextuales
 - Gestión de contenedores y formularios
+- **Recientemente integrado:**
+  - TableCellBuilder con auto-fill functionality
+  - Mejoras en TableBuilder y TableRowBuilder
+  - Refactorización de GameLobbyScreenService
+  - Enum Align para alineación de contenido
 
 #### **servicio-de-traduccion**
 - Servicio de traducción/internacionalización
@@ -142,8 +133,7 @@ gitGraph
 
 ```
 main (producción)
-├── ui-builder (base de UI components)
-│   └── table-cell (extensión de tablas) ⭐ ACTUAL
+├── ui-builder (sistema completo de UI) ⭐ ACTUAL
 ├── servicio-de-traduccion (i18n)
 ├── items-system (sistema de items)
 ├── tilesets (sistema de sprites)
@@ -158,27 +148,36 @@ main (producción)
 
 ## Estado Actual
 
-**Rama Activa:** `table-cell`
+**Rama Activa:** `ui-builder` ⭐
 
 **Última Actividad:**
-- Refactorización de GameLobbyScreenService
-- Implementación de TableCellBuilder
-- Mejoras en manejo de headers y botones de acción
-- Auto-fill functionality para celdas de tabla
+- ✅ Merge exitoso de `table-cell` en `ui-builder` (e386d35)
+- ✅ Implementación completa de TableCellBuilder
+- ✅ Mejoras en TableBuilder y TableRowBuilder
+- ✅ Refactorización de GameLobbyScreenService
+- ✅ Auto-fill functionality para celdas de tabla
+- ✅ Nuevo Enum Align para alineación
+- ✅ Rama `table-cell` eliminada (local y remota)
 
 **Ramas Base:**
 - `main`: Rama principal estable
-- `ui-builder`: Base del sistema UI (556d831)
-- `table-cell`: Desarrollo actual de componentes de tabla (6929cd0)
+- `ui-builder`: Sistema UI completo con componentes de tabla integrados (e386d35)
 
 ## Notas
 
-- La rama `table-cell` se basa en `ui-builder`
-- `ui-builder` contiene el sistema de slots y componentes base
+- ✅ `table-cell` fue mergeada exitosamente en `ui-builder` y eliminada
+- `ui-builder` contiene el sistema completo de UI con todos los componentes
 - Múltiples ramas de features independientes desde `main`
 - Sistema modular permite desarrollo en paralelo
 
+## Historial de Merges
+
+| Fecha | Merge | Descripción |
+|-------|-------|-------------|
+| 2025-10-20 | `table-cell` → `ui-builder` | TableCellBuilder, mejoras en TableBuilder/TableRowBuilder, Enum Align |
+
 ---
 
-**Fecha de generación:** 20 de octubre de 2025  
-**Repository:** GameCore (eormeno)
+**Fecha de actualización:** 20 de octubre de 2025  
+**Repository:** GameCore (eormeno)  
+**Última acción:** Merge y eliminación de rama `table-cell`
