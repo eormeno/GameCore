@@ -25,14 +25,14 @@ class ContainerBuilder
     }
 
     /**
-     * Set the slot name for this container
+     * Set the parent for this container
      * 
-     * @param int|string|null $slot The slot (int = parent ID, string = parent name, null = delete)
+     * @param int|string|null $parent The parent (int = parent ID, string = parent name, null = delete)
      * @return self For method chaining
      */
-    public function slot(int|string|null $slot): self
+    public function parent(int|string|null $parent): self
     {
-        $this->container->slot($slot);
+        $this->container->parent($parent);
         return $this;
     }
 

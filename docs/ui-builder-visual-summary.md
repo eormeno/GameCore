@@ -25,7 +25,7 @@
 
 ```
 game_lobby_screen (32600001) [Container]
-│   slot: "canvas"
+│   parent: "canvas"
 │   name: "game_lobby_screen"
 │
 ├── new_game (32600002) [Button]
@@ -72,7 +72,7 @@ game_lobby_screen (32600001) [Container]
 │     {                                                           │
 │       "32600001": {           ← 🔢 ID técnico                  │
 │         "name": "game_lobby_screen",  ← 📌 Name                │
-│         "slot": "canvas",     ← 🎯 Target slot                 │
+│         "parent": "canvas",     ← 🎯 Target slot                 │
 │         "elements": {                                           │
 │           "32600002": {                                         │
 │             "name": "new_game"  ← 📌 Para referencia           │
@@ -92,7 +92,7 @@ game_lobby_screen (32600001) [Container]
 │  3. Recibe JSON                                                 │
 │     ↓                                                           │
 │     const screen = response[32600001];                          │
-│     const targetSlot = screen.slot;  ← 🎯 "canvas"             │
+│     const targetParent = screen.slot;  ← 🎯 "canvas"             │
 │                                                                 │
 │  4. Renderiza en slot                                           │
 │     ↓                                                           │
@@ -210,8 +210,8 @@ game_lobby_screen (32600001) [Container]
 │      ->slot('canvas')  ← 🎯 "Renderízame aquí"            │
 │                                                            │
 │  Cliente:                                                  │
-│    const targetSlot = screen.slot; // "canvas"             │
-│    renderInSlot(targetSlot, screen);                       │
+│    const targetParent = screen.slot; // "canvas"             │
+│    renderInSlot(targetParent, screen);                       │
 │                                                            │
 └────────────────────────────────────────────────────────────┘
 

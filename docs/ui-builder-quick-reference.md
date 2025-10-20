@@ -70,7 +70,7 @@ $count = $container->count();
     "32600001": {
         "type": "container",
         "name": "game_lobby_screen",  // ⭐ Para referencia
-        "slot": "canvas",              // ⭐ Dónde renderizar
+        "parent": "canvas",              // ⭐ Dónde renderizar
         "elements": {
             "32600002": {
                 "type": "button",

@@ -42,12 +42,12 @@ $container->add($button);
     "1": {
         "type": "container",
         "name": "main",
-        "slot": null,
+        "parent": null,
         "elements": {
             "2": {
                 "type": "button",
                 "name": "submit",
-                "slot": 1,  // ← Asignado automáticamente
+                "parent": 1,  // ← Asignado automáticamente
                 "label": "Submit"
             }
         }
@@ -86,14 +86,14 @@ interface UIElement
      * Get the slot where this element should be rendered
      * @return int|string|null
      */
-    public function getSlot(): int|string|null;
+    public function getParent(): int|string|null;
 
     /**
      * Set the slot where this element should be rendered
      * @param int|string|null $slot
      * @return self
      */
-    public function setSlot(int|string|null $slot): self;
+    public function setParent(int|string|null $slot): self;
 }
 ```
 
@@ -114,12 +114,12 @@ abstract class UIComponent implements UIElement
         ], $this->getDefaultConfig());
     }
     
-    public function getSlot(): int|string|null
+    public function getParent(): int|string|null
     {
         return $this->slot;
     }
     
-    public function setSlot(int|string|null $slot): self
+    public function setParent(int|string|null $slot): self
     {
         $this->slot = $slot;
         $this->config['slot'] = $slot;
@@ -128,7 +128,7 @@ abstract class UIComponent implements UIElement
     
     public function slot(int|string|null $slot): self
     {
-        return $this->setSlot($slot);
+        return $this->setParent($slot);
     }
 }
 ```
@@ -145,7 +145,7 @@ class UIContainer implements UIElement
         // ...
         
         // ✅ Asignar automáticamente el slot al ID del padre
-        $element->setSlot($this->id);
+        $element->setParent($this->id);
         
         $this->children[$elementId] = $element;
         return $this;
@@ -156,7 +156,7 @@ class UIContainer implements UIElement
         // ...
         
         // ✅ Marcar para eliminación estableciendo slot = null
-        $this->children[$elementId]->setSlot(null);
+        $this->children[$elementId]->setParent(null);
         
         unset($this->children[$elementId]);
         return $this;
@@ -187,17 +187,17 @@ $header->add($button); // button->slot = ID de header
     "1": {
         "type": "container",
         "name": "main_screen",
-        "slot": "canvas",
+        "parent": "canvas",
         "elements": {
             "2": {
                 "type": "container",
                 "name": "header",
-                "slot": 1,
+                "parent": 1,
                 "elements": {
                     "3": {
                         "type": "button",
                         "name": "btn",
-                        "slot": 2,
+                        "parent": 2,
                         "label": "Click"
                     }
                 }
@@ -233,7 +233,7 @@ $container->remove($button->getId());
 {
     "3": {
         "type": "button",
-        "slot": null,  // ← Cliente debe eliminar este elemento
+        "parent": null,  // ← Cliente debe eliminar este elemento
         "label": "Delete Me"
     }
 }
@@ -298,12 +298,12 @@ $content->slot('content'); // String conocido por el cliente
     "1": {
         "type": "container",
         "name": "sidebar_panel",
-        "slot": "sidebar"
+        "parent": "sidebar"
     },
     "2": {
         "type": "container",
         "name": "main_content",
-        "slot": "content"
+        "parent": "content"
     }
 }
 ```
@@ -319,8 +319,8 @@ const slots = {
 
 // Renderizar según el slot string
 if (typeof component.slot === 'string') {
-    const targetSlot = slots[component.slot];
-    targetSlot.appendChild(componentElement);
+    const targetParent = slots[component.slot];
+    targetParent.appendChild(componentElement);
 }
 ```
 
@@ -354,11 +354,11 @@ class GameLobbyScreenService
     "32600001": {
         "type": "container",
         "name": "game_lobby_screen",
-        "slot": "canvas",
+        "parent": "canvas",
         "elements": {
             "32600002": {
                 "type": "button",
-                "slot": 32600001,
+                "parent": 32600001,
                 "label": "New Game",
                 "action": "create_new_game"
             }
@@ -379,7 +379,7 @@ $button = UIBuilder::button();
 
 $container->add($button);
 
-assert($button->getSlot() === $container->getId()); // ✅
+assert($button->getParent() === $container->getId()); // ✅
 ```
 
 ### Test 2: Remover elemento
@@ -387,7 +387,7 @@ assert($button->getSlot() === $container->getId()); // ✅
 ```php
 $container->remove($button->getId());
 
-assert($button->getSlot() === null); // ✅
+assert($button->getParent() === null); // ✅
 ```
 
 ### Test 3: JSON output
@@ -424,7 +424,7 @@ Solo enviar los componentes que cambiaron:
 {
     "32600005": {
         "type": "button",
-        "slot": null  // Cliente entiende: eliminar
+        "parent": null  // Cliente entiende: eliminar
     }
 }
 ```
@@ -472,16 +472,16 @@ Cada componente sabe a qué padre pertenece en todo momento.
 ## 📁 Archivos Modificados
 
 1. ✅ `app/Services/UI/Contracts/UIElement.php`
-   - Agregados métodos `getSlot()` y `setSlot()`
+   - Agregados métodos `getParent()` y `setParent()`
 
 2. ✅ `app/Services/UI/Components/UIComponent.php`
    - Propiedad `$slot` agregada
-   - Métodos `getSlot()`, `setSlot()`, `slot()` implementados
+   - Métodos `getParent()`, `setParent()`, `slot()` implementados
    - Inicialización en constructor
 
 3. ✅ `app/Services/UI/Components/UIContainer.php`
    - Propiedad `$slot` agregada
-   - Métodos `getSlot()`, `setSlot()`, `slot()` implementados
+   - Métodos `getParent()`, `setParent()`, `slot()` implementados
    - `add()` establece slot del hijo automáticamente
    - `remove()` establece slot a null automáticamente
 

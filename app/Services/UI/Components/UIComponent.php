@@ -16,7 +16,7 @@ abstract class UIComponent implements UIElement
     protected int $id;
     protected string $type;
     protected ?string $name = null;
-    protected int|string|null $slot = null;
+    protected int|string|null $parent = null;
     protected array $config = [];
 
     public function __construct(?string $name = null)
@@ -33,7 +33,7 @@ abstract class UIComponent implements UIElement
         $this->config = array_merge([
             'type' => $this->type,
             'visible' => true,
-            'slot' => null,
+            'parent' => null,
         ], $this->getDefaultConfig());
         
         // Only include 'name' if it's not null
@@ -156,30 +156,30 @@ abstract class UIComponent implements UIElement
     /**
      * {@inheritDoc}
      */
-    public function getSlot(): int|string|null
+    public function getParent(): int|string|null
     {
-        return $this->slot;
+        return $this->parent;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setSlot(int|string|null $slot): self
+    public function setParent(int|string|null $parent): self
     {
-        $this->slot = $slot;
-        $this->config['slot'] = $slot;
+        $this->parent = $parent;
+        $this->config['parent'] = $parent;
         return $this;
     }
 
     /**
-     * Fluent API for setting slot
+     * Fluent API for setting parent
      * 
-     * @param int|string|null $slot The slot (int = parent ID, string = parent name, null = delete)
+     * @param int|string|null $parent The parent (int = parent ID, string = parent name, null = delete)
      * @return self For method chaining
      */
-    public function slot(int|string|null $slot): self
+    public function parent(int|string|null $parent): self
     {
-        return $this->setSlot($slot);
+        return $this->setParent($parent);
     }
 
     /**

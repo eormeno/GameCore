@@ -16,7 +16,7 @@ use App\Services\UI\UIBuilder;
  * - Has automatic ID generation via UIIdGenerator
  * - Uses `name` property for semantic naming (separate from ID)
  * - Has a flat JSON structure with all components at root level
- * - Uses numeric IDs for parent-child relationships via `slot` property
+ * - Uses numeric IDs for parent-child relationships via `parent` property
  * - Methods like has(), remove(), find(), update() expect numeric IDs (as strings)
  * 
  * Integration tests (BBA and CNT) are passing and demonstrate the correct usage.
@@ -38,7 +38,7 @@ describe('UIContainer Tree Structure', function () {
     test('can set container properties', function () {
         $container = new UIContainer('test');
         $container
-            ->slot('canvas')
+            ->parent('canvas')
             ->layout(LayoutType::HORIZONTAL)
             ->title('Test Title')
             ->visible(false);
@@ -48,7 +48,7 @@ describe('UIContainer Tree Structure', function () {
         $config = $json[$id];
         
         expect($config['type'])->toBe('container')
-            ->and($config['slot'])->toBe('canvas')
+            ->and($config['parent'])->toBe('canvas')
             ->and($config['layout'])->toBe('horizontal')
             ->and($config['title'])->toBe('Test Title')
             ->and($config['visible'])->toBeFalse();
@@ -332,7 +332,7 @@ describe('UI Component Tree Integration', function () {
     
     test('can build complex nested UI structure', function () {
         $screen = UIBuilder::container('game_lobby')
-            ->slot('canvas')
+            ->parent('canvas')
             ->layout(LayoutType::VERTICAL)
             ->title('Game Lobby');
         
@@ -372,7 +372,7 @@ describe('UI Component Tree Integration', function () {
         
         // Verify structure - flat JSON with all components at root level
         expect($json)->toHaveKey($screenId)
-            ->and($json[$screenId]['slot'])->toBe('canvas')
+            ->and($json[$screenId]['parent'])->toBe('canvas')
             ->and($json[$screenId]['title'])->toBe('Game Lobby')
             ->and($json)->toHaveKey($newGameBtn->getId())
             ->and($json)->toHaveKey($infoLabel->getId())

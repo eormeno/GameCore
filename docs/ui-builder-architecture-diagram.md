@@ -45,7 +45,7 @@
 ```
 game_lobby_screen:container (ROOT)
 │
-├── slot: "canvas"
+├── parent: "canvas"
 ├── layout: "vertical"
 ├── title: "Game Lobby"
 │

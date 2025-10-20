@@ -80,7 +80,7 @@ class TableCellBuilder extends UIComponent
         }
 
         $this->child = $component;
-        $component->setSlot($this->id);
+        $component->setParent($this->id);
         return $this;
     }
 

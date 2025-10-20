@@ -30,8 +30,8 @@ class TableBuilder extends UIComponent
         // Create the rows container
         $this->rowsContainer = new UIContainer('rows');
         
-        // Set the rows container's slot to this table's ID (parent-child relationship)
-        $this->rowsContainer->setSlot($this->id);
+        // Set the rows container's parent to this table's ID (parent-child relationship)
+        $this->rowsContainer->setParent($this->id);
         
         // Set the rows_container attribute to reference the container's ID
         $this->config['rows_container'] = $this->rowsContainer->getId();
@@ -42,8 +42,6 @@ class TableBuilder extends UIComponent
         return [
             'title' => '',
             'header_row' => null,
-            'headers' => [],
-            'rows' => [],
             'pagination' => false,
             'min_rows' => null,
         ];
@@ -63,7 +61,7 @@ class TableBuilder extends UIComponent
         }
 
         $this->headerRow = new TableHeaderRowBuilder($this, $name ?? 'header');
-        $this->headerRow->setSlot($this->id);
+        $this->headerRow->setParent($this->id);
         $this->config['header_row'] = $this->headerRow->getId();
         
         return $this->headerRow;
@@ -82,7 +80,7 @@ class TableBuilder extends UIComponent
     /**
      * Add a header to the table with optional configuration
      * 
-     * @deprecated Use createHeaderRow()->createCell() instead
+     * @deprecated Use createHeaderRow()->createCell() instead. This method is no longer supported.
      * @param string $text The header text
      * @param string|null $id Optional custom ID for the header
      * @param bool $sortable Whether the column is sortable
@@ -94,6 +92,7 @@ class TableBuilder extends UIComponent
      * @param string|null $tooltip Tooltip text
      * @param string|null $sortDirection Initial sort direction
      * @return self For method chaining
+     * @throws \RuntimeException Always throws to indicate deprecated method
      */
     public function addHeader(
         string $text,
@@ -107,37 +106,11 @@ class TableBuilder extends UIComponent
         ?string $tooltip = null,
         ?string $sortDirection = null
     ): self {
-        // Generate automatic ID if not provided
-        $headerId = $id ?? strtolower(str_replace([' ', '(', ')', '-'], ['_', '', '', '_'], $text)) . '_header';
-        
-        // Build header config and filter out null values
-        $headerData = [
-            'visible' => true,
-            'text' => $text,
-            'sortable' => $sortable,
-            'sort_direction' => $sortDirection,
-            'width' => $width,
-            'align' => $align->value,
-            'color' => $color,
-            'background_color' => $backgroundColor,
-            'font_weight' => $fontWeight->value,
-            'tooltip' => $tooltip,
-        ];
-        
-        // Filter out null values
-        $headerData = array_filter($headerData, fn($value) => $value !== null);
-        
-        // Remove 'visible' if it's true (default value)
-        if (isset($headerData['visible']) && $headerData['visible'] === true) {
-            unset($headerData['visible']);
-        }
-        
-        $headerConfig = [
-            $headerId . ':tableheader' => $headerData
-        ];
-
-        $this->config['headers'] = array_merge($this->config['headers'], $headerConfig);
-        return $this;
+        throw new \RuntimeException(
+            "addHeader() is deprecated and no longer supported. " .
+            "Use createHeaderRow()->createCell() instead. " .
+            "Example: \$table->createHeaderRow()->createCell()->text('$text');"
+        );
     }
 
     /**
@@ -310,8 +283,11 @@ class TableBuilder extends UIComponent
         // Calculate how many empty rows we need to add
         $emptyRowsNeeded = $minRows - $currentRowCount;
         
-        // Count headers to determine how many cells per row
-        $headerCount = count($this->config['headers'] ?? []);
+        // Count header cells to determine how many cells per row
+        $headerCount = 0;
+        if ($this->headerRow !== null) {
+            $headerCount = count($this->headerRow->getCells());
+        }
         
         // Add empty rows with empty cells
         for ($i = 0; $i < $emptyRowsNeeded; $i++) {

@@ -88,7 +88,7 @@ $container = UIBuilder::container('main_menu')  // name = "main_menu"
     "32600001": {                          // ← ID técnico (key)
         "type": "container",               // ← Tipo de componente
         "name": "game_lobby_screen",       // ← Name semántico ⭐
-        "slot": "canvas",                  // ← Dónde renderizar
+        "parent": "canvas",                  // ← Dónde renderizar
         "layout": "vertical",
         "visible": true,
         "title": "Game Lobby",
@@ -138,7 +138,7 @@ return $screen->build();
 {
     "32600001": {
         "name": "game_lobby_screen",
-        "slot": "canvas",
+        "parent": "canvas",
         "elements": {
             "32600002": {
                 "type": "button",
@@ -158,8 +158,8 @@ const response = await fetch('/api/game/lobby');
 const screen = Object.values(response)[0];
 
 // Renderiza en el slot especificado
-const targetSlot = document.querySelector(`[data-slot="${screen.slot}"]`);
-targetSlot.innerHTML = renderComponent(screen);
+const targetParent = document.querySelector(`[data-slot="${screen.slot}"]`);
+targetParent.innerHTML = renderComponent(screen);
 ```
 
 ### 3. **Cliente → Servidor: Evento de Usuario**

@@ -11,8 +11,8 @@
 
 **Agregado:**
 ```php
-public function getSlot(): int|string|null;
-public function setSlot(int|string|null $slot): self;
+public function getParent(): int|string|null;
+public function setParent(int|string|null $slot): self;
 ```
 
 **Propósito:** Contrato para todos los elementos UI
@@ -25,8 +25,8 @@ public function setSlot(int|string|null $slot): self;
 ```php
 protected int|string|null $slot = null;
 
-public function getSlot(): int|string|null { ... }
-public function setSlot(int|string|null $slot): self { ... }
+public function getParent(): int|string|null { ... }
+public function setParent(int|string|null $slot): self { ... }
 public function slot(int|string|null $slot): self { ... }
 ```
 
@@ -45,8 +45,8 @@ public function slot(int|string|null $slot): self { ... }
 ```php
 protected int|string|null $slot = null;
 
-public function getSlot(): int|string|null { ... }
-public function setSlot(int|string|null $slot): self { ... }
+public function getParent(): int|string|null { ... }
+public function setParent(int|string|null $slot): self { ... }
 public function slot(int|string|null $slot): self { ... }
 ```
 
@@ -57,7 +57,7 @@ public function add(UIElement $element): self
     // ...
     
     // ✅ NUEVO: Asignar slot automáticamente
-    $element->setSlot($this->id);
+    $element->setParent($this->id);
     
     $this->children[$elementId] = $element;
     return $this;
@@ -71,7 +71,7 @@ public function remove(string $elementId): self
     // ...
     
     // ✅ NUEVO: Marcar para eliminación
-    $this->children[$elementId]->setSlot(null);
+    $this->children[$elementId]->setParent(null);
     
     unset($this->children[$elementId]);
     return $this;
@@ -84,7 +84,7 @@ public function tryRemove(string $elementId): bool
 {
     if (isset($this->children[$elementId])) {
         // ✅ NUEVO: Marcar para eliminación
-        $this->children[$elementId]->setSlot(null);
+        $this->children[$elementId]->setParent(null);
         
         unset($this->children[$elementId]);
         return true;
@@ -175,11 +175,11 @@ $screen->slot('canvas');
 {
     "1": {
         "type": "container",
-        "slot": "canvas",
+        "parent": "canvas",
         "elements": {
             "2": {
                 "type": "button",
-                "slot": 1,
+                "parent": 1,
                 "label": "Click"
             }
         }

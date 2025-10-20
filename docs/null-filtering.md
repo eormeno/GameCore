@@ -56,7 +56,7 @@ Se ha modificado el método `toJson()` en las siguientes clases para filtrar val
         "type": "container",
         "visible": true,
         "layout": "vertical",
-        "slot": null,
+        "parent": null,
         "title": null,
         "flex_direction": null,
         "justify_content": null,

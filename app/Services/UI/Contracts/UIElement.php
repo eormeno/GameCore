@@ -52,17 +52,17 @@ interface UIElement
     public function setName(?string $name): self;
 
     /**
-     * Get the slot where this element should be rendered
+     * Get the parent where this element belongs
      * 
-     * @return int|string|null The slot (int = parent ID, string = parent name, null = delete)
+     * @return int|string|null The parent (int = parent ID, string = parent name, null = no parent)
      */
-    public function getSlot(): int|string|null;
+    public function getParent(): int|string|null;
 
     /**
-     * Set the slot where this element should be rendered
+     * Set the parent where this element belongs
      * 
-     * @param int|string|null $slot The slot (int = parent ID, string = parent name, null = delete)
+     * @param int|string|null $parent The parent (int = parent ID, string = parent name, null = delete)
      * @return self For method chaining
      */
-    public function setSlot(int|string|null $slot): self;
+    public function setParent(int|string|null $parent): self;
 }

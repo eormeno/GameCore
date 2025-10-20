@@ -128,17 +128,17 @@ test('table toJson includes header row', function () {
     expect($json[$tableId]['header_row'])->toBe($headerRowId);
 });
 
-test('header row has correct slot reference', function () {
+test('header row has correct parent reference', function () {
     $table = UIBuilder::table('test_table');
     $headerRow = $table->createHeaderRow();
     
     $json = $headerRow->toJson();
     $headerRowId = $headerRow->getId();
     
-    expect($json[$headerRowId]['slot'])->toBe($table->getId());
+    expect($json[$headerRowId]['parent'])->toBe($table->getId());
 });
 
-test('header cells have correct slot reference to header row', function () {
+test('header cells have correct parent reference to header row', function () {
     $table = UIBuilder::table('test_table');
     $headerRow = $table->createHeaderRow();
     $cell = $headerRow->createCell()->text('Name');
@@ -146,7 +146,7 @@ test('header cells have correct slot reference to header row', function () {
     $json = $cell->toJson();
     $cellId = $cell->getId();
     
-    expect($json[$cellId]['slot'])->toBe($headerRow->getId());
+    expect($json[$cellId]['parent'])->toBe($headerRow->getId());
 });
 
 test('header cell filters default values from JSON', function () {

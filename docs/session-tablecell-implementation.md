@@ -125,35 +125,35 @@ enum Align: string {
 {
     "32600007": {
         "type": "tablerow",
-        "slot": 32600003,
+        "parent": 32600003,
         "selected": false,
         "style": "default"
     },
     "32600008": {
         "type": "tablecell",
-        "slot": 32600007,
+        "parent": 32600007,
         "text": 1
     },
     "32600009": {
         "type": "tablecell",
-        "slot": 32600007,
+        "parent": 32600007,
         "text": "Untitled Game"
     },
     "32600015": {
         "type": "tablecell",
-        "slot": 32600007,
+        "parent": 32600007,
         "text": "{...JSON serializado del container de acciones...}"
     },
     "32600016": {
         "type": "tablerow",
-        "slot": 32600003,
+        "parent": 32600003,
         "selected": false,
         "style": "default",
         "empty": true
     },
     "32600017": {
         "type": "tablecell",
-        "slot": 32600016,
+        "parent": 32600016,
         "text": ""
     }
 }

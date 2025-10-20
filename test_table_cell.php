@@ -60,7 +60,7 @@ foreach ($json3 as $compId => $compData) {
         // Find cell ID
         foreach ($json3 as $cellId => $cellData) {
             if (isset($cellData['type']) && $cellData['type'] === 'tablecell') {
-                if ($compData['slot'] === $cellId) {
+                if ($compData['parent'] === $cellId) {
                     $buttonInCell = true;
                     break 2;
                 }
@@ -68,7 +68,7 @@ foreach ($json3 as $compId => $compData) {
         }
     }
 }
-echo ($buttonInCell ? "✅ PASS" : "❌ FAIL") . ": Button is child of cell (slot reference correct)\n\n";
+echo ($buttonInCell ? "✅ PASS" : "❌ FAIL") . ": Button is child of cell (parent reference correct)\n\n";
 
 // Test 4: Multiple cells in a row
 echo "Test 4: Multiple cells in a row\n";
@@ -108,5 +108,5 @@ echo "- Can contain simple text\n";
 echo "- Can contain a single child component\n";
 echo "- Supports align (left, center, right)\n";
 echo "- 'left' align doesn't appear in JSON (default)\n";
-echo "- Cell references parent row via 'slot'\n";
-echo "- Child component references cell via 'slot'\n";
+echo "- Cell references parent row via 'parent'\n";
+echo "- Child component references cell via 'parent'\n";

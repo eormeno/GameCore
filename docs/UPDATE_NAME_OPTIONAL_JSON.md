@@ -355,7 +355,7 @@ if ('name' in component) {
     "32600001": {
         "type": "container",
         "name": "game_lobby_screen",  // ✅ Container principal con nombre
-        "slot": "canvas",
+        "parent": "canvas",
         "layout": "vertical",
         "title": "Game Lobby",
         "elements": {

@@ -485,18 +485,18 @@ The form builder generates a flat JSON structure:
     "sections": [
       {"title": "Personal Info", "id": 12346}
     ],
-    "slot": null
+    "parent": null
   },
   "12346": {
     "type": "section",
     "title": "Personal Info",
-    "slot": 12345
+    "parent": 12345
   },
   "12347": {
     "type": "input",
     "label": "Username",
     "required": true,
-    "slot": 12346
+    "parent": 12346
   }
 }
 ```

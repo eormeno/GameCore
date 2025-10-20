@@ -240,7 +240,7 @@ for ($i = 3; $i < 10; $i++) {
 {
     "type": "tablerow",
     "visible": true,
-    "slot": 2,
+    "parent": 2,
     "cells": [1, "John Doe", "john@example.com"],
     "selected": false,
     "style": "default",
@@ -255,7 +255,7 @@ for ($i = 3; $i < 10; $i++) {
 {
     "type": "tablerow",
     "visible": true,
-    "slot": 2,
+    "parent": 2,
     "cells": ["", "", ""],
     "selected": false,
     "style": "default",

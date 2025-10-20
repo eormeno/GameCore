@@ -54,7 +54,7 @@ $container = UIBuilder::container('game_lobby_screen')
     "32600001": {
         "type": "container",
         "name": "game_lobby_screen",  // 📌 Nombre para referencia
-        "slot": "canvas",              // 🎯 Dónde renderizar
+        "parent": "canvas",              // 🎯 Dónde renderizar
         "layout": "vertical",
         "title": "Game Lobby",
         "elements": { ... }
@@ -66,8 +66,8 @@ $container = UIBuilder::container('game_lobby_screen')
 ```javascript
 // Cliente recibe el JSON y sabe dónde renderizar
 const container = response[32600001];
-const targetSlot = document.getElementById(`${container.slot}-slot`);
-targetSlot.innerHTML = renderComponent(container);
+const targetParent = document.getElementById(`${container.slot}-slot`);
+targetParent.innerHTML = renderComponent(container);
 ```
 
 ---
@@ -305,7 +305,7 @@ class GameLobbyScreenService
     "32600001": {
         "type": "container",
         "name": "game_lobby_screen",   // 📌 Para referencia cliente-servidor
-        "slot": "canvas",               // 🎯 Dónde renderizar
+        "parent": "canvas",               // 🎯 Dónde renderizar
         "layout": "vertical",
         "elements": {
             "32600002": {
@@ -350,8 +350,8 @@ const response = await fetch('/api/game/lobby');
 const screen = response[Object.keys(response)[0]];
 
 // Usa el slot para saber dónde renderizar
-const targetSlot = document.querySelector(`[data-slot="${screen.slot}"]`);
-targetSlot.innerHTML = renderComponent(screen);
+const targetParent = document.querySelector(`[data-slot="${screen.slot}"]`);
+targetParent.innerHTML = renderComponent(screen);
 ```
 
 ### 3. **Cliente → Servidor: Evento de Usuario**

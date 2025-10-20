@@ -105,11 +105,11 @@ $table->headers(array $headers): self
   },
   "2": {
     "type": "container",
-    "slot": 1
+    "parent": 1
   },
   "3": {
     "type": "tableheaderrow",
-    "slot": 1
+    "parent": 1
   },
   "4": {
     "type": "tableheadercell",
@@ -117,7 +117,7 @@ $table->headers(array $headers): self
     "sortable": true,
     "sort_direction": "asc",
     "action": "sort_by_name",
-    "slot": 3
+    "parent": 3
   },
   "5": {
     "type": "tableheadercell",
@@ -125,7 +125,7 @@ $table->headers(array $headers): self
     "sortable": true,
     "action": "sort_by_email",
     "colspan": 2,
-    "slot": 3
+    "parent": 3
   }
 }
 ```

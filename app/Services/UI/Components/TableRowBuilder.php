@@ -47,7 +47,7 @@ class TableRowBuilder extends UIComponent
     public function createCell(?string $name = null): TableCellBuilder
     {
         $cell = new TableCellBuilder($this, $name);
-        $cell->setSlot($this->id);
+        $cell->setParent($this->id);
         $this->cellComponents[] = $cell;
         return $cell;
     }
@@ -60,7 +60,7 @@ class TableRowBuilder extends UIComponent
      */
     public function addCell(TableCellBuilder $cell): self
     {
-        $cell->setSlot($this->id);
+        $cell->setParent($this->id);
         $this->cellComponents[] = $cell;
         return $this;
     }

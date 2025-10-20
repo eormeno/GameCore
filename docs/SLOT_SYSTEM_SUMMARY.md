@@ -10,13 +10,13 @@ El **slot** es un atributo que indica **dónde debe renderizarse un componente**
 
 ```php
 // int → ID del contenedor padre
-"slot": 32600001
+"parent": 32600001
 
 // string → Nombre de slot predefinido
-"slot": "canvas"
+"parent": "canvas"
 
 // null → Eliminar del cliente
-"slot": null
+"parent": null
 ```
 
 ---
@@ -61,12 +61,12 @@ $screen->add($button);
     "1": {
         "type": "container",
         "name": "game_screen",
-        "slot": "canvas",  // ← String manual
+        "parent": "canvas",  // ← String manual
         "elements": {
             "2": {
                 "type": "button",
                 "name": "btn",
-                "slot": 1,  // ← int automático (ID del padre)
+                "parent": 1,  // ← int automático (ID del padre)
                 "label": "Click Me"
             }
         }

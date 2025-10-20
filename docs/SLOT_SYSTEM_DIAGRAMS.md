@@ -7,28 +7,28 @@
 ```
 ┌─────────────────────────────────────────────────────┐
 │ Container: "game_screen" (ID: 1)                    │
-│ slot: "canvas"                                      │
+│ parent: "canvas"                                      │
 │                                                     │
 │  ┌──────────────────────────────────────────────┐  │
 │  │ Container: "header" (ID: 2)                  │  │
-│  │ slot: 1 (padre: game_screen)                 │  │
+│  │ parent: 1 (padre: game_screen)                 │  │
 │  │                                               │  │
 │  │  ┌────────────────────────────────────────┐  │  │
 │  │  │ Button: "btn1" (ID: 3)                 │  │  │
-│  │  │ slot: 2 (padre: header)                │  │  │
+│  │  │ parent: 2 (padre: header)                │  │  │
 │  │  │ label: "Button 1"                      │  │  │
 │  │  └────────────────────────────────────────┘  │  │
 │  │                                               │  │
 │  │  ┌────────────────────────────────────────┐  │  │
 │  │  │ Button: "btn2" (ID: 4)                 │  │  │
-│  │  │ slot: 2 (padre: header)                │  │  │
+│  │  │ parent: 2 (padre: header)                │  │  │
 │  │  │ label: "Button 2"                      │  │  │
 │  │  └────────────────────────────────────────┘  │  │
 │  └──────────────────────────────────────────────┘  │
 │                                                     │
 │  ┌──────────────────────────────────────────────┐  │
 │  │ Label: "warning" (ID: 5)                     │  │
-│  │ slot: 1 (padre: game_screen)                 │  │
+│  │ parent: 1 (padre: game_screen)                 │  │
 │  │ text: "Warning message"                      │  │
 │  └──────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
@@ -56,8 +56,8 @@
 │  UIContainer::add()                 │
 │                                     │
 │  1. Verificar ID no duplicado       │
-│  2. Asignar slot:                   │
-│     $element->setSlot($this->id)    │  ◄── AUTOMÁTICO
+│  2. Asignar parent:                   │
+│     $element->setParent($this->id)    │  ◄── AUTOMÁTICO
 │  3. Agregar a children[]            │
 └──────┬──────────────────────────────┘
        │
@@ -68,7 +68,7 @@
 │                                     │
 │  "2": {                             │
 │    "type": "button",                │
-│    "slot": 1,  ◄── ID del padre     │
+│    "parent": 1,  ◄── ID del padre     │
 │    "label": "Click"                 │
 │  }                                  │
 └──────┬──────────────────────────────┘
@@ -101,7 +101,7 @@
 │                                     │
 │  1. Verificar elemento existe       │
 │  2. Marcar para eliminación:        │
-│     $element->setSlot(null)         │  ◄── AUTOMÁTICO
+│     $element->setParent(null)         │  ◄── AUTOMÁTICO
 │  3. Remover de children[]           │
 └──────┬──────────────────────────────┘
        │
@@ -112,7 +112,7 @@
 │                                     │
 │  "2": {                             │
 │    "type": "button",                │
-│    "slot": null,  ◄── Eliminado     │
+│    "parent": null,  ◄── Eliminado     │
 │    "label": "Click"                 │
 │  }                                  │
 └──────┬──────────────────────────────┘
@@ -141,7 +141,7 @@ Estado Inicial:
 │                │     │                │
 │  ┌──────────┐  │     │                │
 │  │ Button X │  │     │                │
-│  │ slot: 10 │  │     │                │
+│  │ parent: 10 │  │     │                │
 │  └──────────┘  │     │                │
 └────────────────┘     └────────────────┘
 
@@ -157,7 +157,7 @@ $containerA->remove($buttonX->getId())
 
   ┌──────────┐
   │ Button X │
-  │ slot: null │ ◄── Marcado para eliminar
+  │ parent: null │ ◄── Marcado para eliminar
   └──────────┘
 
 Paso 2: Agregar a Container B
@@ -169,7 +169,7 @@ $containerB->add($buttonX)
 │                │     │                │
 │  (vacío)       │     │  ┌──────────┐  │
 └────────────────┘     │  │ Button X │  │
-                       │  │ slot: 20 │  │ ◄── Nuevo padre
+                       │  │ parent: 20 │  │ ◄── Nuevo padre
                        │  └──────────┘  │
                        └────────────────┘
 
@@ -177,13 +177,13 @@ JSON Updates (incremental):
 ┌────────────────────────────────────┐
 │ Update 1: {                        │
 │   "99": {                          │
-│     "slot": null  ← Eliminar       │
+│     "parent": null  ← Eliminar       │
 │   }                                │
 │ }                                  │
 │                                    │
 │ Update 2: {                        │
 │   "99": {                          │
-│     "slot": 20  ← Renderizar en B  │
+│     "parent": 20  ← Renderizar en B  │
 │   }                                │
 │ }                                  │
 └────────────────────────────────────┘
@@ -234,13 +234,13 @@ Servidor:                       Cliente:
 Servidor:                       Cliente:
 ┌──────────────┐               ┌──────────────┐
 │  Container   │               │   Renderizar │
-│  slot: 1     │  ─────────►   │   según slot │
+│  parent: 1     │  ─────────►   │   según slot │
 │              │               │   (automático)│
 │   Button     │               │              │
-│   slot: 1    │               │   ✓ Preciso  │
+│   parent: 1    │               │   ✓ Preciso  │
 │              │               │   ✓ Simple   │
 │   Label      │               │   ✓ Rápido   │
-│   slot: 1    │               │              │
+│   parent: 1    │               │              │
 └──────────────┘               └──────────────┘
 ```
 
@@ -275,10 +275,10 @@ canvas (slot predefinido)
   └─ Container: game_lobby_screen (ID: 32600001)
       │
       ├─ Button: New Game (ID: 32600002)
-      │  └─ slot: 32600001
+      │  └─ parent: 32600001
       │
       └─ Label: Warning (ID: 32600003)
-         └─ slot: 32600001
+         └─ parent: 32600001
 ```
 
 ### JSON Output
@@ -288,17 +288,17 @@ canvas (slot predefinido)
     "32600001": {
         "type": "container",
         "name": "game_lobby_screen",
-        "slot": "canvas",
+        "parent": "canvas",
         "elements": {
             "32600002": {
                 "type": "button",
-                "slot": 32600001,
+                "parent": 32600001,
                 "label": "New Game",
                 "action": "create_new_game"
             },
             "32600003": {
                 "type": "label",
-                "slot": 32600001,
+                "parent": 32600001,
                 "text": "Warning: Limit reached",
                 "visible": false
             }
@@ -339,13 +339,13 @@ Creación
    │
    ▼
 ┌───────────┐
-│ slot: null│  ◄── Estado inicial
+│ parent: null│  ◄── Estado inicial
 └─────┬─────┘
       │
       │ add() → Agregar a contenedor
       ▼
 ┌───────────┐
-│ slot: 123 │  ◄── Asignado a padre (ID: 123)
+│ parent: 123 │  ◄── Asignado a padre (ID: 123)
 └─────┬─────┘
       │
       │ (elemento renderizado en cliente)
@@ -353,7 +353,7 @@ Creación
       │ remove() → Remover de contenedor
       ▼
 ┌───────────┐
-│ slot: null│  ◄── Marcado para eliminar
+│ parent: null│  ◄── Marcado para eliminar
 └───────────┘
       │
       │ (cliente elimina del DOM)
@@ -385,7 +385,7 @@ Tiempo: ~500ms
 #### ✅ CON SLOTS (enviar solo cambio)
 ```
 Servidor envía:
-- 1 botón con slot: null
+- 1 botón con parent: null
 
 Cliente procesa:
 - Busca botón por ID
@@ -403,22 +403,22 @@ Reducción: 98%
 
 ```
 ┌────────────────────────────────────┐
-│ Overlay (slot: "modal-layer")     │
+│ Overlay (parent: "modal-layer")     │
 │                                    │
 │  ┌──────────────────────────────┐ │
-│  │ Dialog (slot: overlay.id)    │ │
+│  │ Dialog (parent: overlay.id)    │ │
 │  │                              │ │
 │  │  ┌────────────────────────┐  │ │
-│  │  │ Title (slot: dialog.id)│  │ │
+│  │  │ Title (parent: dialog.id)│  │ │
 │  │  └────────────────────────┘  │ │
 │  │                              │ │
 │  │  ┌────────────────────────┐  │ │
-│  │  │ Content (slot: dialog)│  │ │
+│  │  │ Content (parent: dialog)│  │ │
 │  │  └────────────────────────┘  │ │
 │  │                              │ │
 │  │  ┌────────────────────────┐  │ │
 │  │  │ [OK] [Cancel]          │  │ │
-│  │  │ (slot: dialog.id)      │  │ │
+│  │  │ (parent: dialog.id)      │  │ │
 │  │  └────────────────────────┘  │ │
 │  └──────────────────────────────┘ │
 └────────────────────────────────────┘
@@ -437,10 +437,10 @@ Agregar item:
 │ List       │
 │ (ID: 100)  │
 │            │
-│ Item 1 ───────► slot: 100
-│ Item 2 ───────► slot: 100
-│ Item 3 ───────► slot: 100
-│ [+] Nuevo      ◄── Crea Item 4, slot: 100
+│ Item 1 ───────► parent: 100
+│ Item 2 ───────► parent: 100
+│ Item 3 ───────► parent: 100
+│ [+] Nuevo      ◄── Crea Item 4, parent: 100
 └────────────┘
 
 Eliminar item 2:

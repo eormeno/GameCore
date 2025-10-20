@@ -52,7 +52,7 @@ $screen->slot('canvas');
 
 ### 4 archivos modificados:
 
-1. **UIElement.php** - Interfaz actualizada con `getSlot()` / `setSlot()`
+1. **UIElement.php** - Interfaz actualizada con `getParent()` / `setParent()`
 2. **UIComponent.php** - Clase base con soporte de slots
 3. **UIContainer.php** - Gestión automática en `add()` / `remove()`
 4. **ContainerBuilder.php** - Métodos de delegación agregados
@@ -107,12 +107,12 @@ $json = $screen->toJson();
     "1": {
         "type": "container",
         "name": "game_screen",
-        "slot": "canvas",
+        "parent": "canvas",
         "elements": {
             "2": {
                 "type": "button",
                 "name": "btn",
-                "slot": 1,
+                "parent": 1,
                 "label": "Click Me"
             }
         }

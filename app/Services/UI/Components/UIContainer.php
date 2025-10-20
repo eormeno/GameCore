@@ -18,7 +18,7 @@ class UIContainer implements UIElement
     protected int $id;
     protected string $type = 'container';
     protected ?string $name = null;
-    protected int|string|null $slot = null;
+    protected int|string|null $parent = null;
     protected array $config = [];
 
     /** @var array<string, UIElement> Map of element ID to UIElement instance */
@@ -41,7 +41,7 @@ class UIContainer implements UIElement
             'type' => $this->type,
             'visible' => true,
             'layout' => LayoutType::VERTICAL->value,
-            'slot' => null,
+            'parent' => null,
             'title' => null,
             
             // Flexbox properties
@@ -201,30 +201,30 @@ class UIContainer implements UIElement
     /**
      * {@inheritDoc}
      */
-    public function getSlot(): int|string|null
+    public function getParent(): int|string|null
     {
-        return $this->slot;
+        return $this->parent;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setSlot(int|string|null $slot): self
+    public function setParent(int|string|null $parent): self
     {
-        $this->slot = $slot;
-        $this->config['slot'] = $slot;
+        $this->parent = $parent;
+        $this->config['parent'] = $parent;
         return $this;
     }
 
     /**
-     * Set the slot name for this container
+     * Set the parent reference for this container
      * 
-     * @param int|string|null $slot The slot (int = parent ID, string = parent name, null = delete)
+     * @param int|string|null $parent The parent (int = parent ID, string = parent name, null = delete)
      * @return self For method chaining
      */
-    public function slot(int|string|null $slot): self
+    public function parent(int|string|null $parent): self
     {
-        return $this->setSlot($slot);
+        return $this->setParent($parent);
     }
 
     /**
@@ -268,8 +268,8 @@ class UIContainer implements UIElement
             );
         }
 
-        // Automatically set the child's slot to this container's ID
-        $element->setSlot($this->id);
+        // Automatically set the child's parent to this container's ID
+        $element->setParent($this->id);
 
         $this->children[$elementId] = $element;
         return $this;
@@ -307,8 +307,8 @@ class UIContainer implements UIElement
             );
         }
 
-        // Mark the element for deletion by setting slot to null
-        $this->children[$elementId]->setSlot(null);
+        // Mark the element for deletion by setting parent to null
+        $this->children[$elementId]->setParent(null);
 
         unset($this->children[$elementId]);
         return $this;
@@ -325,8 +325,8 @@ class UIContainer implements UIElement
     {
         $elementId = (string)$elementId;
         if (isset($this->children[$elementId])) {
-            // Mark the element for deletion by setting slot to null
-            $this->children[$elementId]->setSlot(null);
+            // Mark the element for deletion by setting parent to null
+            $this->children[$elementId]->setParent(null);
             
             unset($this->children[$elementId]);
             return true;
@@ -1424,7 +1424,7 @@ class UIContainer implements UIElement
      * {@inheritDoc}
      * 
      * Converts this container and all its children to a flat JSON structure
-     * All components are returned at the same level, with 'slot' indicating parent-child relationships
+     * All components are returned at the same level, with 'parent' indicating parent-child relationships
      * Null values are filtered out from the configuration
      */
     public function toJson(): array

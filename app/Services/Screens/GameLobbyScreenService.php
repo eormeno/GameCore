@@ -33,7 +33,7 @@ class GameLobbyScreenService
         $maxInstances = $gameApp->max_instances_per_user;
 
         $container = UIBuilder::container()
-            ->slot('canvas')
+            ->parent('canvas')
             ->layout(LayoutType::VERTICAL)
             ->title(t('games.game_lobby_title', ['name' => $gameApp->name]));
 
