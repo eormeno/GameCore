@@ -105,7 +105,8 @@ class GameLobbyScreenService
             ->addHeader(t('games.saved_game_status_column'))
             ->addHeader(t('games.saved_game_join_method_column'))
             ->addHeader(t('games.saved_game_last_played_column'))
-            ->addHeader(t('games.saved_game_actions_column'), 'game_actions', width: '200px')
+            ->addHeader(t('games.saved_game_play_column'))
+            ->addHeader(t('games.saved_game_delete_column'))
             ->minRows($maxInstances); // Auto-fill will handle empty rows
 
         // Add rows using the new TableRow components
@@ -146,13 +147,8 @@ class GameLobbyScreenService
     {
         $savedGameId = $game['id'] ?? null;
 
-        // Build actions container using the new tree API
-        $actionsContainer = UIBuilder::container("saved_game_{$savedGameId}_actions")
-            ->layout(LayoutType::HORIZONTAL);
-
-        // Add buttons to the container
-        $actionsContainer->add($this->buildPlayButton($savedGameId));
-        $actionsContainer->add($this->buildDeleteButton($savedGameId));
+        $playButton = $this->buildPlayButton($savedGameId);
+        $deleteButton = $this->buildDeleteButton($savedGameId);
 
         // Create a TableRow component
         // Use cells() which will auto-generate TableCellBuilder components
@@ -166,7 +162,8 @@ class GameLobbyScreenService
             $game['game_user']['status'],
             $game['game_user']['join_method'],
             $game['game_user']['last_played_at_human'],
-            $actionsContainer->build(), // Convert container to JSON for the cell
+            $playButton,
+            $deleteButton,
         ]);
         
         return $row;
