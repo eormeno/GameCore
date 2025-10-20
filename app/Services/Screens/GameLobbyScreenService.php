@@ -98,16 +98,19 @@ class GameLobbyScreenService
     {
         $table = UIBuilder::table()
             ->title(count($saved_games) > 0 ? t('games.saved_games_title') : t('no_saved_games_title'))
-            ->addHeader(t('games.saved_game_number_column'))
-            ->addHeader(t('games.saved_game_name_column'))
-            ->addHeader(t('games.saved_game_state_column'))
-            ->addHeader(t('games.saved_game_role_column'))
-            ->addHeader(t('games.saved_game_status_column'))
-            ->addHeader(t('games.saved_game_join_method_column'))
-            ->addHeader(t('games.saved_game_last_played_column'))
-            ->addHeader(t('games.saved_game_play_column'))
-            ->addHeader(t('games.saved_game_delete_column'))
             ->minRows($maxInstances); // Auto-fill will handle empty rows
+
+        // Create header row with cells
+        $headerRow = $table->createHeaderRow();
+        $headerRow->createCell()->text(t('games.saved_game_number_column'));
+        $headerRow->createCell()->text(t('games.saved_game_name_column'));
+        $headerRow->createCell()->text(t('games.saved_game_state_column'));
+        $headerRow->createCell()->text(t('games.saved_game_role_column'));
+        $headerRow->createCell()->text(t('games.saved_game_status_column'));
+        $headerRow->createCell()->text(t('games.saved_game_join_method_column'));
+        $headerRow->createCell()->text(t('games.saved_game_last_played_column'));
+        $headerRow->createCell()->text(t('games.saved_game_play_column'));
+        $headerRow->createCell()->text(t('games.saved_game_delete_column'));
 
         // Add rows using the new TableRow components
         $this->addTableRows($table, $saved_games);
