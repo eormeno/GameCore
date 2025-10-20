@@ -5,7 +5,6 @@
 ### Ramas Locales Activas
 - **main** (rama principal - default)
 - **ui-builder** (rama actual) ⭐
-- **servicio-de-traduccion**
 
 ### Ramas Remotas en origin
 
@@ -19,15 +18,11 @@ gitGraph
     commit id: "UI Builder Tree Architecture"
     commit id: "Auto-incremental IDs"
     commit id: "Slot System Implementation"
+    commit id: "Translation service merged"
     commit id: "Forms & Components"
     commit id: "minRows feature"
     commit id: "TableCellBuilder merged"
-    commit id: "Enhanced TableBuilder"
-    
-    checkout main
-    branch servicio-de-traduccion
-    checkout servicio-de-traduccion
-    commit id: "Translation service"
+    commit id: "TableHeaderBuilder merged"
     
     checkout main
     branch items-system
@@ -71,10 +66,12 @@ gitGraph
 #### **ui-builder** ⭐ (ACTUAL)
 - Sistema de construcción de UI con arquitectura de árbol
 - Sistema de slots implementado
+- Sistema de traducción/i18n integrado
 - Componentes completos: Input, Select, Checkbox, Label, Button, Table, TableRow, TableCell, TableHeaderRow, TableHeaderCell
 - IDs auto-incrementales contextuales
 - Gestión de contenedores y formularios
 - **Integraciones recientes:**
+  - **servicio-de-traduccion:** Sistema i18n/traducción (mergeado previamente)
   - **table-header (2025-10-20):** Sistema completo de headers para tablas
     - TableHeaderCellBuilder y TableHeaderRowBuilder
     - Refactorización del sistema de headers con IDs auto-incrementales
@@ -84,10 +81,6 @@ gitGraph
     - Mejoras en TableBuilder y TableRowBuilder
     - Refactorización de GameLobbyScreenService
     - Enum Align para alineación de contenido
-
-#### **servicio-de-traduccion**
-- Servicio de traducción/internacionalización
-- Sistema i18n
 
 ### 🚀 Ramas de Features (Remotas)
 
@@ -139,7 +132,6 @@ gitGraph
 ```
 main (producción)
 ├── ui-builder (sistema completo de UI) ⭐ ACTUAL
-├── servicio-de-traduccion (i18n)
 ├── items-system (sistema de items)
 ├── tilesets (sistema de sprites)
 ├── game-play-refactor (lógica del juego)
@@ -156,6 +148,7 @@ main (producción)
 **Rama Activa:** `ui-builder` ⭐
 
 **Última Actividad:**
+- ✅ Rama `servicio-de-traduccion` eliminada (local y remota) - ya estaba mergeada en ui-builder
 - ✅ Merge exitoso de `table-header` en `ui-builder` (ddfcd56)
 - ✅ Sistema completo de headers para tablas
 - ✅ TableHeaderCellBuilder y TableHeaderRowBuilder implementados
@@ -170,9 +163,10 @@ main (producción)
 
 ## Notas
 
+- ✅ `servicio-de-traduccion` fue mergeada en `ui-builder` y eliminada (ya no necesaria)
 - ✅ `table-header` fue mergeada exitosamente en `ui-builder` y eliminada
 - ✅ `table-cell` fue mergeada exitosamente en `ui-builder` y eliminada
-- `ui-builder` contiene el sistema completo de UI con todos los componentes de tabla
+- `ui-builder` contiene el sistema completo de UI con todos los componentes de tabla y traducción
 - Sistema de tablas completo: TableBuilder, TableRowBuilder, TableCellBuilder, TableHeaderRowBuilder, TableHeaderCellBuilder
 - Múltiples ramas de features independientes desde `main`
 - Sistema modular permite desarrollo en paralelo
@@ -181,6 +175,7 @@ main (producción)
 
 | Fecha | Merge | Descripción |
 |-------|-------|-------------|
+| 2025-10-20 | `servicio-de-traduccion` → `ui-builder` | Sistema de traducción/i18n (mergeado previamente, rama eliminada) |
 | 2025-10-20 | `table-header` → `ui-builder` | TableHeaderCellBuilder, TableHeaderRowBuilder, sistema de headers refactorizado |
 | 2025-10-20 | `table-cell` → `ui-builder` | TableCellBuilder, mejoras en TableBuilder/TableRowBuilder, Enum Align |
 
@@ -188,5 +183,6 @@ main (producción)
 
 **Fecha de actualización:** 20 de octubre de 2025  
 **Repository:** GameCore (eormeno)  
-**Última acción:** Merge y eliminación de rama `table-header`  
-**Componentes de tabla completados:** ✅ Table, TableRow, TableCell, TableHeaderRow, TableHeaderCell
+**Última acción:** Eliminación de rama `servicio-de-traduccion` (ya mergeada)  
+**Componentes de tabla completados:** ✅ Table, TableRow, TableCell, TableHeaderRow, TableHeaderCell  
+**Sistema i18n:** ✅ Integrado en ui-builder
