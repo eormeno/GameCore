@@ -16,6 +16,9 @@ test("1. User receives the 'game_lobby_screen' GUI", function () {
 test("2. User receives a list of open saved games", function () {
 	$gameApp = setupGameApp(TEST_PREFIX);
 	$response = $this->get("/api/game-app/{$gameApp->id}/play");
+	if ($response->status() === 500) {
+		dump("ERROR IN TEST 2:", $response->getContent());
+	}
 	$response->assertStatus(200);
 	//ApiTestHelpers::assertGameLobbyScreenStructure($response);
 });

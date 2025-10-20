@@ -13,6 +13,9 @@ class TableRowBuilder extends UIComponent
     /** @var TableBuilder The parent table */
     private TableBuilder $table;
 
+    /** @var array<TableCellBuilder> Array of cells in this row */
+    private array $cellComponents = [];
+
     /**
      * Create a new table row
      * 
@@ -36,14 +39,73 @@ class TableRowBuilder extends UIComponent
     }
 
     /**
-     * Set the cells data for this row
+     * Create and add a new cell to this row
      * 
-     * @param array $cells Array of cell values
+     * @param string|null $name Optional name for the cell
+     * @return TableCellBuilder The created cell
+     */
+    public function createCell(?string $name = null): TableCellBuilder
+    {
+        $cell = new TableCellBuilder($this, $name);
+        $cell->setSlot($this->id);
+        $this->cellComponents[] = $cell;
+        return $cell;
+    }
+
+    /**
+     * Add an existing cell to this row
+     * 
+     * @param TableCellBuilder $cell The cell to add
+     * @return self For method chaining
+     */
+    public function addCell(TableCellBuilder $cell): self
+    {
+        $cell->setSlot($this->id);
+        $this->cellComponents[] = $cell;
+        return $this;
+    }
+
+    /**
+     * Get all cell components
+     * 
+     * @return array<TableCellBuilder>
+     */
+    public function getCells(): array
+    {
+        return $this->cellComponents;
+    }
+
+    /**
+     * Set the cells data for this row
+     * Creates TableCellBuilder components automatically from the array
+     * 
+     * @param array $cells Array of cell values (strings, numbers, arrays, or UIComponent instances)
      * @return self For method chaining
      */
     public function cells(array $cells): self
     {
-        return $this->setConfig('cells', $cells);
+        // Store the raw data for backward compatibility
+        $this->setConfig('cells', $cells);
+        
+        // Auto-create TableCellBuilder components from the array
+        foreach ($cells as $index => $value) {
+            $cell = $this->createCell("cell_$index");
+            
+            if ($value instanceof UIComponent && !($value instanceof UIContainer)) {
+                // If it's a leaf component (not a container), add it as a child
+                $cell->addChild($value);
+            } elseif (is_array($value)) {
+                // If it's an array (like build() output), store as raw data
+                // For now, just store as text representation
+                // In the future, this could be handled differently by the client
+                $cell->text(json_encode($value));
+            } else {
+                // Otherwise, treat it as text (string, number, etc)
+                $cell->text($value);
+            }
+        }
+        
+        return $this;
     }
 
     /**
@@ -101,6 +163,39 @@ class TableRowBuilder extends UIComponent
     public function getTable(): TableBuilder
     {
         return $this->table;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * Includes all cell components in the flat JSON structure
+     */
+    public function toJson(): array
+    {
+        // Get base config and filter nulls
+        $config = array_filter($this->config, fn($value) => $value !== null);
+
+        // Remove 'visible' if it's true (default value)
+        if (isset($config['visible']) && $config['visible'] === true) {
+            unset($config['visible']);
+        }
+
+        // Exclude additional keys
+        $excludeKeys = $this->getExcludedJsonKeys();
+        if (!empty($excludeKeys)) {
+            $config = array_diff_key($config, array_flip($excludeKeys));
+        }
+
+        // Start with this row
+        $result = [$this->id => $config];
+
+        // Add all cell components
+        foreach ($this->cellComponents as $cell) {
+            $cellJson = $cell->toJson();
+            $result = $result + $cellJson;
+        }
+
+        return $result;
     }
 
     /**
