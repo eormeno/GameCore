@@ -17,6 +17,9 @@ class TableBuilder extends UIComponent
     /** @var UIContainer The rows container */
     private UIContainer $rowsContainer;
 
+    /** @var TableHeaderRowBuilder|null The header row (optional) */
+    private ?TableHeaderRowBuilder $headerRow = null;
+
     /** @var bool Flag to prevent multiple auto-fill calls */
     private bool $autoFillCompleted = false;
 
@@ -38,6 +41,7 @@ class TableBuilder extends UIComponent
     {
         return [
             'title' => '',
+            'header_row' => null,
             'headers' => [],
             'rows' => [],
             'pagination' => false,
@@ -46,8 +50,39 @@ class TableBuilder extends UIComponent
     }
 
     /**
+     * Create and return a header row for this table
+     * Only one header row is allowed per table
+     * 
+     * @param string|null $name Optional name for the header row
+     * @return TableHeaderRowBuilder The header row builder
+     */
+    public function createHeaderRow(?string $name = null): TableHeaderRowBuilder
+    {
+        if ($this->headerRow !== null) {
+            throw new \LogicException("Table already has a header row. Only one header row is allowed per table.");
+        }
+
+        $this->headerRow = new TableHeaderRowBuilder($this, $name ?? 'header');
+        $this->headerRow->setSlot($this->id);
+        $this->config['header_row'] = $this->headerRow->getId();
+        
+        return $this->headerRow;
+    }
+
+    /**
+     * Get the header row if it exists
+     * 
+     * @return TableHeaderRowBuilder|null
+     */
+    public function getHeaderRow(): ?TableHeaderRowBuilder
+    {
+        return $this->headerRow;
+    }
+
+    /**
      * Add a header to the table with optional configuration
      * 
+     * @deprecated Use createHeaderRow()->createCell() instead
      * @param string $text The header text
      * @param string|null $id Optional custom ID for the header
      * @param bool $sortable Whether the column is sortable
@@ -119,6 +154,7 @@ class TableBuilder extends UIComponent
     /**
      * Set all headers at once
      * 
+     * @deprecated Use createHeaderRow()->createCell() instead
      * @param array $headers Array of header configurations
      * @return self For method chaining
      */
@@ -216,7 +252,7 @@ class TableBuilder extends UIComponent
     /**
      * {@inheritDoc}
      * 
-     * Override toJson to include the rows container in flat structure
+     * Override toJson to include the rows container and header row in flat structure
      * and automatically fill with empty rows if minRows is set
      */
     public function toJson(): array
@@ -224,14 +260,22 @@ class TableBuilder extends UIComponent
         // Auto-fill empty rows if minRows is set
         $this->autoFillEmptyRows();
         
-        // Get the table's JSON (without the rows container)
+        // Get the table's JSON (without the rows container and header row)
         $tableJson = parent::toJson();
         
         // Get the rows container's JSON
         $rowsContainerJson = $this->rowsContainer->toJson();
         
-        // Merge both at the same level (flat structure)
-        return $tableJson + $rowsContainerJson;
+        // Start with table + rows container
+        $result = $tableJson + $rowsContainerJson;
+        
+        // Add header row if it exists
+        if ($this->headerRow !== null) {
+            $headerRowJson = $this->headerRow->toJson();
+            $result = $result + $headerRowJson;
+        }
+        
+        return $result;
     }
 
     /**
