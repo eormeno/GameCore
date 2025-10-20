@@ -1,5 +1,18 @@
-# Pasos para instalar el proyecto
-## Clonar el repositorio
+# GameCore - Plataforma de Juegos
+
+Sistema de backend para juegos multijugador con UI Builder dinámico.
+
+## 📚 Documentación
+
+- **[Sistema UI](docs/UI_SYSTEM.md)** - Documentación completa del UI Builder
+- **[Migración Slot→Parent](docs/slot-to-parent-migration.md)** - Guía de actualización
+- **[Refactoring de Headers](docs/table-header-refactoring.md)** - Sistema de headers de tablas
+- **[Sistema i18n](docs/i18n-system.md)** - Internacionalización
+- **[Sistema de Menús](docs/menu-system.md)** - Menús dinámicos
+- **[Componentes de Formulario](docs/form-component.md)** - Formularios
+
+## Pasos para instalar el proyecto
+### Clonar el repositorio
 ```
 git clone https://github.com/eormeno/GameCore
 ```
