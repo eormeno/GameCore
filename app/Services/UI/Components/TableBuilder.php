@@ -17,6 +17,9 @@ class TableBuilder extends UIComponent
     /** @var UIContainer The rows container */
     private UIContainer $rowsContainer;
 
+    /** @var bool Flag to prevent multiple auto-fill calls */
+    private bool $autoFillCompleted = false;
+
     public function __construct(?string $name = null)
     {
         parent::__construct($name);
@@ -159,13 +162,16 @@ class TableBuilder extends UIComponent
 
     /**
      * Create a new table row associated with this table
+     * Automatically adds the row to the table
      * 
      * @param string|null $name Optional name for the row
      * @return TableRowBuilder The new row builder
      */
     public function createRow(?string $name = null): TableRowBuilder
     {
-        return new TableRowBuilder($this, $name);
+        $row = new TableRowBuilder($this, $name);
+        $this->addRow($row);
+        return $row;
     }
 
     /**
@@ -235,10 +241,16 @@ class TableBuilder extends UIComponent
      */
     private function autoFillEmptyRows(): void
     {
+        // Prevent multiple calls
+        if ($this->autoFillCompleted) {
+            return;
+        }
+        
         // Check if minRows is set
         $minRows = $this->config['min_rows'] ?? null;
         
         if ($minRows === null || $minRows <= 0) {
+            $this->autoFillCompleted = true;
             return; // No minRows set, nothing to do
         }
         
@@ -247,6 +259,7 @@ class TableBuilder extends UIComponent
         
         // If we already have enough rows, do nothing
         if ($currentRowCount >= $minRows) {
+            $this->autoFillCompleted = true;
             return;
         }
         
@@ -256,18 +269,21 @@ class TableBuilder extends UIComponent
         // Count headers to determine how many cells per row
         $headerCount = count($this->config['headers'] ?? []);
         
-        // Create empty cells array
-        $emptyCells = array_fill(0, $headerCount, '');
-        
-        // Add empty rows
+        // Add empty rows with empty cells
         for ($i = 0; $i < $emptyRowsNeeded; $i++) {
             $rowNumber = $currentRowCount + $i + 1;
             $emptyRow = new TableRowBuilder($this, "empty_row_$rowNumber");
-            $emptyRow->cells($emptyCells)
-                ->empty(true);
+            $emptyRow->empty(true);
+            
+            // Add empty cells to the row
+            for ($j = 0; $j < $headerCount; $j++) {
+                $emptyRow->createCell()->text('');
+            }
             
             $this->addRow($emptyRow);
         }
+        
+        $this->autoFillCompleted = true;
     }
 
     /**

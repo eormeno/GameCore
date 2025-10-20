@@ -75,10 +75,12 @@ games,quit,games.quit,Quit,Salir
 games,restart,games.restart,Restart,Reiniciar
 games,resume,games.resume,Resume,Continuar
 games,saved_game_actions_column,games.saved_game_actions_column,Actions,Acciones
+games,saved_game_delete_column,games.saved_game_delete_column,Delete,Eliminar
 games,saved_game_join_method_column,games.saved_game_join_method_column,"Join Method","Método de Unión"
 games,saved_game_last_played_column,games.saved_game_last_played_column,"Last Played","Última Partida"
 games,saved_game_name_column,games.saved_game_name_column,"Game Name","Nombre del Juego"
 games,saved_game_number_column,games.saved_game_number_column,#,#
+games,saved_game_play_column,games.saved_game_play_column,Play,Jugar
 games,saved_game_role_column,games.saved_game_role_column,Role,Rol
 games,saved_game_state_column,games.saved_game_state_column,State,Estado
 games,saved_game_status_column,games.saved_game_status_column,Status,Estatus
