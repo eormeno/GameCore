@@ -6,14 +6,14 @@ use App\Http\Controllers\LogViewerController;
 use App\Services\Screens\DemoUIService;
 
 // Demo route
-Route::get('/demo', function () {
-    return view('demo');
-})->name('demo');
+Route::get('/demo', fn() => view('demo'))->name('demo');
 
 // Demo UI API route
-Route::get('/api/demo-ui', function (DemoUIService $service) {
-    return response()->json($service->getDemoScreen());
-})->name('api.demo-ui');
+Route::get(
+    '/api/demo-ui',
+    fn(DemoUIService $service) =>
+    response()->json($service->getDemoScreen())
+)->name('api.demo-ui');
 
 // Log viewer routes
 Route::prefix('logs')->group(function () {
