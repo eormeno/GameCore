@@ -12,10 +12,8 @@ Route::prefix('logs')->group(function () {
     Route::post('/clear', [LogViewerController::class, 'clear'])->name('logs.clear');
 });
 
-// Route::get('/', fn() => response()->file(public_path('index.html')));
-Route::get('/{any}', function () {
-    return response()->file(public_path('index.html'));
-})->where('any', '^(?!api)(?!.*\.[a-z0-9]+$).*');
+Route::get('/{any}', fn() => response()->file(public_path('index.html')))
+    ->where('any', '^(?!api)(?!.*\.[a-z0-9]+$).*');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/game/{prefix}/play', [GameAppController::class, 'playGame'])
