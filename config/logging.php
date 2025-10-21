@@ -22,6 +22,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Log Viewer Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These options control access to the web-based log viewer.
+    | Set viewer_allowed_ips to restrict access by IP address in production.
+    |
+    */
+
+    'viewer_allowed_ips' => env('LOG_VIEWER_ALLOWED_IPS') 
+        ? explode(',', env('LOG_VIEWER_ALLOWED_IPS')) 
+        : [],
+
+    /*
+    |--------------------------------------------------------------------------
     | Deprecations Log Channel
     |--------------------------------------------------------------------------
     |

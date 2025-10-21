@@ -5,6 +5,7 @@ Sistema de backend para juegos multijugador con UI Builder dinámico.
 ## 📚 Documentación
 
 - **[Sistema UI](docs/UI_SYSTEM.md)** - Documentación completa del UI Builder
+- **[Visor de Logs](docs/LOG_VIEWER.md)** - Sistema de visualización y gestión de logs
 - **[Migración Slot→Parent](docs/slot-to-parent-migration.md)** - Guía de actualización
 - **[Refactoring de Headers](docs/table-header-refactoring.md)** - Sistema de headers de tablas
 - **[Sistema i18n](docs/i18n-system.md)** - Internacionalización
@@ -57,6 +58,32 @@ php artisan games
 ### Iniciar el servidor
 ```bash
 php artisan serve
+```
+
+## 🔍 Visualización de Logs
+
+GameCore incluye un sistema completo para visualizar y gestionar logs. Ver **[Documentación del Visor de Logs](docs/LOG_VIEWER.md)** para más detalles.
+
+### Acceso rápido:
+
+**Visor Web:**
+```bash
+# Inicia el servidor y accede a http://localhost:8000/logs
+php artisan serve
+```
+
+**Comandos en Terminal:**
+```bash
+# Ver logs con el script bash
+./logs.sh -v 100          # Ver últimas 100 líneas
+./logs.sh -t              # Seguir logs en tiempo real
+./logs.sh -s "error"      # Buscar errores
+./logs.sh -p              # Usar Laravel Pail
+
+# Ver logs con artisan
+php artisan logs:view --lines=100
+php artisan logs:view --tail
+php artisan pail --timeout=0
 ```
 
 ## Comandos de Desarrollo (Linux)

@@ -2,6 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GameAppController;
+use App\Http\Controllers\LogViewerController;
+
+// Log viewer routes
+Route::prefix('logs')->group(function () {
+    Route::get('/', [LogViewerController::class, 'index'])->name('logs.index');
+    Route::get('/content', [LogViewerController::class, 'getContent'])->name('logs.content');
+    Route::get('/download', [LogViewerController::class, 'download'])->name('logs.download');
+    Route::post('/clear', [LogViewerController::class, 'clear'])->name('logs.clear');
+});
 
 // Route::get('/', fn() => response()->file(public_path('index.html')));
 Route::get('/{any}', function () {
