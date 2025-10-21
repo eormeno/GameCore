@@ -269,17 +269,41 @@
             <div id="lastUpdate">Última actualización: --</div>
         </div>
 
+        @if(session('success'))
+            <div class="success-message" style="background: rgba(76, 175, 80, 0.2); color: #4caf50; padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #4caf50;">
+                ✅ {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="error-message" style="background: rgba(211, 47, 47, 0.2); color: #f48771; padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #d32f2f;">
+                ❌ {{ session('error') }}
+            </div>
+        @endif
+
         <div class="log-container" id="logContainer">
             <div class="loading">Cargando logs...</div>
         </div>
+
+        <!-- Hidden form for CSRF token (fallback method) -->
+        <form id="clearLogForm" method="POST" action="/logs/clear" style="display: none;">
+            @csrf
+            <input type="hidden" name="file" id="clearLogFile">
+        </form>
     </div>
 
     <script>
         let autoRefreshInterval = null;
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-        // Load logs on page load
+        // Verify CSRF token on load
         document.addEventListener('DOMContentLoaded', function() {
+            if (!csrfToken) {
+                console.error('CSRF token not found in meta tag!');
+                alert('⚠️ Error de configuración: No se encontró el token CSRF');
+            } else {
+                console.log('CSRF token loaded successfully');
+            }
             loadLogs();
         });
 
@@ -301,8 +325,10 @@
             try {
                 const response = await fetch(`/logs/content?file=${file}&lines=${lines}&search=${encodeURIComponent(search)}`, {
                     headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    }
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
                 });
                 const data = await response.json();
 
@@ -376,26 +402,44 @@
             }
 
             const file = document.getElementById('logFile').value;
+            const container = document.getElementById('logContainer');
+            const originalContent = container.innerHTML;
+            
+            container.innerHTML = '<div class="loading">Limpiando log...</div>';
             
             try {
                 const response = await fetch('/logs/clear', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({ file })
                 });
 
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert('✅ Log limpiado exitosamente');
-                    loadLogs();
+                console.log('Response status:', response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    if (data.success) {
+                        alert('✅ Log limpiado exitosamente');
+                        loadLogs();
+                    } else {
+                        container.innerHTML = originalContent;
+                        alert('❌ Error: ' + (data.error || 'Error desconocido'));
+                    }
                 } else {
-                    alert('❌ Error: ' + data.error);
+                    container.innerHTML = originalContent;
+                    const text = await response.text();
+                    console.error('Error response:', text);
+                    alert('❌ Error del servidor (código ' + response.status + ')');
                 }
             } catch (error) {
+                console.error('Error clearing log:', error);
+                container.innerHTML = originalContent;
                 alert('❌ Error al limpiar el log: ' + error.message);
             }
         }

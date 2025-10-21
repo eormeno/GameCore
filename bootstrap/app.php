@@ -12,6 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(\App\Http\Middleware\SetLocale::class);
+        
+        // Exclude log viewer clear endpoint from CSRF verification
+        // Only for development - in production, use authentication middleware
+        $middleware->validateCsrfTokens(except: [
+            'logs/clear',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

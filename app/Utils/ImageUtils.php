@@ -51,14 +51,14 @@ class ImageUtils
         if ($creationTime !== 0) {
             touch($path, $creationTime);
         }
-        imagedestroy($image);
+        \imagedestroy($image);
     }
 
     private static function createBaseImage(int $width, int $height)
     {
-        $image = imagecreatetruecolor($width, $height);
-        imagealphablending($image, false);
-        imagesavealpha($image, true);
+        $image = \imagecreatetruecolor($width, $height);
+        \imagealphablending($image, false);
+        \imagesavealpha($image, true);
         return $image;
     }
 
@@ -66,7 +66,7 @@ class ImageUtils
     {
         switch ($shape) {
             case self::DEFAULT_SHAPE:
-                imagefill($image, 0, 0, imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]));
+                \imagefill($image, 0, 0, \imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]));
                 break;
             case 'circle':
                 self::fillCircle($image, $backgroundRGB, $width, $height);
@@ -81,15 +81,15 @@ class ImageUtils
 
     private static function fillCircle($image, array $backgroundRGB, int $width, int $height)
     {
-        imagefill($image, 0, 0, imagecolorallocatealpha($image, 0, 0, 0, 127));
-        $circleColor = imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]);
-        imagefilledellipse($image, $width / 2, $height / 2, $width, $height, $circleColor);
+        \imagefill($image, 0, 0, \imagecolorallocatealpha($image, 0, 0, 0, 127));
+        $circleColor = \imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]);
+        \imagefilledellipse($image, $width / 2, $height / 2, $width, $height, $circleColor);
     }
 
     private static function fillTriangle($image, array $backgroundRGB, int $width, int $height)
     {
-        imagefill($image, 0, 0, imagecolorallocatealpha($image, 0, 0, 0, 127));
-        $triangleColor = imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]);
+        \imagefill($image, 0, 0, \imagecolorallocatealpha($image, 0, 0, 0, 127));
+        $triangleColor = \imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]);
         $trianglePoints = [
             $width / 2,
             0,
@@ -98,12 +98,12 @@ class ImageUtils
             $width,
             $height
         ];
-        imagefilledpolygon($image, $trianglePoints, 3, $triangleColor);
+        \imagefilledpolygon($image, $trianglePoints, 3, $triangleColor);
     }
 
     private static function addTextToImage($image, string $text, int $fontSize, array $textRGB, int $width, int $height)
     {
-        $textColor = imagecolorallocate($image, $textRGB[0], $textRGB[1], $textRGB[2]);
+        $textColor = \imagecolorallocate($image, $textRGB[0], $textRGB[1], $textRGB[2]);
         $fontPath = app_path('GameApps/Common/resources/fonts/arial.ttf');
         self::drawCenteredText($image, $text, $fontPath, $fontSize, $textColor, $width / 2, $height / 2);
     }
@@ -112,14 +112,14 @@ class ImageUtils
     {
         switch ($resourceType) {
             case 'png':
-                imagepng($image, $path);
+                \imagepng($image, $path);
                 break;
             case 'jpg':
             case 'jpeg':
-                imagejpeg($image, $path);
+                \imagejpeg($image, $path);
                 break;
             case 'gif':
-                imagegif($image, $path);
+                \imagegif($image, $path);
                 break;
             default:
                 throw new \InvalidArgumentException("Unsupported resource type: $resourceType");
@@ -141,19 +141,19 @@ class ImageUtils
         $tilesetWidth = $tileWidth * $tilesetColumns;
         $tilesetHeight = $tileHeight * $tilesetRows;
 
-        $image = imagecreatetruecolor($tilesetWidth, $tilesetHeight);
-        imagealphablending($image, false);
-        imagesavealpha($image, true);
+        $image = \imagecreatetruecolor($tilesetWidth, $tilesetHeight);
+        \imagealphablending($image, false);
+        \imagesavealpha($image, true);
 
-        $backgroundColor = imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]);
-        imagefill($image, 0, 0, $backgroundColor);
+        $backgroundColor = \imagecolorallocate($image, $backgroundRGB[0], $backgroundRGB[1], $backgroundRGB[2]);
+        \imagefill($image, 0, 0, $backgroundColor);
 
         for ($row = 0; $row < $tilesetRows; $row++) {
             for ($col = 0; $col < $tilesetColumns; $col++) {
                 $x = $col * $tileWidth;
                 $y = $row * $tileHeight;
-                $tileColor = imagecolorallocate($image, rand(0, 255), rand(0, 255), rand(0, 255));
-                imagefilledrectangle($image, $x, $y, $x + $tileWidth, $y + $tileHeight, $tileColor);
+                $tileColor = \imagecolorallocate($image, rand(0, 255), rand(0, 255), rand(0, 255));
+                \imagefilledrectangle($image, $x, $y, $x + $tileWidth, $y + $tileHeight, $tileColor);
                 $text = strtoupper(dechex($row)) . strtoupper(dechex($col));
                 self::addTextToImage($image, $text, $fontSize, $textRGB, 2 * $x + $tileWidth, 2 * $y + $tileHeight);
             }
@@ -165,18 +165,18 @@ class ImageUtils
         if ($creationTime !== 0) {
             touch($path, $creationTime);
         }
-        imagedestroy($image);
+        \imagedestroy($image);
     }
 
     private static function drawCenteredText($image, $text, $font, $size, $color, $x, $y)
     {
-        $box = imagettfbbox($size, 0, $font, $text);
+        $box = \imagettfbbox($size, 0, $font, $text);
         $textWidth = $box[2] - $box[0];
         $textHeight = $box[1] - $box[7];
         $x = $x - $textWidth / 2;
         $y = $y + $textHeight / 2;
-        $shadowColor = imagecolorallocatealpha($image, 0, 0, 0, 0);
-        imagettftext($image, $size, 0, $x + 2, $y + 2, $shadowColor, $font, $text);
-        imagettftext($image, $size, 0, $x, $y, $color, $font, $text);
+        $shadowColor = \imagecolorallocatealpha($image, 0, 0, 0, 0);
+        \imagettftext($image, $size, 0, $x + 2, $y + 2, $shadowColor, $font, $text);
+        \imagettftext($image, $size, 0, $x, $y, $color, $font, $text);
     }
 }

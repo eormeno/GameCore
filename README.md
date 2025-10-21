@@ -64,6 +64,8 @@ php artisan serve
 
 GameCore incluye un sistema completo para visualizar y gestionar logs. Ver **[Documentación del Visor de Logs](docs/LOG_VIEWER.md)** para más detalles.
 
+⚠️ **Nota de Seguridad**: El visor web está configurado sin autenticación para facilitar el desarrollo. **Antes de desplegar a producción**, agrega middleware de autenticación a las rutas de logs en `routes/web.php`.
+
 ### Acceso rápido:
 
 **Visor Web:**

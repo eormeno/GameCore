@@ -86,21 +86,41 @@ class LogViewerController extends Controller
      */
     public function clear(Request $request)
     {
-        $fileName = $request->input('file', 'laravel.log');
-        $logPath = storage_path('logs/' . basename($fileName));
+        try {
+            // Accept both JSON and form data
+            $fileName = $request->input('file') ?? $request->get('file', 'laravel.log');
+            $logPath = storage_path('logs/' . basename($fileName));
 
-        if (!File::exists($logPath)) {
+            if (!File::exists($logPath)) {
+                if ($request->input('redirect')) {
+                    return redirect()->route('logs.index')->with('error', 'Log file not found');
+                }
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Log file not found'
+                ], 404);
+            }
+
+            File::put($logPath, '');
+
+            // If redirect is requested, redirect back to logs page
+            if ($request->input('redirect')) {
+                return redirect()->route('logs.index')->with('success', 'Log file cleared successfully');
+            }
+
             return response()->json([
-                'error' => 'Log file not found'
-            ], 404);
+                'success' => true,
+                'message' => 'Log file cleared successfully'
+            ]);
+        } catch (\Exception $e) {
+            if ($request->input('redirect')) {
+                return redirect()->route('logs.index')->with('error', 'Error clearing log: ' . $e->getMessage());
+            }
+            return response()->json([
+                'success' => false,
+                'error' => 'Error clearing log: ' . $e->getMessage()
+            ], 500);
         }
-
-        File::put($logPath, '');
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Log file cleared successfully'
-        ]);
     }
 
     /**

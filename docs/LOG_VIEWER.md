@@ -251,7 +251,14 @@ Ejemplo para logs diarios:
 4. **Usa niveles apropiados**: debug, info, warning, error, critical
 5. **Laravel Pail es mejor para desarrollo**: Más rápido y con mejor formato
 
-## 🔗 Enlaces útiles
+## � Documentación
+
+- **[Guía completa](docs/LOG_VIEWER.md)** - Esta guía
+- **[Ejemplos y demos](docs/LOG_VIEWER_DEMO.md)** - Ejemplos prácticos y pruebas
+- **[Troubleshooting](docs/LOG_VIEWER_TROUBLESHOOTING.md)** - Solución de problemas
+- **[Referencia rápida](LOGS_QUICK_REFERENCE.txt)** - Comandos rápidos
+
+## �🔗 Enlaces útiles
 
 - [Documentación de Laravel Logging](https://laravel.com/docs/11.x/logging)
 - [Laravel Pail](https://github.com/laravel/pail)
