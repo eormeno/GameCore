@@ -3,11 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GameAppController;
 use App\Http\Controllers\LogViewerController;
+use App\Services\Screens\DemoUIService;
 
 // Demo route
 Route::get('/demo', function () {
     return view('demo');
 })->name('demo');
+
+// Demo UI API route
+Route::get('/api/demo-ui', function (DemoUIService $service) {
+    return response()->json($service->getDemoScreen());
+})->name('api.demo-ui');
 
 // Log viewer routes
 Route::prefix('logs')->group(function () {
