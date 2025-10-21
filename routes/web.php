@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GameAppController;
 use App\Http\Controllers\LogViewerController;
 
+// Demo route
+Route::get('/demo', function () {
+    return view('demo');
+})->name('demo');
+
 // Log viewer routes
 Route::prefix('logs')->group(function () {
     Route::get('/', [LogViewerController::class, 'index'])->name('logs.index');
