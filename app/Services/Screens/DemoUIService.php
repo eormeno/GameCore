@@ -85,6 +85,39 @@ class DemoUIService
                 ->enabled(false)
         );
 
+        // Section: Horizontal Container with Buttons
+        $container->add(
+            UIBuilder::label()
+                ->text('Horizontal Layout - Button Group')
+                ->style('heading')
+        );
+
+        $horizontalButtons = UIBuilder::container('horizontal_buttons')
+            ->layout(LayoutType::HORIZONTAL);
+
+        $horizontalButtons->add(
+            UIBuilder::button('h_btn_1')
+                ->label('Action 1')
+                ->action('action_1')
+                ->style('primary')
+        );
+
+        $horizontalButtons->add(
+            UIBuilder::button('h_btn_2')
+                ->label('Action 2')
+                ->action('action_2')
+                ->style('success')
+        );
+
+        $horizontalButtons->add(
+            UIBuilder::button('h_btn_3')
+                ->label('Action 3')
+                ->action('action_3')
+                ->style('danger')
+        );
+
+        $container->add($horizontalButtons);
+
         // Section: Labels
         $container->add(
             UIBuilder::label()
@@ -122,7 +155,85 @@ class DemoUIService
                 ->style('info')
         );
 
-        // Section: Inputs
+        // Section: Nested Container - Form Layout
+        $container->add(
+            UIBuilder::label()
+                ->text('Form Layout - Vertical Container with Form Fields')
+                ->style('heading')
+        );
+
+        $formContainer = UIBuilder::container('form_container')
+            ->layout(LayoutType::VERTICAL)
+            ->title('User Registration Form');
+
+        $formContainer->add(
+            UIBuilder::input('form_username')
+                ->label('Username')
+                ->placeholder('Enter your username')
+                ->value('')
+                ->required(true)
+        );
+
+        $formContainer->add(
+            UIBuilder::input('form_email')
+                ->label('Email Address')
+                ->placeholder('user@example.com')
+                ->type('email')
+                ->required(true)
+        );
+
+        $formContainer->add(
+            UIBuilder::input('form_password')
+                ->label('Password')
+                ->placeholder('Enter your password')
+                ->type('password')
+                ->required(true)
+        );
+
+        $formContainer->add(
+            UIBuilder::select('form_country')
+                ->label('Country')
+                ->options([
+                    'us' => 'United States',
+                    'uk' => 'United Kingdom',
+                    'ca' => 'Canada',
+                    'mx' => 'Mexico',
+                    'es' => 'Spain',
+                ])
+                ->placeholder('Select your country')
+                ->required(true)
+        );
+
+        $formContainer->add(
+            UIBuilder::checkbox('form_terms')
+                ->label('I agree to the terms and conditions')
+                ->checked(false)
+                ->required(true)
+        );
+
+        // Form buttons in horizontal layout
+        $formButtons = UIBuilder::container('form_buttons')
+            ->layout(LayoutType::HORIZONTAL);
+
+        $formButtons->add(
+            UIBuilder::button('form_submit')
+                ->label('Submit')
+                ->action('submit_form')
+                ->style('success')
+        );
+
+        $formButtons->add(
+            UIBuilder::button('form_cancel')
+                ->label('Cancel')
+                ->action('cancel_form')
+                ->style('danger')
+        );
+
+        $formContainer->add($formButtons);
+
+        $container->add($formContainer);
+
+        // Section: Input Fields
         $container->add(
             UIBuilder::label()
                 ->text('Input Fields')
@@ -160,6 +271,69 @@ class DemoUIService
                 ->value('Cannot edit this')
                 ->disabled(true)
         );
+
+        // Section: Two Column Layout
+        $container->add(
+            UIBuilder::label()
+                ->text('Two Column Layout - Side by Side Containers')
+                ->style('heading')
+        );
+
+        $twoColumnContainer = UIBuilder::container('two_columns')
+            ->layout(LayoutType::HORIZONTAL);
+
+        // Left Column
+        $leftColumn = UIBuilder::container('left_column')
+            ->layout(LayoutType::VERTICAL)
+            ->title('Left Panel');
+
+        $leftColumn->add(
+            UIBuilder::label()
+                ->text('This is the left panel')
+                ->style('info')
+        );
+
+        $leftColumn->add(
+            UIBuilder::button('left_action')
+                ->label('Left Action')
+                ->action('left_action')
+                ->style('primary')
+        );
+
+        $leftColumn->add(
+            UIBuilder::input('left_input')
+                ->label('Left Input')
+                ->placeholder('Type something...')
+        );
+
+        // Right Column
+        $rightColumn = UIBuilder::container('right_column')
+            ->layout(LayoutType::VERTICAL)
+            ->title('Right Panel');
+
+        $rightColumn->add(
+            UIBuilder::label()
+                ->text('This is the right panel')
+                ->style('success')
+        );
+
+        $rightColumn->add(
+            UIBuilder::button('right_action')
+                ->label('Right Action')
+                ->action('right_action')
+                ->style('success')
+        );
+
+        $rightColumn->add(
+            UIBuilder::checkbox('right_checkbox')
+                ->label('Right Checkbox')
+                ->checked(true)
+        );
+
+        $twoColumnContainer->add($leftColumn);
+        $twoColumnContainer->add($rightColumn);
+
+        $container->add($twoColumnContainer);
 
         // Section: Selects
         $container->add(
@@ -204,6 +378,106 @@ class DemoUIService
                 ->value('option1')
                 ->disabled(true)
         );
+
+        // Section: Complex Nested Layout
+        $container->add(
+            UIBuilder::label()
+                ->text('Complex Nested Layout - Dashboard Example')
+                ->style('heading')
+        );
+
+        $dashboardContainer = UIBuilder::container('dashboard')
+            ->layout(LayoutType::VERTICAL)
+            ->title('Dashboard');
+
+        // Dashboard Header with buttons
+        $dashboardHeader = UIBuilder::container('dashboard_header')
+            ->layout(LayoutType::HORIZONTAL);
+
+        $dashboardHeader->add(
+            UIBuilder::label()
+                ->text('Welcome back, User!')
+                ->style('info')
+        );
+
+        $dashboardHeader->add(
+            UIBuilder::button('dashboard_settings')
+                ->label('Settings')
+                ->action('open_settings')
+                ->style('primary')
+        );
+
+        $dashboardHeader->add(
+            UIBuilder::button('dashboard_logout')
+                ->label('Logout')
+                ->action('logout')
+                ->style('danger')
+        );
+
+        $dashboardContainer->add($dashboardHeader);
+
+        // Dashboard Content - 3 columns
+        $dashboardContent = UIBuilder::container('dashboard_content')
+            ->layout(LayoutType::HORIZONTAL);
+
+        // Stats Panel 1
+        $stats1 = UIBuilder::container('stats_1')
+            ->layout(LayoutType::VERTICAL)
+            ->title('Total Users');
+
+        $stats1->add(
+            UIBuilder::label()
+                ->text('1,234')
+                ->style('success')
+        );
+
+        $stats1->add(
+            UIBuilder::label()
+                ->text('+15% this month')
+                ->style('default')
+        );
+
+        // Stats Panel 2
+        $stats2 = UIBuilder::container('stats_2')
+            ->layout(LayoutType::VERTICAL)
+            ->title('Active Games');
+
+        $stats2->add(
+            UIBuilder::label()
+                ->text('456')
+                ->style('info')
+        );
+
+        $stats2->add(
+            UIBuilder::label()
+                ->text('+8% this month')
+                ->style('default')
+        );
+
+        // Stats Panel 3
+        $stats3 = UIBuilder::container('stats_3')
+            ->layout(LayoutType::VERTICAL)
+            ->title('Revenue');
+
+        $stats3->add(
+            UIBuilder::label()
+                ->text('$12,345')
+                ->style('warning')
+        );
+
+        $stats3->add(
+            UIBuilder::label()
+                ->text('+22% this month')
+                ->style('default')
+        );
+
+        $dashboardContent->add($stats1);
+        $dashboardContent->add($stats2);
+        $dashboardContent->add($stats3);
+
+        $dashboardContainer->add($dashboardContent);
+
+        $container->add($dashboardContainer);
 
         // Section: Checkboxes
         $container->add(
