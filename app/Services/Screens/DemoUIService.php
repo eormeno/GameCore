@@ -512,4 +512,106 @@ class DemoUIService
                 ->disabled(true)
         );
     }
+
+    // ============================================================
+    // Event Handlers
+    // ============================================================
+    // Methods that handle UI component events from the frontend.
+    // Convention: action "snake_case" → method "onPascalCase"
+    // ============================================================
+
+    /**
+     * Handle test action event
+     * 
+     * Triggered by: Primary Button (action: "test_action")
+     * 
+     * @param array $params Event parameters
+     * @return array Response
+     */
+    public function onTestAction(array $params): array
+    {
+        return [
+            'success' => true,
+            'message' => 'Test action executed successfully!',
+            'timestamp' => now()->toIso8601String(),
+            'params' => $params,
+        ];
+    }
+
+    /**
+     * Handle form submission
+     * 
+     * Example action: "submit_form"
+     * 
+     * @param array $params Form data
+     * @return array Response
+     */
+    public function onSubmitForm(array $params): array
+    {
+        // Validate form data
+        $username = $params['username'] ?? null;
+        $email = $params['email'] ?? null;
+
+        if (empty($username) || empty($email)) {
+            return [
+                'success' => false,
+                'message' => 'Username and email are required',
+            ];
+        }
+
+        // Process form (save to database, send email, etc.)
+        // ...
+
+        return [
+            'success' => true,
+            'message' => "Form submitted successfully for user: {$username}",
+            'data' => [
+                'username' => $username,
+                'email' => $email,
+            ],
+        ];
+    }
+
+    /**
+     * Handle form cancellation
+     * 
+     * Example action: "cancel_form"
+     * 
+     * @param array $params Event parameters
+     * @return array Response
+     */
+    public function onCancelForm(array $params): array
+    {
+        return [
+            'success' => true,
+            'message' => 'Form cancelled',
+            'redirect' => '/dashboard',
+        ];
+    }
+
+    /**
+     * Handle settings opening
+     * 
+     * Example action: "open_settings"
+     * 
+     * @param array $params Event parameters
+     * @return array Response with UI update
+     */
+    public function onOpenSettings(array $params): array
+    {
+        // Could return updated UI components here
+        return [
+            'success' => true,
+            'message' => 'Opening settings...',
+            'ui_update' => [
+                // New UI components to render
+                'modal' => [
+                    'type' => 'modal',
+                    'title' => 'Settings',
+                    'content' => 'Settings panel content here...',
+                ],
+            ],
+        ];
+    }
 }
+

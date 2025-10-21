@@ -69,10 +69,92 @@ class ButtonComponent extends UIComponent {
     }
 
     handleAction(action, parameters = {}) {
-        // Dispatch custom event for action handling
-        window.dispatchEvent(new CustomEvent('ui-action', {
-            detail: { action, parameters, componentId: this.id }
-        }));
+        // Send POST request to backend
+        this.sendEventToBackend('click', action, parameters);
+    }
+
+    /**
+     * Send UI event to backend
+     * 
+     * @param {string} event - Event type (click, change, etc.)
+     * @param {string} action - Action name (snake_case)
+     * @param {object} parameters - Event parameters
+     */
+    async sendEventToBackend(event, action, parameters = {}) {
+        try {
+            // Get CSRF token from meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            console.log('Sending event:', { component_id: this.id, action, csrfToken });
+
+            const response = await fetch('/api/ui-event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    component_id: parseInt(this.id),
+                    event: event,
+                    action: action,
+                    parameters: parameters,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('✅ Action executed:', action, result);
+                
+                // Show success message if provided
+                if (result.message) {
+                    this.showNotification(result.message, 'success');
+                }
+
+                // Handle UI updates if provided
+                if (result.ui_update) {
+                    this.handleUIUpdate(result.ui_update);
+                }
+
+                // Handle redirects if provided
+                if (result.redirect) {
+                    window.location.href = result.redirect;
+                }
+            } else {
+                console.error('❌ Action failed:', action, result);
+                this.showNotification(result.error || 'Action failed', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Network error:', error);
+            this.showNotification('Network error: ' + error.message, 'error');
+        }
+    }
+
+    /**
+     * Show notification to user
+     * 
+     * @param {string} message - Message to display
+     * @param {string} type - Type (success, error, info, warning)
+     */
+    showNotification(message, type = 'info') {
+        // Simple console notification for now
+        // TODO: Implement proper UI notification system
+        const emoji = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' }[type] || 'ℹ️';
+        console.log(`${emoji} ${message}`);
+    }
+
+    /**
+     * Handle UI updates from backend
+     * 
+     * @param {object} uiUpdate - UI update configuration
+     */
+    handleUIUpdate(uiUpdate) {
+        // TODO: Implement UI update handling
+        // This would re-render components or show modals based on backend response
+        console.log('UI Update:', uiUpdate);
     }
 }
 

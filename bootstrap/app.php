@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Only for development - in production, use authentication middleware
         $middleware->validateCsrfTokens(except: [
             'logs/clear',
+            'api/ui-event',  // Temporary: UI event handler
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

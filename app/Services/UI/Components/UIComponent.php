@@ -46,7 +46,7 @@ abstract class UIComponent implements UIElement
      * Detecta automáticamente la clase que está invocando el builder
      * Busca en el stack trace la primera clase fuera del namespace UI
      * 
-     * @return string El nombre base de la clase invocante
+     * @return string El nombre completo con namespace de la clase invocante
      */
     private function detectCallingContext(): string
     {
@@ -58,7 +58,8 @@ abstract class UIComponent implements UIElement
                 isset($frame['class']) &&
                 !str_starts_with($frame['class'], 'App\\Services\\UI\\')
             ) {
-                return class_basename($frame['class']);
+                // Retornar el nombre completo con namespace (no solo el basename)
+                return $frame['class'];
             }
         }
 

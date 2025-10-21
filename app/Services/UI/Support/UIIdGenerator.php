@@ -13,6 +13,12 @@ class UIIdGenerator
     /** @var array<string, int> Auto-increment counter per context */
     private static array $autoIncPerContext = [];
 
+    /** @var array<int, string> Mapping from offset to context class name */
+    private static array $offsetToContext = [];
+
+    /** @var bool Flag to ensure services are loaded only once */
+    private static bool $servicesLoaded = false;
+
     /**
      * Generate a unique ID for a UI element
      * 
@@ -27,6 +33,9 @@ class UIIdGenerator
 
         $localId = ++self::$autoIncPerContext[$context];
         $offset = self::getContextOffset($context);
+
+        // Register offset → context mapping for reverse lookup
+        self::$offsetToContext[$offset] = $context;
 
         return $offset + $localId;
     }
@@ -44,6 +53,49 @@ class UIIdGenerator
             'offset' => self::getContextOffset($context),
             'current_count' => self::$autoIncPerContext[$context] ?? 0,
         ];
+    }
+
+    /**
+     * Get context class name from component ID
+     * 
+     * Uses lazy loading to ensure all registered UI services are mapped.
+     * Performance: ~0.001ms (in-memory array lookup)
+     * 
+     * @param int $id Component ID
+     * @return string|null Context class name or null if not found
+     */
+    public static function getContextFromId(int $id): ?string
+    {
+        self::ensureServicesLoaded();
+
+        $offset = (int)floor($id / 10000) * 10000;
+        return self::$offsetToContext[$offset] ?? null;
+    }
+
+    /**
+     * Lazy load registered UI services
+     * 
+     * Loads the service registry only once per PHP worker process.
+     * This ensures deterministic offset → service mapping without
+     * requiring database or cache lookups.
+     * 
+     * @return void
+     */
+    private static function ensureServicesLoaded(): void
+    {
+        if (self::$servicesLoaded) {
+            return;
+        }
+
+        // Load all registered UI services from config
+        $services = config('ui-services', []);
+        
+        foreach ($services as $serviceClass) {
+            $offset = self::getContextOffset($serviceClass);
+            self::$offsetToContext[$offset] = $serviceClass;
+        }
+
+        self::$servicesLoaded = true;
     }
 
     /**

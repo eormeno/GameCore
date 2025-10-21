@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GameAppController;
 use App\Http\Controllers\LogViewerController;
+use App\Http\Controllers\UIEventController;
 use App\Services\Screens\DemoUIService;
 
 // Demo route
@@ -14,6 +15,9 @@ Route::get(
     fn(DemoUIService $service) =>
     response()->json($service->getDemoScreen())
 )->name('api.demo-ui');
+
+// UI Event Handler
+Route::post('/api/ui-event', [UIEventController::class, 'handleEvent'])->name('ui.event');
 
 // Log viewer routes
 Route::prefix('logs')->group(function () {
