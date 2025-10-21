@@ -2,6 +2,30 @@
 
 Sistema de backend para juegos multijugador con UI Builder dinámico.
 
+## ⚙️ Requisitos Previos
+
+### PHP
+- **Versión**: PHP 8.1 o superior (recomendado PHP 8.3)
+- **Extensiones requeridas**:
+  - `php-gd` - Biblioteca de imágenes para generación de recursos gráficos
+  - `php-mbstring` - Manejo de cadenas multibyte
+  - `php-xml` - Procesamiento XML
+  - `php-curl` - Cliente HTTP
+  - `php-zip` - Compresión de archivos
+  - `php-bcmath` - Matemáticas de precisión arbitraria
+  - `php-sqlite3` o `php-mysql` - Base de datos (según configuración)
+
+### Instalación de extensiones PHP en Ubuntu/Debian
+```bash
+# Para PHP 8.3
+sudo apt update
+sudo apt install php8.3 php8.3-cli php8.3-gd php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-bcmath php8.3-sqlite3 php8.3-mysql
+```
+
+### Otros requisitos
+- **Composer** - Gestor de dependencias de PHP
+- **Git** - Control de versiones
+
 ## 📚 Documentación
 
 - **[Sistema UI](docs/UI_SYSTEM.md)** - Documentación completa del UI Builder
@@ -185,7 +209,14 @@ ln -sf $(pwd)/test.sh /usr/local/bin/gametest
 
 ## Instalación para producción en un servidor Ubuntu
 ### Requisitos
-- PHP. con las extensiones habilitadas en php.ini (openssl, pdo_mysql, mbstring, etc.).
-- Composer
-- Nginx
-- MySQL
+- **PHP 8.1+** con las siguientes extensiones:
+  - `php-gd` (Generación de imágenes)
+  - `php-mbstring` (Cadenas multibyte)
+  - `php-xml` (Procesamiento XML)
+  - `php-curl` (Cliente HTTP)
+  - `php-zip` (Compresión)
+  - `php-bcmath` (Matemáticas)
+  - `php-mysql` (Base de datos MySQL)
+- **Composer** - Gestor de dependencias
+- **Nginx** - Servidor web
+- **MySQL** - Base de datos
