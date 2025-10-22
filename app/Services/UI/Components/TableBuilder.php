@@ -167,7 +167,12 @@ class TableBuilder extends UIComponent
      * Override toJson to include the rows container and header row in flat structure
      * and automatically fill with empty rows if minRows is set
      */
-    public function toJson(): array
+    /**
+     * {@inheritDoc}
+     * 
+     * Override toJson to handle table structure serialization
+     */
+    public function toJson(?int $order = null): array
     {
         // Auto-fill empty rows if minRows is set
         $this->autoFillEmptyRows();

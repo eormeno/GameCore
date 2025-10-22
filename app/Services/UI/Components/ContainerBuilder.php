@@ -211,7 +211,10 @@ class ContainerBuilder
      * 
      * @return array The JSON representation
      */
-    public function toJson(): array
+    /**
+     * {@inheritDoc}
+     */
+    public function toJson(?int $order = null): array
     {
         return $this->container->toJson();
     }

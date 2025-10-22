@@ -1443,38 +1443,40 @@ class UIContainer implements UIElement
      * All components are returned at the same level, with 'parent' indicating parent-child relationships
      * Null values are filtered out from the configuration
      */
-    public function toJson(): array
+    /**
+     * {@inheritDoc}
+     */
+    public function toJson(?int $order = null): array
     {
-        // Start with this container's configuration and filter out null values
+        // Filter out null values from config
         $config = array_filter($this->config, fn($value) => $value !== null);
         
-        // Remove 'visible' if it's true (default value)
+        // Remove default visible value to save JSON size
         if (isset($config['visible']) && $config['visible'] === true) {
             unset($config['visible']);
         }
         
-        // Include 'name' attribute only if it's not null (for client-side referencing)
-        if ($this->name !== null) {
-            $config['name'] = $this->name;
+        // Container receives its own _order from parent
+        if ($order !== null) {
+            $config['_order'] = $order;
         }
-
-        // Start with this container
-        $result = [$this->id => $config];
-
-        // Add insertion order index to preserve order in JavaScript
-        $orderIndex = 1; // Start from 1 (container is 0)
         
-        // Add all children at the same level (flat structure)
-        // CRITICAL: Add _order field to preserve insertion order in JavaScript
+        // CRITICAL: Include component ID in config for frontend lookups
+        $config['_id'] = $this->id;
+        
+        // Start with this container's config
+        $result = [$this->id => $config];
+        
+        // Append children with incremental order (1, 2, 3...)
+        $childOrder = 1;
         foreach ($this->children as $childId => $child) {
-            $childJson = $child->toJson();
-            // Add order index to each component
-            foreach ($childJson as $key => $value) {
-                $value['_order'] = $orderIndex++;
-                $result[$key] = $value;
-            }
+            $childJson = $child->toJson($childOrder);
+            $childOrder++;
+            
+            // Merge child JSON into result
+            $result = array_merge($result, $childJson);
         }
-
+        
         return $result;
     }
 

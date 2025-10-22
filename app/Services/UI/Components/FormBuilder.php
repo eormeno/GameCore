@@ -1204,7 +1204,10 @@ class FormBuilder extends UIContainer
     /**
      * {@inheritDoc}
      */
-    public function toJson(): array
+    /**
+     * {@inheritDoc}
+     */
+    public function toJson(?int $order = null): array
     {
         $json = parent::toJson();
         

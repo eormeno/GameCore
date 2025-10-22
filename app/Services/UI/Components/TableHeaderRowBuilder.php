@@ -85,7 +85,10 @@ class TableHeaderRowBuilder extends UIComponent
      * 
      * Includes all header cell components in the flat JSON structure
      */
-    public function toJson(): array
+    /**
+     * {@inheritDoc}
+     */
+    public function toJson(?int $order = null): array
     {
         // Get base config and filter nulls
         $config = array_filter($this->config, fn($value) => $value !== null);

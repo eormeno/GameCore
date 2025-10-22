@@ -30,9 +30,10 @@ interface UIElement
      * For leaf elements (Button, Label), this returns their configuration.
      * For composite elements (Container), this recursively calls toJson() on children.
      * 
+     * @param int|null $order Optional order index relative to parent container (1, 2, 3...)
      * @return array The JSON-serializable array representation
      */
-    public function toJson(): array;
+    public function toJson(?int $order = null): array;
 
     /**
      * Get the visibility state of the element

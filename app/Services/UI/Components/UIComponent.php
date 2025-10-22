@@ -248,22 +248,29 @@ abstract class UIComponent implements UIElement
      * For leaf components, returns the configuration wrapped in the component ID
      * Null values are filtered out from the configuration
      */
-    public function toJson(): array
+    /**
+     * {@inheritDoc}
+     */
+    public function toJson(?int $order = null): array
     {
         // Filter out null values from config
         $config = array_filter($this->config, fn($value) => $value !== null);
         
-        // Remove 'visible' if it's true (default value)
+        // Remove default visible value to save JSON size
         if (isset($config['visible']) && $config['visible'] === true) {
             unset($config['visible']);
         }
         
-        // Allow subclasses to exclude additional keys
-        $excludeKeys = $this->getExcludedJsonKeys();
-        if (!empty($excludeKeys)) {
-            $config = array_diff_key($config, array_flip($excludeKeys));
+        // Add _order if provided by parent
+        if ($order !== null) {
+            $config['_order'] = $order;
         }
         
+        // CRITICAL: Include component ID in config for frontend lookups
+        // This is needed because JSON_FORCE_OBJECT reindexes array keys
+        $config['_id'] = $this->id;
+        
+        // Return as associative array with component ID as key
         return [$this->id => $config];
     }
 

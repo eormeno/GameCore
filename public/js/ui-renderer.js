@@ -21,7 +21,9 @@ class UIComponent {
     }
 
     applyCommonAttributes(element) {
-        element.setAttribute('data-component-id', this.id);
+        // Use internal component ID (_id) for data attribute, not JSON key
+        const componentId = this.config._id || this.id;
+        element.setAttribute('data-component-id', componentId);
         if (this.config.name) {
             element.id = this.config.name;
         }
@@ -85,7 +87,10 @@ class ButtonComponent extends UIComponent {
             // Get CSRF token from meta tag
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-            console.log('Sending event:', { component_id: this.id, action, csrfToken });
+            // Use internal component ID (_id), not the JSON key
+            const componentId = this.config._id || parseInt(this.id);
+
+            console.log('Sending event:', { component_id: componentId, action, csrfToken });
 
             const response = await fetch('/api/ui-event', {
                 method: 'POST',
@@ -97,7 +102,7 @@ class ButtonComponent extends UIComponent {
                 },
                 credentials: 'same-origin',
                 body: JSON.stringify({
-                    component_id: parseInt(this.id),
+                    component_id: componentId,
                     event: event,
                     action: action,
                     parameters: parameters,
@@ -469,23 +474,19 @@ class UIRenderer {
     render() {
         console.log('Rendering UI with data:', this.data);
 
-        // Step 1: Create all component instances PRESERVING ORDER
-        // CRITICAL: Sort by _order field to preserve insertion order (Object.keys() sorts numeric keys)
-        const componentIds = Object.keys(this.data).sort((a, b) => {
-            const orderA = this.data[a]._order ?? 0;
-            const orderB = this.data[b]._order ?? 0;
-            return orderA - orderB;
-        });
+        // Step 1: Build a map of internal ID -> JSON key
+        // Each component now has _id in its config
+        const internalIdToKey = new Map();
+        const componentIds = Object.keys(this.data);
         
-        // DEBUG: Log order of counter components
-        console.log('=== Component Order ===');
-        for (const id of componentIds) {
-            const config = this.data[id];
-            if (config.name && (config.name.includes('counter') || config.name.includes('btn_'))) {
-                console.log(`ID: ${id} | Name: ${config.name} | Parent: ${config.parent} | Order: ${config._order}`);
+        for (const key of componentIds) {
+            const config = this.data[key];
+            if (config._id !== undefined) {
+                internalIdToKey.set(config._id, key);
             }
         }
-        
+
+        // Step 2: Create all component instances
         for (const id of componentIds) {
             const config = this.data[id];
             const component = ComponentFactory.create(id, config);
@@ -496,22 +497,42 @@ class UIRenderer {
 
         console.log(`Created ${this.components.size} components`);
 
-        // Step 2: Group components by parent to maintain sibling order
-        const childrenByParent = new Map(); // parent -> [child_ids in order]
+        // Step 3: Group components by parent and sort by _order
+        const childrenByParent = new Map();
         for (const id of componentIds) {
             const component = this.components.get(id);
             if (!component) continue;
             
             const parentId = component.config.parent;
-            const parentKey = typeof parentId === 'string' ? parentId : parentId.toString();
+            let parentKey;
+            
+            if (typeof parentId === 'string') {
+                // Parent is a DOM element
+                parentKey = parentId;
+            } else if (typeof parentId === 'number') {
+                // Parent is a component - find its key using _id
+                parentKey = internalIdToKey.get(parentId);
+                if (!parentKey) {
+                    console.error(`Parent component with internal ID ${parentId} not found in JSON`);
+                    continue;
+                }
+            }
             
             if (!childrenByParent.has(parentKey)) {
                 childrenByParent.set(parentKey, []);
             }
-            childrenByParent.get(parentKey).push(id);
+            childrenByParent.get(parentKey).push({
+                id: id,
+                order: component.config._order ?? 999999
+            });
+        }
+        
+        // Sort children within each parent by their _order
+        for (const [parent, children] of childrenByParent.entries()) {
+            children.sort((a, b) => a.order - b.order);
         }
 
-        // Step 3: Mount components in hierarchical order
+        // Step 4: Mount components in hierarchical order
         const mounted = new Set();
         const maxIterations = this.components.size * 2;
         let iterations = 0;
@@ -519,39 +540,42 @@ class UIRenderer {
         while (mounted.size < this.components.size && iterations < maxIterations) {
             iterations++;
             
-            // Iterate in ORIGINAL ORDER
-            for (const id of componentIds) {
-                const component = this.components.get(id);
-                if (!component || mounted.has(id)) continue;
-
-                const parentId = component.config.parent;
-
-                if (typeof parentId === 'string') {
-                    // Parent is a DOM element (always available)
-                    const parentElement = document.getElementById(parentId);
-                    if (parentElement) {
-                        component.mount(parentElement);
-                        mounted.add(id);
-                    } else {
-                        console.error(`Parent element not found: ${parentId}`);
-                        mounted.add(id);
-                    }
-                } else if (typeof parentId === 'number') {
-                    // Parent is another component - check if parent is mounted
-                    const parentComponent = this.components.get(parentId.toString());
+            // For each parent, mount its children in order
+            for (const [parentKey, children] of childrenByParent.entries()) {
+                for (const childInfo of children) {
+                    const id = childInfo.id;
+                    const component = this.components.get(id);
                     
-                    if (!parentComponent) {
-                        console.error(`Parent component not found: ${parentId}`);
-                        mounted.add(id);
-                        continue;
-                    }
+                    if (!component || mounted.has(id)) continue;
 
-                    // Wait for parent to be mounted first
-                    if (mounted.has(parentId.toString())) {
-                        // Mount in order by just using appendChild
-                        // Since we iterate in order, siblings will be appended in correct order
-                        component.mount(parentComponent.element);
-                        mounted.add(id);
+                    const parentId = component.config.parent;
+
+                    if (typeof parentId === 'string') {
+                        // Parent is a DOM element (always available)
+                        const parentElement = document.getElementById(parentId);
+                        if (parentElement) {
+                            component.mount(parentElement);
+                            mounted.add(id);
+                        } else {
+                            console.error(`Parent element not found: ${parentId}`);
+                            mounted.add(id);
+                        }
+                    } else if (typeof parentId === 'number') {
+                        // Parent is a component - find its key using _id
+                        const parentComponentKey = internalIdToKey.get(parentId);
+                        const parentComponent = this.components.get(parentComponentKey);
+                        
+                        if (!parentComponent) {
+                            console.error(`Parent component not found for ID: ${parentId}`);
+                            mounted.add(id);
+                            continue;
+                        }
+
+                        // Wait for parent to be mounted first
+                        if (mounted.has(parentComponentKey)) {
+                            component.mount(parentComponent.element);
+                            mounted.add(id);
+                        }
                     }
                 }
             }
