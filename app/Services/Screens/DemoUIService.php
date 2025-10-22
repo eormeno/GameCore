@@ -4,17 +4,58 @@ namespace App\Services\Screens;
 
 use App\Services\UI\UIBuilder;
 use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\Traits\StoresUIState;
+use App\Services\UI\Support\UIDiffer;
+use App\Services\UI\Components\UIContainer;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class DemoUIService
 {
+    use StoresUIState;
+    
     /**
-     * Get the demo screen with various UI components
-     *
-     * @return array
+     * Get counter value from cache
+     * 
+     * @return int Current counter value
      */
-    public function getDemoScreen(): array
+    private function getCounterValue(): int
     {
-        $container = UIBuilder::container()
+        $userId = Auth::check() ? Auth::id() : session()->getId();
+        $key = "demo_counter:{$userId}";
+        $value = Cache::get($key, 0);
+        Log::info('CACHE GET: ' . $key . ' = ' . $value);
+        return $value;
+    }
+    
+    /**
+     * Set counter value in cache
+     * 
+     * @param int $value New counter value
+     * @return void
+     */
+    private function setCounterValue(int $value): void
+    {
+        $userId = Auth::check() ? Auth::id() : session()->getId();
+        $key = "demo_counter:{$userId}";
+        Cache::put($key, $value, now()->addHours(24));
+        
+        Log::info('CACHE SET: ' . $key . ' = ' . $value);
+        Log::info('CACHE READ BACK: ' . $key . ' = ' . Cache::get($key, 'NOT_SET'));
+    }
+    
+    /**
+     * Build base UI structure (required by StoresUIState trait)
+     * 
+     * Esta UI se genera cada vez que se necesita y se guarda en cache.
+     * Los componentes con name tienen IDs determinísticos.
+     * 
+     * @return UIContainer Base UI structure
+     */
+    protected function buildBaseUI(): UIContainer
+    {
+        $container = UIBuilder::container('main')
             ->parent('main')
             ->layout(LayoutType::VERTICAL)
             ->title('Demo UI Components');
@@ -22,7 +63,20 @@ class DemoUIService
         // Build UI elements
         $this->buildUIElements($container);
 
-        return $container->toJson();
+        return $container;
+    }
+    
+    /**
+     * Get the demo screen with various UI components
+     * 
+     * Retorna UI desde cache o regenera si no existe
+     *
+     * @return array
+     */
+    public function getDemoScreen(): array
+    {
+        // Usar cache con auto-regeneración
+        return $this->getStoredUI();
     }
 
     /**
@@ -33,20 +87,108 @@ class DemoUIService
      */
     private function buildUIElements($container): void
     {
+        // ========================================
+        // DEMO SIMPLIFICADO - SISTEMA REACTIVO
+        // ========================================
+        
+        // Welcome label (con nombre para poder modificarlo)
+        $container->add(
+            UIBuilder::label('lbl_welcome')
+                ->text('🔵 Estado inicial: Presiona "Test Update" para cambiar este texto')
+                ->style('info')
+        );
+        
+        // Botón para ACTUALIZAR componente
+        $container->add(
+            UIBuilder::button('btn_test_update')
+                ->label('🔄 Test Update (ACTUALIZAR)')
+                ->action('test_action')
+                ->icon('star')
+                ->style('primary')
+                ->variant('filled')
+        );
+
+        // Botón para AGREGAR componente
+        $container->add(
+            UIBuilder::button('btn_test_add')
+                ->label('➕ Test Add (AGREGAR)')
+                ->action('open_settings')
+                ->icon('settings')
+                ->style('warning')
+                ->variant('filled')
+        );
+
+        // Separador visual
+        $container->add(
+            UIBuilder::label()
+                ->text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+                ->style('default')
+        );
+
+        // Contador con botones incrementar/decrementar
+        $container->add(
+            UIBuilder::label()
+                ->text('🔢 Contador Interactivo:')
+                ->style('default')
+        );
+
+        $counterContainer = UIBuilder::container('counter_container')
+            ->layout(LayoutType::HORIZONTAL);
+
+        $counterContainer->add(
+            UIBuilder::button('btn_decrement')
+                ->label('➖')
+                ->action('decrement_counter')
+                ->style('danger')
+                ->variant('filled')
+        );
+
+        // Obtener valor del contador desde session
+        $counterValue = $this->getCounterValue();
+        $counterStyle = 'primary';
+        
+        if ($counterValue > 5) {
+            $counterStyle = 'success';
+        } elseif ($counterValue < 0) {
+            $counterStyle = 'danger';
+        }
+
+        $counterContainer->add(
+            UIBuilder::label('lbl_counter')
+                ->text((string) $counterValue)
+                ->style($counterStyle)
+        );
+
+        $counterContainer->add(
+            UIBuilder::button('btn_increment')
+                ->label('➕')
+                ->action('increment_counter')
+                ->style('success')
+                ->variant('filled')
+        );
+
+        $container->add($counterContainer);
+
+        // Separador visual
+        $container->add(
+            UIBuilder::label()
+                ->text('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+                ->style('default')
+        );
+
+        $container->add(
+            UIBuilder::label()
+                ->text('💡 Nuevos componentes aparecerán aquí abajo:')
+                ->style('default')
+        );
+
+        /* CÓDIGO COMENTADO - DEMOS ADICIONALES
+        
         // Section: Buttons
         $container->add(
             UIBuilder::label()
                 ->text('Buttons with Different Styles')
                 ->style('heading')
-        );
-
-        $container->add(
-            UIBuilder::button('btn_primary')
-                ->label('Primary Button')
-                ->action('test_action')
-                ->icon('star')
-                ->style('primary')
-                ->variant('filled')
         );
 
         $container->add(
@@ -232,285 +374,7 @@ class DemoUIService
         $formContainer->add($formButtons);
 
         $container->add($formContainer);
-
-        // Section: Input Fields
-        $container->add(
-            UIBuilder::label()
-                ->text('Input Fields')
-                ->style('heading')
-        );
-
-        $container->add(
-            UIBuilder::input('input_text')
-                ->label('Username')
-                ->placeholder('Enter your username')
-                ->value('')
-                ->required(true)
-        );
-
-        $container->add(
-            UIBuilder::input('input_email')
-                ->label('Email Address')
-                ->placeholder('user@example.com')
-                ->type('email')
-                ->required(true)
-        );
-
-        $container->add(
-            UIBuilder::input('input_password')
-                ->label('Password')
-                ->placeholder('Enter your password')
-                ->type('password')
-                ->required(true)
-        );
-
-        $container->add(
-            UIBuilder::input('input_disabled')
-                ->label('Disabled Input')
-                ->placeholder('This field is disabled')
-                ->value('Cannot edit this')
-                ->disabled(true)
-        );
-
-        // Section: Two Column Layout
-        $container->add(
-            UIBuilder::label()
-                ->text('Two Column Layout - Side by Side Containers')
-                ->style('heading')
-        );
-
-        $twoColumnContainer = UIBuilder::container('two_columns')
-            ->layout(LayoutType::HORIZONTAL);
-
-        // Left Column
-        $leftColumn = UIBuilder::container('left_column')
-            ->layout(LayoutType::VERTICAL)
-            ->title('Left Panel');
-
-        $leftColumn->add(
-            UIBuilder::label()
-                ->text('This is the left panel')
-                ->style('info')
-        );
-
-        $leftColumn->add(
-            UIBuilder::button('left_action')
-                ->label('Left Action')
-                ->action('left_action')
-                ->style('primary')
-        );
-
-        $leftColumn->add(
-            UIBuilder::input('left_input')
-                ->label('Left Input')
-                ->placeholder('Type something...')
-        );
-
-        // Right Column
-        $rightColumn = UIBuilder::container('right_column')
-            ->layout(LayoutType::VERTICAL)
-            ->title('Right Panel');
-
-        $rightColumn->add(
-            UIBuilder::label()
-                ->text('This is the right panel')
-                ->style('success')
-        );
-
-        $rightColumn->add(
-            UIBuilder::button('right_action')
-                ->label('Right Action')
-                ->action('right_action')
-                ->style('success')
-        );
-
-        $rightColumn->add(
-            UIBuilder::checkbox('right_checkbox')
-                ->label('Right Checkbox')
-                ->checked(true)
-        );
-
-        $twoColumnContainer->add($leftColumn);
-        $twoColumnContainer->add($rightColumn);
-
-        $container->add($twoColumnContainer);
-
-        // Section: Selects
-        $container->add(
-            UIBuilder::label()
-                ->text('Select Dropdowns')
-                ->style('heading')
-        );
-
-        $container->add(
-            UIBuilder::select('select_country')
-                ->label('Select Country')
-                ->options([
-                    'us' => 'United States',
-                    'uk' => 'United Kingdom',
-                    'ca' => 'Canada',
-                    'mx' => 'Mexico',
-                    'es' => 'Spain',
-                ])
-                ->value('us')
-                ->required(true)
-        );
-
-        $container->add(
-            UIBuilder::select('select_role')
-                ->label('Select Role')
-                ->options([
-                    'admin' => 'Administrator',
-                    'moderator' => 'Moderator',
-                    'user' => 'User',
-                    'guest' => 'Guest',
-                ])
-                ->placeholder('Choose a role...')
-        );
-
-        $container->add(
-            UIBuilder::select('select_disabled')
-                ->label('Disabled Select')
-                ->options([
-                    'option1' => 'Option 1',
-                    'option2' => 'Option 2',
-                ])
-                ->value('option1')
-                ->disabled(true)
-        );
-
-        // Section: Complex Nested Layout
-        $container->add(
-            UIBuilder::label()
-                ->text('Complex Nested Layout - Dashboard Example')
-                ->style('heading')
-        );
-
-        $dashboardContainer = UIBuilder::container('dashboard')
-            ->layout(LayoutType::VERTICAL)
-            ->title('Dashboard');
-
-        // Dashboard Header with buttons
-        $dashboardHeader = UIBuilder::container('dashboard_header')
-            ->layout(LayoutType::HORIZONTAL);
-
-        $dashboardHeader->add(
-            UIBuilder::label()
-                ->text('Welcome back, User!')
-                ->style('info')
-        );
-
-        $dashboardHeader->add(
-            UIBuilder::button('dashboard_settings')
-                ->label('Settings')
-                ->action('open_settings')
-                ->style('primary')
-        );
-
-        $dashboardHeader->add(
-            UIBuilder::button('dashboard_logout')
-                ->label('Logout')
-                ->action('logout')
-                ->style('danger')
-        );
-
-        $dashboardContainer->add($dashboardHeader);
-
-        // Dashboard Content - 3 columns
-        $dashboardContent = UIBuilder::container('dashboard_content')
-            ->layout(LayoutType::HORIZONTAL);
-
-        // Stats Panel 1
-        $stats1 = UIBuilder::container('stats_1')
-            ->layout(LayoutType::VERTICAL)
-            ->title('Total Users');
-
-        $stats1->add(
-            UIBuilder::label()
-                ->text('1,234')
-                ->style('success')
-        );
-
-        $stats1->add(
-            UIBuilder::label()
-                ->text('+15% this month')
-                ->style('default')
-        );
-
-        // Stats Panel 2
-        $stats2 = UIBuilder::container('stats_2')
-            ->layout(LayoutType::VERTICAL)
-            ->title('Active Games');
-
-        $stats2->add(
-            UIBuilder::label()
-                ->text('456')
-                ->style('info')
-        );
-
-        $stats2->add(
-            UIBuilder::label()
-                ->text('+8% this month')
-                ->style('default')
-        );
-
-        // Stats Panel 3
-        $stats3 = UIBuilder::container('stats_3')
-            ->layout(LayoutType::VERTICAL)
-            ->title('Revenue');
-
-        $stats3->add(
-            UIBuilder::label()
-                ->text('$12,345')
-                ->style('warning')
-        );
-
-        $stats3->add(
-            UIBuilder::label()
-                ->text('+22% this month')
-                ->style('default')
-        );
-
-        $dashboardContent->add($stats1);
-        $dashboardContent->add($stats2);
-        $dashboardContent->add($stats3);
-
-        $dashboardContainer->add($dashboardContent);
-
-        $container->add($dashboardContainer);
-
-        // Section: Checkboxes
-        $container->add(
-            UIBuilder::label()
-                ->text('Checkboxes')
-                ->style('heading')
-        );
-
-        $container->add(
-            UIBuilder::checkbox('check_terms')
-                ->label('I accept the terms and conditions')
-                ->checked(false)
-                ->required(true)
-        );
-
-        $container->add(
-            UIBuilder::checkbox('check_newsletter')
-                ->label('Subscribe to newsletter')
-                ->checked(true)
-        );
-
-        $container->add(
-            UIBuilder::checkbox('check_notifications')
-                ->label('Enable notifications')
-                ->checked(false)
-        );
-
-        $container->add(
-            UIBuilder::checkbox('check_disabled')
-                ->label('This checkbox is disabled')
-                ->checked(true)
-                ->disabled(true)
-        );
+        */ // FIN DE CÓDIGO COMENTADO
     }
 
     // ============================================================
@@ -524,17 +388,36 @@ class DemoUIService
      * Handle test action event
      * 
      * Triggered by: Primary Button (action: "test_action")
+     * Demuestra: Actualización automática de texto en label
      * 
      * @param array $params Event parameters
-     * @return array Response
+     * @return array Response with UI updates
      */
     public function onTestAction(array $params): array
     {
+        // 1. Obtener UI anterior del cache
+        $oldUI = $this->getStoredUI();
+        
+        // 2. Regenerar UI con cambios
+        $container = $this->buildBaseUI();
+        
+        // 3. Modificar componente específico
+        // Cambiar el texto del primer label (Welcome label)
+        $welcomeLabel = $container->findByName('lbl_welcome');
+        if ($welcomeLabel && method_exists($welcomeLabel, 'text')) {
+            /** @var \App\Services\UI\Components\LabelBuilder $welcomeLabel */
+            $welcomeLabel->text('¡Botón presionado! Acción ejecutada exitosamente.');
+            $welcomeLabel->style('success');
+        }
+        
+        // 4. Guardar nueva versión en cache
+        $newUI = $container->toJson();
+        $this->storeUI($container);
+        
+        // 5. Calcular y retornar solo los cambios
         return [
-            'success' => true,
             'message' => 'Test action executed successfully!',
-            'timestamp' => now()->toIso8601String(),
-            'params' => $params,
+            'ui_update' => UIDiffer::compare($oldUI, $newUI)
         ];
     }
 
@@ -553,17 +436,15 @@ class DemoUIService
         $email = $params['email'] ?? null;
 
         if (empty($username) || empty($email)) {
-            return [
-                'success' => false,
-                'message' => 'Username and email are required',
-            ];
+            return response()->json([
+                'error' => 'Username and email are required',
+            ], 400)->getData(true);
         }
 
         // Process form (save to database, send email, etc.)
         // ...
 
         return [
-            'success' => true,
             'message' => "Form submitted successfully for user: {$username}",
             'data' => [
                 'username' => $username,
@@ -583,7 +464,6 @@ class DemoUIService
     public function onCancelForm(array $params): array
     {
         return [
-            'success' => true,
             'message' => 'Form cancelled',
             'redirect' => '/dashboard',
         ];
@@ -593,25 +473,126 @@ class DemoUIService
      * Handle settings opening
      * 
      * Example action: "open_settings"
+     * Demuestra: Agregar nuevo componente dinámicamente
      * 
      * @param array $params Event parameters
      * @return array Response with UI update
      */
     public function onOpenSettings(array $params): array
     {
-        // Could return updated UI components here
+        $oldUI = $this->getStoredUI();
+        
+        $container = $this->buildBaseUI();
+        
+        // Agregar nuevo label al final
+        $container->add(
+            UIBuilder::label('lbl_settings_' . time())
+                ->text('⚙️ Settings panel opened!')
+                ->style('warning')
+        );
+        
+        $newUI = $container->toJson();
+        $this->storeUI($container);
+        
         return [
-            'success' => true,
             'message' => 'Opening settings...',
-            'ui_update' => [
-                // New UI components to render
-                'modal' => [
-                    'type' => 'modal',
-                    'title' => 'Settings',
-                    'content' => 'Settings panel content here...',
-                ],
-            ],
+            'ui_update' => UIDiffer::compare($oldUI, $newUI)
+        ];
+    }
+
+    /**
+     * Handle counter increment
+     * 
+     * Example action: "increment_counter"
+     * Demuestra: Actualizar valor numérico en label
+     * 
+     * @param array $params Event parameters
+     * @return array Response with UI update
+     */
+    public function onIncrementCounter(array $params): array
+    {
+        // 1. Incrementar valor en sesión PRIMERO
+        $currentValue = $this->getCounterValue();
+        $newValue = $currentValue + 1;
+        $this->setCounterValue($newValue);
+        
+        // 2. Forzar regeneración de UI (sin usar cache)
+        // El problema es que Cache::remember no regenera si existe
+        $this->clearStoredUI();
+        $container = $this->buildBaseUI();
+        $newUI = $container->toJson();
+        
+        // 3. Guardar en cache para próxima carga
+        $this->storeUI($container);
+        
+        // 4. Para el diff, solo enviamos el cambio del contador
+        // (más eficiente que comparar toda la UI)
+        $counterLabel = $container->findByName('lbl_counter');
+        $diff = [];
+        
+        if ($counterLabel) {
+            $counterJson = $counterLabel->toJson();
+            // toJson() retorna [id => config]
+            $counterId = array_key_first($counterJson);
+            $counterConfig = $counterJson[$counterId];
+            
+            $diff[$counterId] = [
+                'text' => (string) $newValue,
+                'style' => $counterConfig['style']
+            ];
+        }
+        
+        Log::info('INCREMENT - Current: ' . $currentValue . ', New: ' . $newValue);
+        Log::info('Diff: ' . json_encode($diff));
+        
+        return [
+            'message' => "Counter incremented to {$newValue}",
+            'ui_update' => $diff
+        ];
+    }
+
+    /**
+     * Handle counter decrement
+     * 
+     * Example action: "decrement_counter"
+     * Demuestra: Actualizar valor numérico en label
+     * 
+     * @param array $params Event parameters
+     * @return array Response with UI update
+     */
+    public function onDecrementCounter(array $params): array
+    {
+        // 1. Decrementar valor en sesión PRIMERO
+        $currentValue = $this->getCounterValue();
+        $newValue = $currentValue - 1;
+        $this->setCounterValue($newValue);
+        
+        // 2. Forzar regeneración de UI
+        $this->clearStoredUI();
+        $container = $this->buildBaseUI();
+        
+        // 3. Guardar en cache
+        $this->storeUI($container);
+        
+        // 4. Crear diff manual del contador
+        $counterLabel = $container->findByName('lbl_counter');
+        $diff = [];
+        
+        if ($counterLabel) {
+            $counterJson = $counterLabel->toJson();
+            // toJson() retorna [id => config]
+            $counterId = array_key_first($counterJson);
+            $counterConfig = $counterJson[$counterId];
+            
+            $diff[$counterId] = [
+                'text' => (string) $newValue,
+                'style' => $counterConfig['style']
+            ];
+        }
+        
+        return [
+            'message' => "Counter decremented to {$newValue}",
+            'ui_update' => $diff
         ];
     }
 }
-

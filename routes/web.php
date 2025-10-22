@@ -13,7 +13,7 @@ Route::get('/demo', fn() => view('demo'))->name('demo');
 Route::get(
     '/api/demo-ui',
     fn(DemoUIService $service) =>
-    response()->json($service->getDemoScreen())
+    response()->json($service->getDemoScreen(), 200, [], JSON_FORCE_OBJECT)
 )->name('api.demo-ui');
 
 // UI Event Handler

@@ -55,7 +55,6 @@ class UIEventController extends Controller
                 ]);
 
                 return response()->json([
-                    'success' => false,
                     'error' => 'Service not found for this component',
                 ], 404);
             }
@@ -75,7 +74,6 @@ class UIEventController extends Controller
                 ]);
 
                 return response()->json([
-                    'success' => false,
                     'error' => "Action '{$action}' not implemented",
                 ], 404);
             }
@@ -85,12 +83,7 @@ class UIEventController extends Controller
 
             // Ensure result is an array
             if (!is_array($result)) {
-                $result = ['success' => true, 'data' => $result];
-            }
-
-            // Add success flag if not present
-            if (!isset($result['success'])) {
-                $result['success'] = true;
+                $result = ['data' => $result];
             }
 
             Log::info('UI Event: Action executed successfully', [
@@ -110,7 +103,6 @@ class UIEventController extends Controller
             ]);
 
             return response()->json([
-                'success' => false,
                 'error' => 'Internal server error',
                 'message' => config('app.debug') ? $e->getMessage() : null,
             ], 500);

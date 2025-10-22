@@ -26,8 +26,15 @@ abstract class UIComponent implements UIElement
         // Detectar automáticamente el contexto desde la clase que invoca
         $context = $this->detectCallingContext();
 
-        // Usar el generador centralizado de IDs
-        $this->id = UIIdGenerator::generate($context);
+        // Generar ID según si tiene nombre o no
+        if ($this->name !== null) {
+            // ID DETERMINÍSTICO: Basado en contexto + nombre
+            // Siempre genera el mismo ID para el mismo contexto + nombre
+            $this->id = $this->generateDeterministicId($context, $this->name);
+        } else {
+            // ID AUTO-INCREMENT: Para componentes temporales sin nombre
+            $this->id = UIIdGenerator::generate($context);
+        }
 
         $this->type = $this->getTypeFromClassName();
         $this->config = array_merge([
@@ -67,6 +74,48 @@ abstract class UIComponent implements UIElement
     }
 
     /**
+     * Genera ID determinístico basado en contexto + nombre
+     * Siempre retorna el mismo ID para el mismo contexto + nombre
+     * 
+     * @param string $context Nombre completo de la clase invocante
+     * @param string $name Nombre del componente
+     * @return int ID determinístico
+     */
+    private function generateDeterministicId(string $context, string $name): int
+    {
+        // Obtener offset del contexto (ej: 56150000)
+        $offset = $this->getContextOffset($context);
+        
+        // Hash del nombre (0-9999)
+        $hash = abs(crc32($name)) % 9999;
+        
+        // ID final: offset + hash + 1
+        return $offset + $hash + 1;
+    }
+
+    /**
+     * Obtener offset del contexto (mismo cálculo que UIIdGenerator)
+     * 
+     * @param string $context Nombre completo de la clase
+     * @return int Offset único para el contexto
+     */
+    private function getContextOffset(string $context): int
+    {
+        if ($context === 'default') {
+            return 0;
+        }
+        
+        // Generar un hash numérico único del nombre de la clase usando CRC32
+        $hash = crc32($context);
+        
+        // Convertir a positivo si es negativo y escalar al rango deseado
+        // Múltiplos de 10000, máximo 9999 contextos diferentes
+        $offset = (abs($hash) % 9999) * 10000;
+        
+        return $offset;
+    }
+
+    /**
      * Extract the component type from the class name
      * Example: "ButtonBuilder" -> "button"
      */
@@ -90,6 +139,16 @@ abstract class UIComponent implements UIElement
     public function getId(): int
     {
         return $this->id;
+    }
+
+    /**
+     * Get the component name
+     * 
+     * @return string|null Component name or null if not set
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 
     /**

@@ -106,17 +106,18 @@ class ButtonComponent extends UIComponent {
 
             const result = await response.json();
 
-            if (result.success) {
+            // ÉXITO: response.ok = true (status 200-299)
+            if (response.ok) {
                 console.log('✅ Action executed:', action, result);
+                
+                // Handle UI updates if provided
+                if (result.ui_update) {
+                    this.handleUIUpdate(result.ui_update);
+                }
                 
                 // Show success message if provided
                 if (result.message) {
                     this.showNotification(result.message, 'success');
-                }
-
-                // Handle UI updates if provided
-                if (result.ui_update) {
-                    this.handleUIUpdate(result.ui_update);
                 }
 
                 // Handle redirects if provided
@@ -124,6 +125,7 @@ class ButtonComponent extends UIComponent {
                     window.location.href = result.redirect;
                 }
             } else {
+                // ERROR: response.ok = false (status 400+)
                 console.error('❌ Action failed:', action, result);
                 this.showNotification(result.error || 'Action failed', 'error');
             }
@@ -149,12 +151,137 @@ class ButtonComponent extends UIComponent {
     /**
      * Handle UI updates from backend
      * 
+     * Protocolo:
+     * - AGREGAR: { id: { type, text, parent, ... } } ← tiene parent
+     * - ACTUALIZAR: { id: { text: "nuevo" } } ← solo props modificadas
+     * - ELIMINAR: { id: { parent: null } } ← parent = null
+     * 
      * @param {object} uiUpdate - UI update configuration
      */
     handleUIUpdate(uiUpdate) {
-        // TODO: Implement UI update handling
-        // This would re-render components or show modals based on backend response
-        console.log('UI Update:', uiUpdate);
+        console.log('📦 Processing UI updates:', uiUpdate);
+        
+        for (const [id, changes] of Object.entries(uiUpdate)) {
+            const element = document.querySelector(`[data-component-id="${id}"]`);
+            
+            // CASO 1: ELIMINAR (parent = null)
+            if (changes.parent === null) {
+                if (element) {
+                    console.log(`🗑️ Removing component ${id}`);
+                    element.remove();
+                }
+                continue;
+            }
+            
+            // CASO 2: AGREGAR (tiene parent y elemento no existe)
+            if (!element && changes.parent) {
+                console.log(`➕ Adding component ${id}`, changes);
+                this.addComponent(id, changes);
+                continue;
+            }
+            
+            // CASO 3: ACTUALIZAR (elemento existe y hay cambios)
+            if (element) {
+                console.log(`✏️ Updating component ${id}`, changes);
+                this.updateComponent(element, changes);
+            }
+        }
+    }
+
+    /**
+     * Agregar nuevo componente al DOM
+     * 
+     * @param {string} id - Component ID
+     * @param {object} config - Component configuration
+     */
+    addComponent(id, config) {
+        try {
+            // Crear componente usando factory (id primero, config segundo)
+            const component = ComponentFactory.create(id, config);
+            
+            if (!component) {
+                console.error(`❌ ComponentFactory returned null for type: ${config.type}`);
+                return;
+            }
+            
+            const element = component.render();
+            
+            // Buscar parent y agregar
+            const parentElement = document.querySelector(`[data-component-id="${config.parent}"]`) 
+                               || document.getElementById(config.parent);
+            
+            if (parentElement) {
+                parentElement.appendChild(element);
+                console.log(`➕ Component ${id} added to parent ${config.parent}`);
+            } else {
+                console.error(`❌ Parent ${config.parent} not found for component ${id}`);
+            }
+        } catch (error) {
+            console.error(`❌ Error adding component ${id}:`, error);
+        }
+    }
+
+    /**
+     * Actualizar componente existente en el DOM
+     * 
+     * @param {HTMLElement} element - DOM element
+     * @param {object} changes - Properties to update
+     */
+    updateComponent(element, changes) {
+        try {
+            // Texto (labels, buttons)
+            if (changes.text !== undefined) {
+                element.textContent = changes.text;
+            }
+            
+            // Label (buttons)
+            if (changes.label !== undefined) {
+                element.textContent = changes.label;
+            }
+            
+            // Estilos/clases CSS
+            if (changes.style !== undefined) {
+                // Remover clases de estilo antiguas
+                element.classList.remove('default', 'primary', 'secondary', 'success', 'warning', 'danger', 'info');
+                element.classList.add(changes.style);
+            }
+            
+            // Visibilidad
+            if (changes.visible !== undefined) {
+                element.style.display = changes.visible ? '' : 'none';
+            }
+            
+            // Estado enabled/disabled
+            if (changes.enabled !== undefined) {
+                if (element.tagName === 'BUTTON' || element.tagName === 'INPUT') {
+                    element.disabled = !changes.enabled;
+                }
+            }
+            
+            // Valor (inputs)
+            if (changes.value !== undefined) {
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    element.value = changes.value;
+                } else {
+                    const input = element.querySelector('input, textarea');
+                    if (input) input.value = changes.value;
+                }
+            }
+            
+            // Checked (checkboxes)
+            if (changes.checked !== undefined) {
+                if (element.type === 'checkbox') {
+                    element.checked = changes.checked;
+                } else {
+                    const checkbox = element.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = changes.checked;
+                }
+            }
+            
+            console.log(`✅ Component updated`);
+        } catch (error) {
+            console.error(`❌ Error updating component:`, error);
+        }
     }
 }
 
@@ -342,8 +469,25 @@ class UIRenderer {
     render() {
         console.log('Rendering UI with data:', this.data);
 
-        // Step 1: Create all component instances
-        for (const [id, config] of Object.entries(this.data)) {
+        // Step 1: Create all component instances PRESERVING ORDER
+        // CRITICAL: Sort by _order field to preserve insertion order (Object.keys() sorts numeric keys)
+        const componentIds = Object.keys(this.data).sort((a, b) => {
+            const orderA = this.data[a]._order ?? 0;
+            const orderB = this.data[b]._order ?? 0;
+            return orderA - orderB;
+        });
+        
+        // DEBUG: Log order of counter components
+        console.log('=== Component Order ===');
+        for (const id of componentIds) {
+            const config = this.data[id];
+            if (config.name && (config.name.includes('counter') || config.name.includes('btn_'))) {
+                console.log(`ID: ${id} | Name: ${config.name} | Parent: ${config.parent} | Order: ${config._order}`);
+            }
+        }
+        
+        for (const id of componentIds) {
+            const config = this.data[id];
             const component = ComponentFactory.create(id, config);
             if (component) {
                 this.components.set(id, component);
@@ -352,30 +496,72 @@ class UIRenderer {
 
         console.log(`Created ${this.components.size} components`);
 
-        // Step 2: Mount components in hierarchical order
-        for (const [id, component] of this.components) {
+        // Step 2: Group components by parent to maintain sibling order
+        const childrenByParent = new Map(); // parent -> [child_ids in order]
+        for (const id of componentIds) {
+            const component = this.components.get(id);
+            if (!component) continue;
+            
             const parentId = component.config.parent;
+            const parentKey = typeof parentId === 'string' ? parentId : parentId.toString();
+            
+            if (!childrenByParent.has(parentKey)) {
+                childrenByParent.set(parentKey, []);
+            }
+            childrenByParent.get(parentKey).push(id);
+        }
 
-            if (typeof parentId === 'string') {
-                // Parent is a DOM element
-                const parentElement = document.getElementById(parentId);
-                if (parentElement) {
-                    component.mount(parentElement);
-                } else {
-                    console.error(`Parent element not found: ${parentId}`);
-                }
-            } else if (typeof parentId === 'number') {
-                // Parent is another component
-                const parentComponent = this.components.get(parentId.toString());
-                if (parentComponent && parentComponent.element) {
-                    component.mount(parentComponent.element);
-                } else {
-                    console.error(`Parent component not found or not rendered: ${parentId}`);
+        // Step 3: Mount components in hierarchical order
+        const mounted = new Set();
+        const maxIterations = this.components.size * 2;
+        let iterations = 0;
+
+        while (mounted.size < this.components.size && iterations < maxIterations) {
+            iterations++;
+            
+            // Iterate in ORIGINAL ORDER
+            for (const id of componentIds) {
+                const component = this.components.get(id);
+                if (!component || mounted.has(id)) continue;
+
+                const parentId = component.config.parent;
+
+                if (typeof parentId === 'string') {
+                    // Parent is a DOM element (always available)
+                    const parentElement = document.getElementById(parentId);
+                    if (parentElement) {
+                        component.mount(parentElement);
+                        mounted.add(id);
+                    } else {
+                        console.error(`Parent element not found: ${parentId}`);
+                        mounted.add(id);
+                    }
+                } else if (typeof parentId === 'number') {
+                    // Parent is another component - check if parent is mounted
+                    const parentComponent = this.components.get(parentId.toString());
+                    
+                    if (!parentComponent) {
+                        console.error(`Parent component not found: ${parentId}`);
+                        mounted.add(id);
+                        continue;
+                    }
+
+                    // Wait for parent to be mounted first
+                    if (mounted.has(parentId.toString())) {
+                        // Mount in order by just using appendChild
+                        // Since we iterate in order, siblings will be appended in correct order
+                        component.mount(parentComponent.element);
+                        mounted.add(id);
+                    }
                 }
             }
         }
 
-        console.log('UI rendering complete');
+        if (mounted.size < this.components.size) {
+            console.warn(`Could not mount ${this.components.size - mounted.size} components (circular dependency or missing parents)`);
+        }
+
+        console.log(`UI rendering complete (${mounted.size}/${this.components.size} mounted)`);
     }
 }
 

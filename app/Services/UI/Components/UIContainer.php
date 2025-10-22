@@ -34,8 +34,14 @@ class UIContainer implements UIElement
         // Detectar automáticamente el contexto desde la clase que invoca
         $context = $this->detectCallingContext();
 
-        // Usar el generador centralizado de IDs
-        $this->id = UIIdGenerator::generate($context);
+        // Generar ID según si tiene nombre o no
+        if ($this->name !== null) {
+            // ID DETERMINÍSTICO: Basado en contexto + nombre
+            $this->id = $this->generateDeterministicId($context, $this->name);
+        } else {
+            // ID AUTO-INCREMENT: Para contenedores temporales
+            $this->id = UIIdGenerator::generate($context);
+        }
 
         $this->config = [
             'type' => $this->type,
@@ -139,6 +145,16 @@ class UIContainer implements UIElement
     public function getId(): int
     {
         return $this->id;
+    }
+
+    /**
+     * Get the container name
+     * 
+     * @return string|null Container name or null if not set
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 
     /**
@@ -1445,11 +1461,18 @@ class UIContainer implements UIElement
         // Start with this container
         $result = [$this->id => $config];
 
+        // Add insertion order index to preserve order in JavaScript
+        $orderIndex = 1; // Start from 1 (container is 0)
+        
         // Add all children at the same level (flat structure)
-        foreach ($this->children as $child) {
+        // CRITICAL: Add _order field to preserve insertion order in JavaScript
+        foreach ($this->children as $childId => $child) {
             $childJson = $child->toJson();
-            // Use the + operator to preserve numeric keys (IDs)
-            $result = $result + $childJson;
+            // Add order index to each component
+            foreach ($childJson as $key => $value) {
+                $value['_order'] = $orderIndex++;
+                $result[$key] = $value;
+            }
         }
 
         return $result;
@@ -1487,5 +1510,110 @@ class UIContainer implements UIElement
         }
 
         return 'default';
+    }
+
+    /**
+     * Genera ID determinístico basado en contexto + nombre
+     * Siempre retorna el mismo ID para el mismo contexto + nombre
+     * 
+     * @param string $context Nombre completo de la clase invocante
+     * @param string $name Nombre del contenedor
+     * @return int ID determinístico
+     */
+    private function generateDeterministicId(string $context, string $name): int
+    {
+        // Obtener offset del contexto (ej: 56150000)
+        $offset = $this->getContextOffset($context);
+        
+        // Hash del nombre (0-9999)
+        $hash = abs(crc32($name)) % 9999;
+        
+        // ID final: offset + hash + 1
+        return $offset + $hash + 1;
+    }
+
+    /**
+     * Obtener offset del contexto (mismo cálculo que UIIdGenerator)
+     * 
+     * @param string $context Nombre completo de la clase
+     * @return int Offset único para el contexto
+     */
+    private function getContextOffset(string $context): int
+    {
+        if ($context === 'default') {
+            return 0;
+        }
+        
+        // Generar un hash numérico único del nombre de la clase usando CRC32
+        $hash = crc32($context);
+        
+        // Convertir a positivo si es negativo y escalar al rango deseado
+        // Múltiplos de 10000, máximo 9999 contextos diferentes
+        $offset = (abs($hash) % 9999) * 10000;
+        
+        return $offset;
+    }
+
+    /**
+     * Buscar componente hijo por nombre (recursivo)
+     * 
+     * @param string $name Nombre del componente a buscar
+     * @return UIElement|null Componente encontrado o null
+     */
+    public function findByName(string $name): ?UIElement
+    {
+        foreach ($this->children as $child) {
+            // Buscar en hijos directos que tengan método getName
+            $childName = null;
+            if (method_exists($child, 'getName')) {
+                /** @var UIComponent|UIContainer $child */
+                $childName = $child->getName();
+            }
+            
+            if ($childName === $name) {
+                return $child;
+            }
+            
+            // Buscar recursivamente en contenedores
+            if ($child instanceof UIContainer) {
+                $found = $child->findByName($name);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Buscar componente hijo por ID (recursivo)
+     * 
+     * @param int $id ID del componente a buscar
+     * @return UIElement|null Componente encontrado o null
+     */
+    public function findById(int $id): ?UIElement
+    {
+        // Verificar si este contenedor tiene el ID
+        if ($this->id === $id) {
+            return $this;
+        }
+        
+        foreach ($this->children as $child) {
+            // Verificar ID del hijo
+            if ($child->getId() === $id) {
+                return $child;
+            }
+            
+            // Buscar recursivamente en contenedores
+            if ($child instanceof UIContainer) {
+                $found = $child->findById($id);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+        
+        return null;
     }
 }
