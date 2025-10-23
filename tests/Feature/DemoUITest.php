@@ -62,11 +62,11 @@ test("3. Counter starts at 0", function () {
     expect($counterLabel['_id'])->toBeInt();
 });
 
-test("4. User clicks 'Increment' button and counter increases", function () {
+test("4. User clicks 'Increment' button and counter value updates", function () {
     // Get initial UI
-    $initialResponse = $this->get("/api/demo-ui");
-    $initialResponse->assertStatus(200);
-    $initialUI = $initialResponse->json();
+    $response = $this->get("/api/demo-ui");
+    $response->assertStatus(200);
+    $initialUI = $response->json();
 
     // Find component IDs using helper
     $ids = UITestHelper::findComponentIdsByNames($initialUI, [
@@ -80,7 +80,7 @@ test("4. User clicks 'Increment' button and counter increases", function () {
     expect($buttonId)->not->toBeNull('btn_increment should exist');
     expect($counterId)->not->toBeNull('lbl_counter should exist');
 
-    // Click increment button once (cache resets between requests in test environment)
+    // Click increment button and verify response structure
     $response = $this->post('/api/ui-event', [
         'component_id' => $buttonId,
         'event' => 'click',
@@ -91,13 +91,16 @@ test("4. User clicks 'Increment' button and counter increases", function () {
     $response->assertStatus(200);
     $responseData = $response->json();
     
-    // Assert response format
+    // Verify response structure
     expect($responseData)->toHaveCount(1, 'Only one component should be updated');
-    
-    // Verify counter was incremented (value depends on test environment cache behavior)
-    expect($responseData[0]['text'])->toMatch('/^\d+$/');
-    expect((int)$responseData[0]['text'])->toBeGreaterThanOrEqual(1);
+    expect($responseData[0])->toHaveKey('text');
+    expect($responseData[0])->toHaveKey('style');
+    expect($responseData[0])->toHaveKey('_id');
     expect($responseData[0]['_id'])->toEqual($counterId);
+    
+    // Verify counter value is numeric and positive
+    expect($responseData[0]['text'])->toBeNumeric("Counter should be numeric");
+    expect((int)$responseData[0]['text'])->toBeGreaterThanOrEqual(1, "Counter should be at least 1");
 });
 
 test("5. Increment action returns correct response format", function () {
