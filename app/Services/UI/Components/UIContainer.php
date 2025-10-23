@@ -1473,8 +1473,8 @@ class UIContainer implements UIElement
             $childJson = $child->toJson($childOrder);
             $childOrder++;
             
-            // Merge child JSON into result
-            $result = array_merge($result, $childJson);
+            // Use + operator to preserve numeric keys (array_merge reindexes them!)
+            $result = $result + $childJson;
         }
         
         return $result;

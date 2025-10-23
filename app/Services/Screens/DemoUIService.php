@@ -395,14 +395,13 @@ class DemoUIService
      */
     public function onTestAction(array $params): array
     {
-        // 1. Obtener UI anterior del cache
-        $oldUI = $this->getStoredUI();
+        // 1. Obtener UI almacenada en cache
+        $container = $this->getUIContainer();
         
-        // 2. Regenerar UI con cambios
-        $container = $this->buildBaseUI();
+        // 2. Obtener JSON anterior para diff
+        $oldUI = $container->toJson();
         
         // 3. Modificar componente específico
-        // Cambiar el texto del primer label (Welcome label)
         $welcomeLabel = $container->findByName('lbl_welcome');
         if ($welcomeLabel && method_exists($welcomeLabel, 'text')) {
             /** @var \App\Services\UI\Components\LabelBuilder $welcomeLabel */
@@ -410,15 +409,23 @@ class DemoUIService
             $welcomeLabel->style('success');
         }
         
-        // 4. Guardar nueva versión en cache
+        // 4. Obtener JSON nueva para diff
         $newUI = $container->toJson();
+        
+        // 5. Guardar cambios en cache
         $this->storeUI($container);
         
-        // 5. Calcular y retornar solo los cambios
-        return [
-            'message' => 'Test action executed successfully!',
-            'ui_update' => UIDiffer::compare($oldUI, $newUI)
-        ];
+        // 6. Calcular cambios usando UIDiffer
+        $diff = UIDiffer::compare($oldUI, $newUI);
+        
+        // 7. Convertir diff a formato de array con _id incluido
+        $result = [];
+        foreach ($diff as $componentId => $changes) {
+            $changes['_id'] = $componentId;
+            $result[] = $changes;
+        }
+        
+        return $result;
     }
 
     /**
@@ -494,10 +501,15 @@ class DemoUIService
         $newUI = $container->toJson();
         $this->storeUI($container);
         
-        return [
-            'message' => 'Opening settings...',
-            'ui_update' => UIDiffer::compare($oldUI, $newUI)
-        ];
+        // Calcular cambios y convertir a array con _id
+        $diff = UIDiffer::compare($oldUI, $newUI);
+        $result = [];
+        foreach ($diff as $componentId => $changes) {
+            $changes['_id'] = $componentId;
+            $result[] = $changes;
+        }
+        
+        return $result;
     }
 
     /**
@@ -511,44 +523,37 @@ class DemoUIService
      */
     public function onIncrementCounter(array $params): array
     {
-        // 1. Incrementar valor en sesión PRIMERO
+        // 1. Incrementar valor en cache
         $currentValue = $this->getCounterValue();
         $newValue = $currentValue + 1;
         $this->setCounterValue($newValue);
         
-        // 2. Forzar regeneración de UI (sin usar cache)
-        // El problema es que Cache::remember no regenera si existe
+        // 2. Forzar regeneración de UI
         $this->clearStoredUI();
         $container = $this->buildBaseUI();
-        $newUI = $container->toJson();
         
-        // 3. Guardar en cache para próxima carga
+        // 3. Guardar en cache
         $this->storeUI($container);
         
-        // 4. Para el diff, solo enviamos el cambio del contador
-        // (más eficiente que comparar toda la UI)
+        // 4. Crear diff manual del contador
         $counterLabel = $container->findByName('lbl_counter');
-        $diff = [];
+        $result = [];
         
         if ($counterLabel) {
             $counterJson = $counterLabel->toJson();
-            // toJson() retorna [id => config]
             $counterId = array_key_first($counterJson);
             $counterConfig = $counterJson[$counterId];
             
-            $diff[$counterId] = [
+            $result[] = [
                 'text' => (string) $newValue,
-                'style' => $counterConfig['style']
+                'style' => $counterConfig['style'],
+                '_id' => $counterId
             ];
         }
         
         Log::info('INCREMENT - Current: ' . $currentValue . ', New: ' . $newValue);
-        Log::info('Diff: ' . json_encode($diff));
         
-        return [
-            'message' => "Counter incremented to {$newValue}",
-            'ui_update' => $diff
-        ];
+        return $result;
     }
 
     /**
@@ -562,7 +567,7 @@ class DemoUIService
      */
     public function onDecrementCounter(array $params): array
     {
-        // 1. Decrementar valor en sesión PRIMERO
+        // 1. Decrementar valor en cache
         $currentValue = $this->getCounterValue();
         $newValue = $currentValue - 1;
         $this->setCounterValue($newValue);
@@ -576,23 +581,20 @@ class DemoUIService
         
         // 4. Crear diff manual del contador
         $counterLabel = $container->findByName('lbl_counter');
-        $diff = [];
+        $result = [];
         
         if ($counterLabel) {
             $counterJson = $counterLabel->toJson();
-            // toJson() retorna [id => config]
             $counterId = array_key_first($counterJson);
             $counterConfig = $counterJson[$counterId];
             
-            $diff[$counterId] = [
+            $result[] = [
                 'text' => (string) $newValue,
-                'style' => $counterConfig['style']
+                'style' => $counterConfig['style'],
+                '_id' => $counterId
             ];
         }
         
-        return [
-            'message' => "Counter decremented to {$newValue}",
-            'ui_update' => $diff
-        ];
+        return $result;
     }
 }

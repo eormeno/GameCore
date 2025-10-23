@@ -65,8 +65,8 @@ class UIDiffer
         
         // Comparar todas las propiedades del nuevo componente
         foreach ($new as $key => $value) {
-            // Ignorar 'type' (no cambia)
-            if ($key === 'type') {
+            // Ignorar 'type', '_order' y '_id' (no son cambios de contenido)
+            if ($key === 'type' || $key === '_order' || $key === '_id') {
                 continue;
             }
             
@@ -78,7 +78,7 @@ class UIDiffer
         
         // Detectar propiedades eliminadas (ahora son null)
         foreach ($old as $key => $value) {
-            if (!isset($new[$key]) && $key !== 'type' && $key !== 'parent') {
+            if (!isset($new[$key]) && $key !== 'type' && $key !== 'parent' && $key !== '_order' && $key !== '_id') {
                 $changes[$key] = null;
             }
         }

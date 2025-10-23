@@ -35,6 +35,35 @@ trait StoresUIState
     }
     
     /**
+     * Get UI container instance from cache, regenerate if missing
+     * 
+     * IMPORTANT: Returns the actual UIContainer object, not JSON.
+     * Use this when you need to modify the UI structure.
+     * 
+     * @return UIContainer UI container instance
+     */
+    protected function getUIContainer(): UIContainer
+    {
+        $containerKey = $this->getUIContainerStorageKey();
+        
+        // Check if container exists in cache
+        $container = Cache::get($containerKey);
+        
+        if ($container instanceof UIContainer) {
+            return $container;
+        }
+        
+        // If not found or invalid, rebuild and store
+        $container = $this->buildBaseUI();
+        Cache::put($containerKey, $container, now()->addMinutes(30));
+        
+        // Also store JSON version for backward compatibility
+        Cache::put($this->getUIStorageKey(), $container->toJson(), now()->addMinutes(30));
+        
+        return $container;
+    }
+    
+    /**
      * Store UI state in cache
      * 
      * @param UIContainer $ui UI container to store
@@ -43,9 +72,11 @@ trait StoresUIState
     protected function storeUI(UIContainer $ui): void
     {
         $key = $this->getUIStorageKey();
+        $containerKey = $this->getUIContainerStorageKey();
         
         // Guardar por 30 minutos (suficiente para sesión activa)
         Cache::put($key, $ui->toJson(), now()->addMinutes(30));
+        Cache::put($containerKey, $ui, now()->addMinutes(30));
     }
     
     /**
@@ -82,5 +113,15 @@ trait StoresUIState
         $userId = Auth::check() ? Auth::id() : session()->getId();
         
         return "ui_state:{$serviceClass}:{$userId}";
+    }
+    
+    /**
+     * Generate unique storage key for UI container object
+     * 
+     * @return string Cache key for container
+     */
+    private function getUIContainerStorageKey(): string
+    {
+        return $this->getUIStorageKey() . ':container';
     }
 }

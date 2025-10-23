@@ -41,6 +41,31 @@ class UIIdGenerator
     }
 
     /**
+     * Generate a deterministic ID based on component name
+     * 
+     * This ensures the same component name always gets the same ID,
+     * making IDs stable across requests for named components.
+     * 
+     * @param string $context The calling context (full class name with namespace)
+     * @param string $name The component name
+     * @return int Deterministic ID
+     */
+    public static function generateFromName(string $context, string $name): int
+    {
+        $offset = self::getContextOffset($context);
+        
+        // Generate deterministic local ID from component name
+        // Use crc32 to get a hash, then limit to 9999 to avoid offset collision
+        $hash = crc32($name);
+        $localId = (abs($hash) % 9999) + 1; // +1 to avoid ID 0
+        
+        // Register offset → context mapping for reverse lookup
+        self::$offsetToContext[$offset] = $context;
+        
+        return $offset + $localId;
+    }
+
+    /**
      * Get context information for debugging
      * 
      * @param string $context Context name

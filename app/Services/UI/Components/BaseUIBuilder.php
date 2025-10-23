@@ -19,7 +19,12 @@ abstract class BaseUIBuilder
         $context = $this->detectCallingContext();
         
         // Usar el generador centralizado de IDs
-        $this->id = UIIdGenerator::generate($context);
+        // Si tiene nombre, generar ID determinístico basado en el nombre
+        if ($name !== null) {
+            $this->id = UIIdGenerator::generateFromName($context, $name);
+        } else {
+            $this->id = UIIdGenerator::generate($context);
+        }
         
         $this->type = $this->getTypeFromClassName();
         $this->config = array_merge([
@@ -37,7 +42,7 @@ abstract class BaseUIBuilder
      * Detecta automáticamente la clase que está invocando el builder
      * Busca en el stack trace la primera clase fuera del namespace UI
      * 
-     * @return string El nombre base de la clase invocante
+     * @return string El nombre completo con namespace de la clase invocante
      */
     private function detectCallingContext(): string
     {
@@ -47,7 +52,7 @@ abstract class BaseUIBuilder
         foreach ($trace as $frame) {
             if (isset($frame['class']) && 
                 !str_starts_with($frame['class'], 'App\\Services\\UI\\')) {
-                return class_basename($frame['class']);
+                return $frame['class']; // Retornar nombre completo con namespace
             }
         }
         
