@@ -48,9 +48,11 @@ class DemoUIService extends AbstractUIService
      * Esta UI se genera cada vez que se necesita y se guarda en cache.
      * Los componentes con name tienen IDs determinísticos.
      * 
+     * @param mixed ...$params Optional parameters for UI construction
+     * 
      * @return UIContainer Base UI structure
      */
-    protected function buildBaseUI(): UIContainer
+    protected function buildBaseUI(...$params): UIContainer
     {
         $container = UIBuilder::container('main')
             ->parent('main')

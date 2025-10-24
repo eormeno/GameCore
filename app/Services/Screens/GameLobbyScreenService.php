@@ -7,8 +7,10 @@ use App\Models\GameApp;
 use App\Services\UI\UIBuilder;
 use App\Services\GameInstanceService;
 use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\AbstractUIService;
+use App\Services\UI\Components\UIContainer;
 
-class GameLobbyScreenService
+class GameLobbyScreenService extends AbstractUIService
 {
     private GameInstanceService $gameInstanceService;
 
@@ -25,8 +27,28 @@ class GameLobbyScreenService
      * @param GameApp $gameApp
      * @return array
      */
-    public function getGameLobbyScreen(User $user, GameApp $gameApp): array
+    // public function getGameLobbyScreen(User $user, GameApp $gameApp): array
+    // {
+    //     $savedGames = $this->gameInstanceService->getSavedGames($user, $gameApp);
+    //     $saved_games = $this->gameInstanceService->toApiFormat($savedGames);
+    //     $canCreateNewGame = $this->gameInstanceService->canCreateNewGame($user, $gameApp);
+    //     $maxInstances = $gameApp->max_instances_per_user;
+
+    //     $container = UIBuilder::container()
+    //         ->parent('canvas')
+    //         ->layout(LayoutType::VERTICAL)
+    //         ->title(t('games.game_lobby_title', ['name' => $gameApp->name]));
+
+    //     // Build and add UI elements to the container using the tree structure
+    //     $this->buildUIElements($container, $canCreateNewGame, $maxInstances, $saved_games);
+
+    //     return $container->toJson();
+    // }
+
+    protected function buildBaseUI(...$params): UIContainer
     {
+        $user = $params[0];
+        $gameApp = $params[1];
         $savedGames = $this->gameInstanceService->getSavedGames($user, $gameApp);
         $saved_games = $this->gameInstanceService->toApiFormat($savedGames);
         $canCreateNewGame = $this->gameInstanceService->canCreateNewGame($user, $gameApp);
@@ -40,7 +62,7 @@ class GameLobbyScreenService
         // Build and add UI elements to the container using the tree structure
         $this->buildUIElements($container, $canCreateNewGame, $maxInstances, $saved_games);
 
-        return $container->toJson();
+        return $container;
     }
 
     /**
@@ -160,7 +182,7 @@ class GameLobbyScreenService
     //         $playButton,
     //         $deleteButton,
     //     ]);
-        
+
     //     return $row;
     // }
 
@@ -193,14 +215,4 @@ class GameLobbyScreenService
     //         ->icon('trash')
     //         ->style('danger');
     // }
-
-    /**
-     * Get the expected response structure (useful for validation/testing)
-     * 
-     * @return array
-     */
-    public static function getResponseStructure(): array
-    {
-        return GameLobbyScreenStructure::response();
-    }
 }

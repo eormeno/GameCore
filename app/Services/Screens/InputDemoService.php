@@ -24,7 +24,7 @@ class InputDemoService extends AbstractUIService
 {
     protected LabelBuilder $lbl_result;
 
-    protected function buildBaseUI(): UIContainer
+    protected function buildBaseUI(...$params): UIContainer
     {
         $container = UIBuilder::container('main')
             ->parent('main')

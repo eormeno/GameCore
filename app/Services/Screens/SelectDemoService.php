@@ -112,7 +112,7 @@ class SelectDemoService extends AbstractUIService
         ['value' => 'zh', 'label' => 'Chinese'],
     ];
 
-    protected function buildBaseUI(): UIContainer
+    protected function buildBaseUI(...$params): UIContainer
     {
         $container = UIBuilder::container('main')
             ->parent('main')

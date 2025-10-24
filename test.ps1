@@ -18,6 +18,9 @@ $testClasses = @{
     'bba' = 'BBAPlayGameTest';
     'mtq' = 'MTQPlayGameTest';
     'ui' = 'UIBuilderTest';
+    'demo' = 'DemoUITest';
+    'select' = 'SelectDemoTest';
+    'input' = 'InputDemoTest';
 }
 
 # Find the filter in prefix and get the test class name

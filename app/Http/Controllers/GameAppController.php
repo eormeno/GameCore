@@ -48,7 +48,7 @@ class GameAppController extends Controller
             //         ]
             //     ]);
             // }
-            $gameLobbyScreen = $gameLobbyScreenService->getGameLobbyScreen($currentUser, $gameApp);
+            $gameLobbyScreen = $gameLobbyScreenService->getUI($currentUser, $gameApp);
             return response()->json($gameLobbyScreen);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -63,7 +63,8 @@ class GameAppController extends Controller
                 ]
             ], 500);
         }
-    }    public function newGameUI(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService)
+    }
+    public function newGameUI(int $gameAppId, GameInstanceService $gamesService, GameAppService $gameAppService)
     {
         try {
             $currentUser = Auth::user();

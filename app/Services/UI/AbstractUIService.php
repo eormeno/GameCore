@@ -53,9 +53,10 @@ abstract class AbstractUIService
      * Override this method in your service to define the base UI.
      * This will be called automatically if the cache expires.
      * 
+     * @param mixed ...$params Optional parameters for UI construction
      * @return UIContainer Base UI structure
      */
-    abstract protected function buildBaseUI(): UIContainer;
+    abstract protected function buildBaseUI(...$params): UIContainer;
 
     /**
      * Initialize event context
@@ -180,24 +181,26 @@ abstract class AbstractUIService
      * Returns the UI from cache or regenerates if not exists.
      * This is the standard public method to retrieve UI for all services.
      * 
+     * @param mixed ...$params Optional parameters that can be used by child classes
      * @return array UI structure in JSON format
      */
-    public function getUI(): array
+    public function getUI(...$params): array
     {
-        return $this->getStoredUI();
+        return $this->getStoredUI(...$params);
     }
     
     /**
      * Get stored UI state, regenerate if missing
      * 
+     * @param mixed ...$params Optional parameters passed to buildBaseUI
      * @return array UI structure in JSON format
      */
-    protected function getStoredUI(): array
+    protected function getStoredUI(...$params): array
     {
         $key = $this->getUIStorageKey();
         
-        return Cache::remember($key, now()->addMinutes(30), function() {
-            return $this->buildBaseUI()->toJson();
+        return Cache::remember($key, now()->addMinutes(30), function() use ($params) {
+            return $this->buildBaseUI(...$params)->toJson();
         });
     }
     
