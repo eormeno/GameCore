@@ -5,6 +5,7 @@ use App\Http\Controllers\GameAppController;
 use App\Http\Controllers\LogViewerController;
 use App\Http\Controllers\UIEventController;
 use App\Services\Screens\DemoUIService;
+use App\Services\Screens\InputDemoService;
 
 // Demo route
 Route::get('/demo', fn() => view('demo'))->name('demo');
@@ -15,6 +16,13 @@ Route::get(
     fn(DemoUIService $service) =>
     response()->json($service->getDemoScreen())
 )->name('api.demo-ui');
+
+// Input Demo UI API route
+Route::get(
+    '/api/input-demo',
+    fn(InputDemoService $service) =>
+    response()->json($service->getInputDemoScreen())
+)->name('api.input-demo');
 
 // UI Event Handler
 Route::post('/api/ui-event', [UIEventController::class, 'handleEvent'])->name('ui.event');

@@ -418,11 +418,11 @@ class DemoUIService
         // 6. Calcular cambios usando UIDiffer
         $diff = UIDiffer::compare($oldUI, $newUI);
         
-        // 7. Convertir diff a formato de array con _id incluido
+        // 7. Asegurar que cada componente incluye _id y mantener formato indexado
         $result = [];
         foreach ($diff as $componentId => $changes) {
             $changes['_id'] = $componentId;
-            $result[] = $changes;
+            $result[$componentId] = $changes; // Mantener índice por componentId
         }
         
         return $result;
@@ -501,12 +501,12 @@ class DemoUIService
         $newUI = $container->toJson();
         $this->storeUI($container);
         
-        // Calcular cambios y convertir a array con _id
+        // Calcular cambios y asegurar formato indexado
         $diff = UIDiffer::compare($oldUI, $newUI);
         $result = [];
         foreach ($diff as $componentId => $changes) {
             $changes['_id'] = $componentId;
-            $result[] = $changes;
+            $result[$componentId] = $changes; // Mantener índice por componentId
         }
         
         return $result;
@@ -544,7 +544,7 @@ class DemoUIService
             $counterId = array_key_first($counterJson);
             $counterConfig = $counterJson[$counterId];
             
-            $result[] = [
+            $result[$counterId] = [ // Mantener índice por componentId
                 'text' => (string) $newValue,
                 'style' => $counterConfig['style'],
                 '_id' => $counterId
@@ -588,7 +588,7 @@ class DemoUIService
             $counterId = array_key_first($counterJson);
             $counterConfig = $counterJson[$counterId];
             
-            $result[] = [
+            $result[$counterId] = [ // Mantener índice por componentId
                 'text' => (string) $newValue,
                 'style' => $counterConfig['style'],
                 '_id' => $counterId

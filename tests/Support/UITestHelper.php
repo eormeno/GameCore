@@ -65,49 +65,101 @@ class UITestHelper
     }
     
     /**
-     * Assert UI component structure
+     * Assert indexed response format (following backend-ui-responses.md)
      * 
-     * Validates that all components have required fields: type, parent, _id
+     * CRITICAL: Response must be an object indexed by _id, NOT a simple array.
      * 
-     * @param array $ui UI structure
+     * Validates:
+     * - Response is indexed by integer component IDs (not sequential 0,1,2...)
+     * - Each component's _id matches its array index
+     * - Components have required attributes based on context
+     * 
+     * Correct format:
+     * {
+     *   "56155660": {
+     *     "_id": 56155660,
+     *     "text": "Hello",
+     *     "style": "success"
+     *   }
+     * }
+     * 
+     * Incorrect format (will fail):
+     * [
+     *   {
+     *     "_id": 56155660,
+     *     "text": "Hello"
+     *   }
+     * ]
+     * 
+     * @param array $response Response from ui-event endpoint or /api/demo-ui
+     * @param bool $requireType Whether 'type' field is required (true for full UI, false for updates)
+     * @param bool $requireParent Whether 'parent' field is required (true for full UI, false for updates)
+     * @return void
+     */
+    public static function assertIndexedResponseFormat(
+        array $response, 
+        bool $requireType = false, 
+        bool $requireParent = false
+    ): void {
+        Assert::assertIsArray($response, 'Response should be an array/object');
+        Assert::assertNotEmpty($response, 'Response should not be empty');
+        
+        // Verify response is indexed by numeric keys (component IDs)
+        $keys = array_keys($response);
+        foreach ($keys as $key) {
+            Assert::assertIsInt($key, "Response must be indexed by integer component IDs, found key: " . var_export($key, true));
+        }
+        
+        // Verify each component has _id that matches its index
+        foreach ($response as $componentId => $component) {
+            Assert::assertIsArray($component, "Component at index $componentId should be an array");
+            Assert::assertArrayHasKey('_id', $component, "Component at index $componentId must have '_id' field");
+            Assert::assertIsInt($component['_id'], "Component '_id' at index $componentId must be integer");
+            Assert::assertEquals(
+                $componentId,
+                $component['_id'],
+                "Component '_id' must match its array index: expected {$componentId}, got {$component['_id']}"
+            );
+            
+            // Check required fields based on context
+            if ($requireType) {
+                Assert::assertArrayHasKey('type', $component, "Component at index $componentId must have 'type' field");
+            }
+            
+            if ($requireParent) {
+                Assert::assertArrayHasKey('parent', $component, "Component at index $componentId must have 'parent' field");
+            }
+            
+            // Verify component has attributes beyond just _id
+            Assert::assertGreaterThan(1, count($component), "Component should have attributes besides _id");
+        }
+    }
+    
+    /**
+     * Assert full UI structure (includes type and parent validation)
+     * 
+     * Use this for validating complete UI responses from endpoints like /api/demo-ui
+     * 
+     * @param array $ui Full UI structure
      * @return void
      */
     public static function assertUIStructure(array $ui): void
     {
-        Assert::assertIsArray($ui, 'UI should be an array');
-        Assert::assertNotEmpty($ui, 'UI should not be empty');
-        
-        foreach ($ui as $key => $component) {
-            Assert::assertIsArray($component, "Component at key $key should be an array");
-            Assert::assertArrayHasKey('type', $component, "Component at key $key must have 'type'");
-            Assert::assertArrayHasKey('parent', $component, "Component at key $key must have 'parent'");
-            Assert::assertArrayHasKey('_id', $component, "Component at key $key must have '_id'");
-            Assert::assertIsInt($component['_id'], "Component _id at key $key must be integer");
-        }
+        self::assertIndexedResponseFormat($ui, requireType: true, requireParent: true);
     }
     
     /**
      * Assert update response format (following backend-ui-responses.md)
      * 
-     * Validates that response is an array where each element has:
-     * - _id (integer)
-     * - Modified attributes (but NOT 'type' for updates)
+     * Alias for assertIndexedResponseFormat with allowType=false
+     * Use this for event responses (updates only)
      * 
      * @param array $response Response from ui-event endpoint
      * @return void
      */
     public static function assertUpdateResponseFormat(array $response): void
     {
-        Assert::assertIsArray($response, 'Response should be an array');
-        Assert::assertNotEmpty($response, 'Response should not be empty');
-        
-        foreach ($response as $index => $change) {
-            Assert::assertIsArray($change, "Change at index $index should be an array");
-            Assert::assertArrayHasKey('_id', $change, "Change at index $index must have '_id'");
-            Assert::assertIsInt($change['_id'], "Change _id at index $index must be integer");
-            Assert::assertArrayNotHasKey('type', $change, "Update should not include 'type' field");
-            Assert::assertGreaterThan(1, count($change), "Change should have modified attributes besides _id");
-        }
+        self::assertIndexedResponseFormat($response, false);
     }
     
     /**

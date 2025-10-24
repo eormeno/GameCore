@@ -37,11 +37,15 @@ test("2. User clicks 'Test Update' button and label is updated", function () {
     $response->assertStatus(200);
     $responseData = $response->json();
 
-    // Assert response format and content
+    // Assert response format (indexed by component ID)
     expect($responseData)->toHaveCount(1);
-    expect($responseData[0]['text'])->toBe('¡Botón presionado! Acción ejecutada exitosamente.');
-    expect($responseData[0]['style'])->toBe('success');
-    expect($responseData[0]['_id'])->toEqual($ids['lbl_welcome']);
+    expect($responseData)->toHaveKey($ids['lbl_welcome']);
+    
+    // Verify component changes
+    $labelChanges = $responseData[$ids['lbl_welcome']];
+    expect($labelChanges['text'])->toBe('¡Botón presionado! Acción ejecutada exitosamente.');
+    expect($labelChanges['style'])->toBe('success');
+    expect($labelChanges['_id'])->toEqual($ids['lbl_welcome']);
 });
 
 test("3. Counter starts at 0", function () {
@@ -91,16 +95,20 @@ test("4. User clicks 'Increment' button and counter value updates", function () 
     $response->assertStatus(200);
     $responseData = $response->json();
     
-    // Verify response structure
+    // Verify response structure (indexed by component ID)
     expect($responseData)->toHaveCount(1, 'Only one component should be updated');
-    expect($responseData[0])->toHaveKey('text');
-    expect($responseData[0])->toHaveKey('style');
-    expect($responseData[0])->toHaveKey('_id');
-    expect($responseData[0]['_id'])->toEqual($counterId);
+    expect($responseData)->toHaveKey($counterId);
+    
+    // Verify counter changes
+    $counterChanges = $responseData[$counterId];
+    expect($counterChanges)->toHaveKey('text');
+    expect($counterChanges)->toHaveKey('style');
+    expect($counterChanges)->toHaveKey('_id');
+    expect($counterChanges['_id'])->toEqual($counterId);
     
     // Verify counter value is numeric and positive
-    expect($responseData[0]['text'])->toBeNumeric("Counter should be numeric");
-    expect((int)$responseData[0]['text'])->toBeGreaterThanOrEqual(1, "Counter should be at least 1");
+    expect($counterChanges['text'])->toBeNumeric("Counter should be numeric");
+    expect((int)$counterChanges['text'])->toBeGreaterThanOrEqual(1, "Counter should be at least 1");
 });
 
 test("5. Increment action returns correct response format", function () {
@@ -132,19 +140,21 @@ test("5. Increment action returns correct response format", function () {
     $response->assertStatus(200);
     $responseData = $response->json();
 
-    // Verify response format
+    // Verify response format (indexed by component ID)
     expect($responseData)->toBeArray();
     expect($responseData)->toHaveCount(1);
+    expect($responseData)->toHaveKey($counterId);
 
     // Verify structure
-    expect($responseData[0])->toHaveKey('_id');
-    expect($responseData[0])->toHaveKey('text');
-    expect($responseData[0])->toHaveKey('style');
-    expect($responseData[0]['_id'])->toEqual($counterId);
+    $counterChanges = $responseData[$counterId];
+    expect($counterChanges)->toHaveKey('_id');
+    expect($counterChanges)->toHaveKey('text');
+    expect($counterChanges)->toHaveKey('style');
+    expect($counterChanges['_id'])->toEqual($counterId);
 
     // Verify text is numeric
-    expect($responseData[0]['text'])->toBeString();
-    expect(is_numeric($responseData[0]['text']))->toBeTrue('Counter text should be numeric');
+    expect($counterChanges['text'])->toBeString();
+    expect(is_numeric($counterChanges['text']))->toBeTrue('Counter text should be numeric');
 });
 
 test("6. Decrement action returns correct response format", function () {
@@ -180,15 +190,19 @@ test("6. Decrement action returns correct response format", function () {
     expect($responseData)->toBeArray();
     expect($responseData)->toHaveCount(1);
 
+    // Verify response is indexed by component ID
+    expect($responseData)->toHaveKey($counterId);
+    $counterChanges = $responseData[$counterId];
+
     // Verify structure
-    expect($responseData[0])->toHaveKey('_id');
-    expect($responseData[0])->toHaveKey('text');
-    expect($responseData[0])->toHaveKey('style');
-    expect($responseData[0]['_id'])->toEqual($counterId);
+    expect($counterChanges)->toHaveKey('_id');
+    expect($counterChanges)->toHaveKey('text');
+    expect($counterChanges)->toHaveKey('style');
+    expect($counterChanges['_id'])->toEqual($counterId);
 
     // Verify text is numeric
-    expect($responseData[0]['text'])->toBeString();
-    expect(is_numeric($responseData[0]['text']))->toBeTrue('Counter text should be numeric');
+    expect($counterChanges['text'])->toBeString();
+    expect(is_numeric($counterChanges['text']))->toBeTrue('Counter text should be numeric');
 });
 
 test("7. Response format follows backend-ui-responses.md pattern for updates", function () {
