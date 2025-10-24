@@ -3,18 +3,19 @@
 namespace App\Services\Screens;
 
 use App\Services\UI\UIBuilder;
-use App\Services\UI\Enums\LayoutType;
-use App\Services\UI\Traits\StoresUIState;
-use App\Services\UI\Support\UIDiffer;
-use App\Services\UI\Components\UIContainer;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Services\UI\Enums\LayoutType;
+use Illuminate\Support\Facades\Cache;
+use App\Services\UI\AbstractUIService;
+use App\Services\UI\Components\UIContainer;
+use App\Services\UI\Components\LabelBuilder;
 
-class DemoUIService
+class DemoUIService extends AbstractUIService
 {
-    use StoresUIState;
-    
+    // Components that can be modified by event handlers
+    protected LabelBuilder $lbl_welcome;
+    protected LabelBuilder $lbl_counter;
+
     /**
      * Get counter value from cache
      * 
@@ -25,10 +26,9 @@ class DemoUIService
         $userId = Auth::check() ? Auth::id() : session()->getId();
         $key = "demo_counter:{$userId}";
         $value = Cache::get($key, 0);
-        Log::info('CACHE GET: ' . $key . ' = ' . $value);
         return $value;
     }
-    
+
     /**
      * Set counter value in cache
      * 
@@ -40,11 +40,8 @@ class DemoUIService
         $userId = Auth::check() ? Auth::id() : session()->getId();
         $key = "demo_counter:{$userId}";
         Cache::put($key, $value, now()->addHours(24));
-        
-        Log::info('CACHE SET: ' . $key . ' = ' . $value);
-        Log::info('CACHE READ BACK: ' . $key . ' = ' . Cache::get($key, 'NOT_SET'));
     }
-    
+
     /**
      * Build base UI structure (required by StoresUIState trait)
      * 
@@ -65,19 +62,6 @@ class DemoUIService
 
         return $container;
     }
-    
-    /**
-     * Get the demo screen with various UI components
-     * 
-     * Retorna UI desde cache o regenera si no existe
-     *
-     * @return array
-     */
-    public function getDemoScreen(): array
-    {
-        // Usar cache con auto-regeneración
-        return $this->getStoredUI();
-    }
 
     /**
      * Build and add UI elements to the container
@@ -90,14 +74,14 @@ class DemoUIService
         // ========================================
         // DEMO SIMPLIFICADO - SISTEMA REACTIVO
         // ========================================
-        
+
         // Welcome label (con nombre para poder modificarlo)
         $container->add(
             UIBuilder::label('lbl_welcome')
                 ->text('🔵 Estado inicial: Presiona "Test Update" para cambiar este texto')
                 ->style('info')
         );
-        
+
         // Botón para ACTUALIZAR componente
         $container->add(
             UIBuilder::button('btn_test_update')
@@ -146,7 +130,7 @@ class DemoUIService
         // Obtener valor del contador desde session
         $counterValue = $this->getCounterValue();
         $counterStyle = 'primary';
-        
+
         if ($counterValue > 5) {
             $counterStyle = 'success';
         } elseif ($counterValue < 0) {
@@ -391,41 +375,13 @@ class DemoUIService
      * Demuestra: Actualización automática de texto en label
      * 
      * @param array $params Event parameters
-     * @return array Response with UI updates
+     * @return void
      */
-    public function onTestAction(array $params): array
+    public function onTestAction(array $params): void
     {
-        // 1. Obtener UI almacenada en cache
-        $container = $this->getUIContainer();
-        
-        // 2. Obtener JSON anterior para diff
-        $oldUI = $container->toJson();
-        
-        // 3. Modificar componente específico
-        $welcomeLabel = $container->findByName('lbl_welcome');
-        if ($welcomeLabel && method_exists($welcomeLabel, 'text')) {
-            /** @var \App\Services\UI\Components\LabelBuilder $welcomeLabel */
-            $welcomeLabel->text('¡Botón presionado! Acción ejecutada exitosamente.');
-            $welcomeLabel->style('success');
-        }
-        
-        // 4. Obtener JSON nueva para diff
-        $newUI = $container->toJson();
-        
-        // 5. Guardar cambios en cache
-        $this->storeUI($container);
-        
-        // 6. Calcular cambios usando UIDiffer
-        $diff = UIDiffer::compare($oldUI, $newUI);
-        
-        // 7. Asegurar que cada componente incluye _id y mantener formato indexado
-        $result = [];
-        foreach ($diff as $componentId => $changes) {
-            $changes['_id'] = $componentId;
-            $result[$componentId] = $changes; // Mantener índice por componentId
-        }
-        
-        return $result;
+        $this->lbl_welcome
+            ->text('¡Botón presionado! Acción ejecutada exitosamente.')
+            ->style('success');
     }
 
     /**
@@ -483,33 +439,16 @@ class DemoUIService
      * Demuestra: Agregar nuevo componente dinámicamente
      * 
      * @param array $params Event parameters
-     * @return array Response with UI update
+     * @return void
      */
-    public function onOpenSettings(array $params): array
+    public function onOpenSettings(array $params): void
     {
-        $oldUI = $this->getStoredUI();
-        
-        $container = $this->buildBaseUI();
-        
-        // Agregar nuevo label al final
-        $container->add(
+        // Agregar nuevo label al final del container
+        $this->container->add(
             UIBuilder::label('lbl_settings_' . time())
                 ->text('⚙️ Settings panel opened!')
                 ->style('warning')
         );
-        
-        $newUI = $container->toJson();
-        $this->storeUI($container);
-        
-        // Calcular cambios y asegurar formato indexado
-        $diff = UIDiffer::compare($oldUI, $newUI);
-        $result = [];
-        foreach ($diff as $componentId => $changes) {
-            $changes['_id'] = $componentId;
-            $result[$componentId] = $changes; // Mantener índice por componentId
-        }
-        
-        return $result;
     }
 
     /**
@@ -519,41 +458,24 @@ class DemoUIService
      * Demuestra: Actualizar valor numérico en label
      * 
      * @param array $params Event parameters
-     * @return array Response with UI update
+     * @return void
      */
-    public function onIncrementCounter(array $params): array
+    public function onIncrementCounter(array $params): void
     {
-        // 1. Incrementar valor en cache
+        // Incrementar valor en cache
         $currentValue = $this->getCounterValue();
         $newValue = $currentValue + 1;
         $this->setCounterValue($newValue);
-        
-        // 2. Forzar regeneración de UI
-        $this->clearStoredUI();
-        $container = $this->buildBaseUI();
-        
-        // 3. Guardar en cache
-        $this->storeUI($container);
-        
-        // 4. Crear diff manual del contador
-        $counterLabel = $container->findByName('lbl_counter');
-        $result = [];
-        
-        if ($counterLabel) {
-            $counterJson = $counterLabel->toJson();
-            $counterId = array_key_first($counterJson);
-            $counterConfig = $counterJson[$counterId];
-            
-            $result[$counterId] = [ // Mantener índice por componentId
-                'text' => (string) $newValue,
-                'style' => $counterConfig['style'],
-                '_id' => $counterId
-            ];
+
+        // Determinar estilo basado en el valor
+        $counterStyle = 'primary';
+        if ($newValue > 5) {
+            $counterStyle = 'success';
+        } elseif ($newValue < 0) {
+            $counterStyle = 'danger';
         }
-        
-        Log::info('INCREMENT - Current: ' . $currentValue . ', New: ' . $newValue);
-        
-        return $result;
+
+        $this->lbl_counter->text((string) $newValue)->style($counterStyle);
     }
 
     /**
@@ -563,38 +485,22 @@ class DemoUIService
      * Demuestra: Actualizar valor numérico en label
      * 
      * @param array $params Event parameters
-     * @return array Response with UI update
+     * @return void
      */
-    public function onDecrementCounter(array $params): array
+    public function onDecrementCounter(array $params): void
     {
-        // 1. Decrementar valor en cache
+        // Decrementar valor en cache
         $currentValue = $this->getCounterValue();
         $newValue = $currentValue - 1;
         $this->setCounterValue($newValue);
-        
-        // 2. Forzar regeneración de UI
-        $this->clearStoredUI();
-        $container = $this->buildBaseUI();
-        
-        // 3. Guardar en cache
-        $this->storeUI($container);
-        
-        // 4. Crear diff manual del contador
-        $counterLabel = $container->findByName('lbl_counter');
-        $result = [];
-        
-        if ($counterLabel) {
-            $counterJson = $counterLabel->toJson();
-            $counterId = array_key_first($counterJson);
-            $counterConfig = $counterJson[$counterId];
-            
-            $result[$counterId] = [ // Mantener índice por componentId
-                'text' => (string) $newValue,
-                'style' => $counterConfig['style'],
-                '_id' => $counterId
-            ];
+
+        $counterStyle = 'primary';
+        if ($newValue > 5) {
+            $counterStyle = 'success';
+        } elseif ($newValue < 0) {
+            $counterStyle = 'danger';
         }
-        
-        return $result;
+
+        $this->lbl_counter->text((string) $newValue)->style($counterStyle);
     }
 }

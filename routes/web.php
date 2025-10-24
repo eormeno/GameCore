@@ -14,7 +14,7 @@ Route::get('/demo', fn() => view('demo'))->name('demo');
 Route::get(
     '/api/demo-ui',
     fn(DemoUIService $service) =>
-    response()->json($service->getDemoScreen())
+    response()->json($service->getUI())
 )->name('api.demo-ui');
 
 // Input Demo UI API route

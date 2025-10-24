@@ -102,13 +102,17 @@ test("4. User clicks 'Increment' button and counter value updates", function () 
     // Verify counter changes
     $counterChanges = $responseData[$counterId];
     expect($counterChanges)->toHaveKey('text');
-    expect($counterChanges)->toHaveKey('style');
     expect($counterChanges)->toHaveKey('_id');
     expect($counterChanges['_id'])->toEqual($counterId);
     
     // Verify counter value is numeric and positive
     expect($counterChanges['text'])->toBeNumeric("Counter should be numeric");
     expect((int)$counterChanges['text'])->toBeGreaterThanOrEqual(1, "Counter should be at least 1");
+    
+    // Style may or may not be present depending on whether it changed
+    if (isset($counterChanges['style'])) {
+        expect($counterChanges['style'])->toBeString();
+    }
 });
 
 test("5. Increment action returns correct response format", function () {
@@ -149,11 +153,15 @@ test("5. Increment action returns correct response format", function () {
     $counterChanges = $responseData[$counterId];
     expect($counterChanges)->toHaveKey('_id');
     expect($counterChanges)->toHaveKey('text');
-    expect($counterChanges)->toHaveKey('style');
     expect($counterChanges['_id'])->toEqual($counterId);
 
     // Verify text is numeric
     expect($counterChanges['text'])->toBeString();
+    
+    // Style may or may not be present depending on whether it changed
+    if (isset($counterChanges['style'])) {
+        expect($counterChanges['style'])->toBeString();
+    }
     expect(is_numeric($counterChanges['text']))->toBeTrue('Counter text should be numeric');
 });
 
