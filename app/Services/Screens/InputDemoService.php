@@ -2,10 +2,14 @@
 
 namespace App\Services\Screens;
 
-use App\Services\UI\Components\UIContainer;
-use App\Services\UI\Enums\LayoutType;
-use App\Services\UI\Traits\StoresUIState;
 use App\Services\UI\UIBuilder;
+use App\Services\UI\Enums\LayoutType;
+use App\GameApps\Common\prefabs\Label;
+use App\Services\UI\Traits\StoresUIState;
+use App\Services\UI\Components\UIContainer;
+use App\Services\UI\Components\InputBuilder;
+use App\Services\UI\Components\LabelBuilder;
+use App\Services\UI\Components\ButtonBuilder;
 
 /**
  * Input Demo Service
@@ -20,55 +24,45 @@ class InputDemoService
 {
     use StoresUIState;
 
-    /**
-     * Build base UI structure (required by StoresUIState trait)
-     * 
-     * Creates a simple UI with:
-     * - Instruction label
-     * - Text input
-     * - "Get Value" button
-     * - Result label
-     * 
-     * @return UIContainer Base UI structure
-     */
+    private UIContainer $container;
+    private LabelBuilder $lbl_instruction;
+    private LabelBuilder $lbl_result;
+    private InputBuilder $input_text;
+    private ButtonBuilder $btn_get_value;
+
     protected function buildBaseUI(): UIContainer
     {
-        $container = UIBuilder::container('main')
+        $this->container = UIBuilder::container('main')
             ->parent('main')
             ->layout(LayoutType::VERTICAL)
             ->title('Input Component Demo');
 
-        // Instruction label
-        $container->add(
-            UIBuilder::label('lbl_instruction')
-                ->text('📝 Type something in the input below and click "Get Value"')
-                ->style('info')
-        );
+        $this->lbl_instruction = UIBuilder::label('lbl_instruction')
+            ->text('📝 Type something in the input below and click "Get Value"')
+            ->style('info');
 
-        // Text input
-        $container->add(
-            UIBuilder::input('input_text')
-                ->placeholder('Enter your text here...')
-                ->value('')
-                ->required(false)
-        );
+        $this->container->add($this->lbl_instruction);
 
-        // Get Value button
-        $container->add(
-            UIBuilder::button('btn_get_value')
-                ->label('Get Value')
-                ->action('get_value')
-                ->style('primary')
-        );
+        $this->input_text = UIBuilder::input('input_text')
+            ->placeholder('Enter your text here...')
+            ->value('')
+            ->required(false);
+        $this->container->add($this->input_text);
+
+        $this->btn_get_value = UIBuilder::button('btn_get_value')
+            ->label('Get Value')
+            ->action('get_value')
+            ->style('primary');
+        $this->container->add($this->btn_get_value);
 
         // Result label (initially empty)
-        $container->add(
-            UIBuilder::label('lbl_result')
-                ->text('Result will appear here')
-                ->style('default')
-        );
+        $this->lbl_result = UIBuilder::label('lbl_result')
+            ->text('Result will appear here')
+            ->style('default');
 
-        return $container;
+        $this->container->add($this->lbl_result);
+
+        return $this->container;
     }
 
     /**
@@ -98,10 +92,10 @@ class InputDemoService
 
         // Get UI container from cache
         $container = $this->getUIContainer();
-        
+
         // Get JSON before changes
         $oldUI = $container->toJson();
-        
+
         // Update result label with the input value
         $resultLabel = $container->findByName('lbl_result');
         if ($resultLabel && method_exists($resultLabel, 'text')) {
@@ -114,23 +108,23 @@ class InputDemoService
                     ->style('success');
             }
         }
-        
+
         // Get JSON after changes
         $newUI = $container->toJson();
-        
+
         // Save changes to cache
         $this->storeUI($container);
-        
+
         // Calculate changes using UIDiffer
         $diff = \App\Services\UI\Support\UIDiffer::compare($oldUI, $newUI);
-        
+
         // Asegurar formato indexado con _id incluido
         $result = [];
         foreach ($diff as $componentId => $changes) {
             $changes['_id'] = $componentId;
             $result[$componentId] = $changes; // Mantener índice por componentId
         }
-        
+
         return $result;
     }
 }
