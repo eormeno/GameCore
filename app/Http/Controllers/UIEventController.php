@@ -78,8 +78,21 @@ class UIEventController extends Controller
                 ], 404);
             }
 
+            // Check if service uses new AbstractUIService architecture
+            $usesAbstractService = $service instanceof \App\Services\UI\AbstractUIService;
+
+            // Initialize event context for AbstractUIService
+            if ($usesAbstractService) {
+                $service->initializeEventContext();
+            }
+
             // Invoke method
             $result = $service->$method($parameters);
+
+            // Finalize event context for AbstractUIService
+            if ($usesAbstractService) {
+                $result = $service->finalizeEventContext();
+            }
 
             // Ensure result is an array
             if (!is_array($result)) {

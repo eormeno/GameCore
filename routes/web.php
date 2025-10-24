@@ -21,7 +21,7 @@ Route::get(
 Route::get(
     '/api/input-demo',
     fn(InputDemoService $service) =>
-    response()->json($service->getInputDemoScreen())
+    response()->json($service->getUI())
 )->name('api.input-demo');
 
 // UI Event Handler
