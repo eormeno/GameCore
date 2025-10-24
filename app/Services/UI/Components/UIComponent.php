@@ -310,6 +310,21 @@ abstract class UIComponent implements UIElement
     }
 
     /**
+     * Get a configuration value
+     * 
+     * Allows reading component properties from event handlers.
+     * Useful for getting current state like text, value, checked, etc.
+     * 
+     * @param string $key The configuration key
+     * @param mixed $default Default value if key doesn't exist
+     * @return mixed The configuration value or default
+     */
+    public function get(string $key, mixed $default = null): mixed
+    {
+        return $this->config[$key] ?? $default;
+    }
+
+    /**
      * Método de utilidad para debugging - obtiene información del contexto
      * 
      * @param string $context Nombre del contexto

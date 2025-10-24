@@ -29,6 +29,7 @@ return [
     
     \App\Services\Screens\DemoUIService::class,
     \App\Services\Screens\InputDemoService::class,
+    \App\Services\Screens\SelectDemoService::class,
     \App\Services\Screens\GameLobbyScreenService::class,
     
 ];

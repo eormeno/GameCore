@@ -6,6 +6,7 @@ use App\Http\Controllers\LogViewerController;
 use App\Http\Controllers\UIEventController;
 use App\Services\Screens\DemoUIService;
 use App\Services\Screens\InputDemoService;
+use App\Services\Screens\SelectDemoService;
 
 // Demo route
 Route::get('/demo', fn() => view('demo'))->name('demo');
@@ -23,6 +24,13 @@ Route::get(
     fn(InputDemoService $service) =>
     response()->json($service->getUI())
 )->name('api.input-demo');
+
+// Select Demo UI API route
+Route::get(
+    '/api/select-demo',
+    fn(SelectDemoService $service) =>
+    response()->json($service->getUI())
+)->name('api.select-demo');
 
 // UI Event Handler
 Route::post('/api/ui-event', [UIEventController::class, 'handleEvent'])->name('ui.event');
