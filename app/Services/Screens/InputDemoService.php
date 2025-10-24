@@ -2,11 +2,11 @@
 
 namespace App\Services\Screens;
 
-use App\Services\UI\AbstractUIService;
-use App\Services\UI\Components\LabelBuilder;
 use App\Services\UI\UIBuilder;
 use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
+use App\Services\UI\Components\LabelBuilder;
 
 /**
  * Input Demo Service
@@ -22,7 +22,6 @@ use App\Services\UI\Components\UIContainer;
  */
 class InputDemoService extends AbstractUIService
 {
-
     protected LabelBuilder $lbl_result;
 
     protected function buildBaseUI(): UIContainer
@@ -60,8 +59,6 @@ class InputDemoService extends AbstractUIService
 
         return $container;
     }
-
-
 
     /**
      * Handle "Get Value" button click
