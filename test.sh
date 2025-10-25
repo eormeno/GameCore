@@ -19,6 +19,9 @@ declare -A testClasses=(
     ["bba"]="BBAPlayGameTest"
     ["mtq"]="MTQPlayGameTest"
     ["ui"]="UIBuilderTest"
+    ["demo"]="DemoUITest"
+    ["select"]="SelectDemoTest"
+    ["input"]="InputDemoTest"
 )
 
 # Find the filter in prefix and get the test class name
@@ -32,4 +35,4 @@ if [ -z "$testClass" ]; then
     exit 1
 fi
 
-php artisan test --filter="$testClass"
+php artisan test --filter="$testClass" --compact
