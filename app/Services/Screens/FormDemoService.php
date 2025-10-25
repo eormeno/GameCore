@@ -76,12 +76,13 @@ class FormDemoService extends AbstractUIService
 
     /**
      * Handle form submission with validation
+     * Reads input values from frontend parameters (sent by collectContextValues)
      */
     public function onSubmitForm(array $params): void
     {
-        // Get current input values
-        $name = trim($this->input_name->get('value', ''));
-        $email = trim($this->input_email->get('value', ''));
+        // Get input values from frontend parameters (sent by collectContextValues)
+        $name = trim($params['input_name'] ?? '');
+        $email = trim($params['input_email'] ?? '');
 
         // Validation errors array
         $errors = [];
