@@ -9,6 +9,7 @@ use App\Services\Screens\InputDemoService;
 use App\Services\Screens\SelectDemoService;
 use App\Services\Screens\CheckboxDemoService;
 use App\Services\Screens\FormDemoService;
+use App\Services\Screens\ButtonDemoService;
 
 // Demo route
 Route::get('/demo', fn() => view('demo'))->name('demo');
@@ -47,6 +48,13 @@ Route::get(
     fn(FormDemoService $service) =>
     response()->json($service->getUI())
 )->name('api.form-demo');
+
+// Button Demo UI API route
+Route::get(
+    '/api/button-demo',
+    fn(ButtonDemoService $service) =>
+    response()->json($service->getUI())
+)->name('api.button-demo');
 
 // UI Event Handler
 Route::post('/api/ui-event', [UIEventController::class, 'handleEvent'])->name('ui.event');

@@ -32,6 +32,7 @@ return [
     \App\Services\Screens\SelectDemoService::class,
     \App\Services\Screens\CheckboxDemoService::class,
     \App\Services\Screens\FormDemoService::class,
+    \App\Services\Screens\ButtonDemoService::class,
     \App\Services\Screens\GameLobbyScreenService::class,
     
 ];
