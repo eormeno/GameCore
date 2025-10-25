@@ -54,7 +54,10 @@ class ButtonComponent extends UIComponent {
         const button = document.createElement('button');
         button.className = `ui-button ${this.config.style || 'primary'}`;
         button.textContent = this.config.label || 'Button';
-        button.disabled = !this.config.enabled;
+        
+        // Handle enabled state (default to true if not specified)
+        const isEnabled = this.config.enabled !== undefined ? this.config.enabled : true;
+        button.disabled = !isEnabled;
 
         if (this.config.action) {
             button.addEventListener('click', () => {
@@ -115,9 +118,13 @@ class ButtonComponent extends UIComponent {
             if (response.ok) {
                 console.log('✅ Action executed:', action, result);
                 
-                // Handle UI updates if provided
-                if (result.ui_update) {
-                    this.handleUIUpdate(result.ui_update);
+                // Handle UI updates using global renderer
+                if (result && Object.keys(result).length > 0) {
+                    if (globalRenderer) {
+                        globalRenderer.handleUIUpdate(result);
+                    } else {
+                        console.error('❌ Global renderer not initialized');
+                    }
                 }
                 
                 // Show success message if provided
@@ -151,142 +158,6 @@ class ButtonComponent extends UIComponent {
         // TODO: Implement proper UI notification system
         const emoji = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' }[type] || 'ℹ️';
         console.log(`${emoji} ${message}`);
-    }
-
-    /**
-     * Handle UI updates from backend
-     * 
-     * Protocolo:
-     * - AGREGAR: { id: { type, text, parent, ... } } ← tiene parent
-     * - ACTUALIZAR: { id: { text: "nuevo" } } ← solo props modificadas
-     * - ELIMINAR: { id: { parent: null } } ← parent = null
-     * 
-     * @param {object} uiUpdate - UI update configuration
-     */
-    handleUIUpdate(uiUpdate) {
-        console.log('📦 Processing UI updates:', uiUpdate);
-        
-        for (const [id, changes] of Object.entries(uiUpdate)) {
-            const element = document.querySelector(`[data-component-id="${id}"]`);
-            
-            // CASO 1: ELIMINAR (parent = null)
-            if (changes.parent === null) {
-                if (element) {
-                    console.log(`🗑️ Removing component ${id}`);
-                    element.remove();
-                }
-                continue;
-            }
-            
-            // CASO 2: AGREGAR (tiene parent y elemento no existe)
-            if (!element && changes.parent) {
-                console.log(`➕ Adding component ${id}`, changes);
-                this.addComponent(id, changes);
-                continue;
-            }
-            
-            // CASO 3: ACTUALIZAR (elemento existe y hay cambios)
-            if (element) {
-                console.log(`✏️ Updating component ${id}`, changes);
-                this.updateComponent(element, changes);
-            }
-        }
-    }
-
-    /**
-     * Agregar nuevo componente al DOM
-     * 
-     * @param {string} id - Component ID
-     * @param {object} config - Component configuration
-     */
-    addComponent(id, config) {
-        try {
-            // Crear componente usando factory (id primero, config segundo)
-            const component = ComponentFactory.create(id, config);
-            
-            if (!component) {
-                console.error(`❌ ComponentFactory returned null for type: ${config.type}`);
-                return;
-            }
-            
-            const element = component.render();
-            
-            // Buscar parent y agregar
-            const parentElement = document.querySelector(`[data-component-id="${config.parent}"]`) 
-                               || document.getElementById(config.parent);
-            
-            if (parentElement) {
-                parentElement.appendChild(element);
-                console.log(`➕ Component ${id} added to parent ${config.parent}`);
-            } else {
-                console.error(`❌ Parent ${config.parent} not found for component ${id}`);
-            }
-        } catch (error) {
-            console.error(`❌ Error adding component ${id}:`, error);
-        }
-    }
-
-    /**
-     * Actualizar componente existente en el DOM
-     * 
-     * @param {HTMLElement} element - DOM element
-     * @param {object} changes - Properties to update
-     */
-    updateComponent(element, changes) {
-        try {
-            // Texto (labels, buttons)
-            if (changes.text !== undefined) {
-                element.textContent = changes.text;
-            }
-            
-            // Label (buttons)
-            if (changes.label !== undefined) {
-                element.textContent = changes.label;
-            }
-            
-            // Estilos/clases CSS
-            if (changes.style !== undefined) {
-                // Remover clases de estilo antiguas
-                element.classList.remove('default', 'primary', 'secondary', 'success', 'warning', 'danger', 'info');
-                element.classList.add(changes.style);
-            }
-            
-            // Visibilidad
-            if (changes.visible !== undefined) {
-                element.style.display = changes.visible ? '' : 'none';
-            }
-            
-            // Estado enabled/disabled
-            if (changes.enabled !== undefined) {
-                if (element.tagName === 'BUTTON' || element.tagName === 'INPUT') {
-                    element.disabled = !changes.enabled;
-                }
-            }
-            
-            // Valor (inputs)
-            if (changes.value !== undefined) {
-                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    element.value = changes.value;
-                } else {
-                    const input = element.querySelector('input, textarea');
-                    if (input) input.value = changes.value;
-                }
-            }
-            
-            // Checked (checkboxes)
-            if (changes.checked !== undefined) {
-                if (element.type === 'checkbox') {
-                    element.checked = changes.checked;
-                } else {
-                    const checkbox = element.querySelector('input[type="checkbox"]');
-                    if (checkbox) checkbox.checked = changes.checked;
-                }
-            }
-            
-            console.log(`✅ Component updated`);
-        } catch (error) {
-            console.error(`❌ Error updating component:`, error);
-        }
     }
 }
 
@@ -472,30 +343,37 @@ class UIRenderer {
     }
 
     render() {
-        console.log('Rendering UI with data:', this.data);
+        console.log('🎨 Rendering UI with data:', this.data);
 
         // Step 1: Build a map of internal ID -> JSON key
         // Each component now has _id in its config
         const internalIdToKey = new Map();
         const componentIds = Object.keys(this.data);
         
+        console.log('📋 Component IDs from JSON keys:', componentIds);
+        
         for (const key of componentIds) {
             const config = this.data[key];
             if (config._id !== undefined) {
                 internalIdToKey.set(config._id, key);
+                console.log(`  🔗 Mapped _id ${config._id} -> JSON key "${key}"`);
             }
         }
 
         // Step 2: Create all component instances
         for (const id of componentIds) {
             const config = this.data[id];
+            console.log(`  🏗️ Creating component type="${config.type}" id="${id}"`, config);
             const component = ComponentFactory.create(id, config);
             if (component) {
                 this.components.set(id, component);
+                console.log(`    ✅ Created successfully`);
+            } else {
+                console.log(`    ❌ Failed to create`);
             }
         }
 
-        console.log(`Created ${this.components.size} components`);
+        console.log(`✅ Created ${this.components.size} components`);
 
         // Step 3: Group components by parent and sort by _order
         const childrenByParent = new Map();
@@ -537,6 +415,8 @@ class UIRenderer {
         const maxIterations = this.components.size * 2;
         let iterations = 0;
 
+        console.log('🚀 Starting component mounting...');
+
         while (mounted.size < this.components.size && iterations < maxIterations) {
             iterations++;
             
@@ -549,6 +429,8 @@ class UIRenderer {
                     if (!component || mounted.has(id)) continue;
 
                     const parentId = component.config.parent;
+                    
+                    console.log(`  📍 Attempting to mount "${id}" (type: ${component.config.type}), parent: ${parentId}`);
 
                     if (typeof parentId === 'string') {
                         // Parent is a DOM element (always available)
@@ -556,8 +438,9 @@ class UIRenderer {
                         if (parentElement) {
                             component.mount(parentElement);
                             mounted.add(id);
+                            console.log(`    ✅ Mounted to DOM element "${parentId}"`);
                         } else {
-                            console.error(`Parent element not found: ${parentId}`);
+                            console.error(`    ❌ Parent element not found: ${parentId}`);
                             mounted.add(id);
                         }
                     } else if (typeof parentId === 'number') {
@@ -566,7 +449,7 @@ class UIRenderer {
                         const parentComponent = this.components.get(parentComponentKey);
                         
                         if (!parentComponent) {
-                            console.error(`Parent component not found for ID: ${parentId}`);
+                            console.error(`    ❌ Parent component not found for ID: ${parentId}`);
                             mounted.add(id);
                             continue;
                         }
@@ -575,6 +458,9 @@ class UIRenderer {
                         if (mounted.has(parentComponentKey)) {
                             component.mount(parentComponent.element);
                             mounted.add(id);
+                            console.log(`    ✅ Mounted to component "${parentComponentKey}" (_id: ${parentId})`);
+                        } else {
+                            console.log(`    ⏳ Waiting for parent "${parentComponentKey}" to be mounted first`);
                         }
                     }
                 }
@@ -582,21 +468,145 @@ class UIRenderer {
         }
 
         if (mounted.size < this.components.size) {
-            console.warn(`Could not mount ${this.components.size - mounted.size} components (circular dependency or missing parents)`);
+            console.warn(`⚠️ Could not mount ${this.components.size - mounted.size} components (circular dependency or missing parents)`);
         }
 
-        console.log(`UI rendering complete (${mounted.size}/${this.components.size} mounted)`);
+        console.log(`✅ UI rendering complete (${mounted.size}/${this.components.size} mounted)`);
+    }
+
+    /**
+     * Handle UI updates from backend
+     * 
+     * @param {object} uiUpdate - UI update object (same structure as initial render)
+     */
+    handleUIUpdate(uiUpdate) {
+        console.log('📦 Processing UI updates:', uiUpdate);
+        
+        for (const [jsonKey, changes] of Object.entries(uiUpdate)) {
+            const componentId = changes._id;
+            const element = document.querySelector(`[data-component-id="${componentId}"]`);
+            
+            if (element) {
+                // Component exists in DOM → UPDATE
+                console.log(`✏️ Updating component ${componentId}`, changes);
+                this.updateComponent(element, changes);
+            } else {
+                // Component doesn't exist → CREATE (rare in events, more common in initial render)
+                console.log(`➕ Creating new component ${componentId}`, changes);
+                this.addComponent(jsonKey, changes);
+            }
+        }
+    }
+
+    /**
+     * Update existing component in DOM
+     * 
+     * @param {HTMLElement} element - DOM element to update
+     * @param {object} changes - Properties to update
+     */
+    updateComponent(element, changes) {
+        try {
+            // Text (labels)
+            if (changes.text !== undefined) {
+                element.textContent = changes.text;
+            }
+            
+            // Label (buttons)
+            if (changes.label !== undefined) {
+                element.textContent = changes.label;
+            }
+            
+            // Style/classes
+            if (changes.style !== undefined) {
+                element.classList.remove('default', 'primary', 'secondary', 'success', 'warning', 'danger', 'info');
+                element.classList.add(changes.style);
+            }
+            
+            // Visibility
+            if (changes.visible !== undefined) {
+                element.style.display = changes.visible ? '' : 'none';
+            }
+            
+            // Enabled/disabled state
+            if (changes.enabled !== undefined) {
+                if (element.tagName === 'BUTTON' || element.tagName === 'INPUT') {
+                    element.disabled = !changes.enabled;
+                }
+            }
+            
+            // Value (inputs)
+            if (changes.value !== undefined) {
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    element.value = changes.value;
+                } else {
+                    const input = element.querySelector('input, textarea');
+                    if (input) input.value = changes.value;
+                }
+            }
+            
+            // Checked (checkboxes)
+            if (changes.checked !== undefined) {
+                if (element.type === 'checkbox') {
+                    element.checked = changes.checked;
+                } else {
+                    const checkbox = element.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = changes.checked;
+                }
+            }
+            
+            console.log(`✅ Component ${changes._id} updated successfully`);
+        } catch (error) {
+            console.error(`❌ Error updating component ${changes._id}:`, error);
+        }
+    }
+
+    /**
+     * Add new component to DOM
+     * 
+     * @param {string} jsonKey - JSON key of the component
+     * @param {object} config - Component configuration
+     */
+    addComponent(jsonKey, config) {
+        try {
+            const component = ComponentFactory.create(jsonKey, config);
+            
+            if (!component) {
+                console.error(`❌ ComponentFactory returned null for type: ${config.type}`);
+                return;
+            }
+            
+            const element = component.render();
+            
+            // Find parent and append
+            const parentElement = document.querySelector(`[data-component-id="${config.parent}"]`) 
+                               || document.getElementById(config.parent);
+            
+            if (parentElement) {
+                parentElement.appendChild(element);
+                console.log(`➕ Component ${config._id} added to parent ${config.parent}`);
+            } else {
+                console.error(`❌ Parent ${config.parent} not found for component ${config._id}`);
+            }
+        } catch (error) {
+            console.error(`❌ Error adding component:`, error);
+        }
     }
 }
 
+// Global renderer instance
+let globalRenderer = null;
+
 // ==================== Main Application ====================
-async function loadDemoUI() {
+async function loadDemoUI(demoName = null) {
     try {
+        // Use demo name from window global (set by Laravel) or parameter
+        const demo = demoName || window.DEMO_NAME || 'button-demo';
+        
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         
-        console.log('Fetching UI data from /api/demo-ui...');
+        console.log(`Fetching UI data from /api/${demo}...`);
         
-        const response = await fetch('/api/demo-ui', {
+        const response = await fetch(`/api/${demo}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -612,9 +622,9 @@ async function loadDemoUI() {
         const uiData = await response.json();
         console.log('UI Data received:', uiData);
         
-        // Render the UI
-        const renderer = new UIRenderer(uiData);
-        renderer.render();
+        // Create and store global renderer
+        globalRenderer = new UIRenderer(uiData);
+        globalRenderer.render();
         
     } catch (error) {
         console.error('Error loading demo UI:', error);
@@ -636,4 +646,6 @@ window.addEventListener('ui-action', (event) => {
 });
 
 // Load UI on page load
-document.addEventListener('DOMContentLoaded', loadDemoUI);
+document.addEventListener('DOMContentLoaded', () => {
+    loadDemoUI();
+});

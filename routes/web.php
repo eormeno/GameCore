@@ -6,6 +6,11 @@ use App\Http\Controllers\LogViewerController;
 use App\Http\Controllers\UIEventController;
 use App\Http\Controllers\UIDemoController;
 
+// Demo route - Dynamic demo viewer
+Route::get('/demo/{demo}', fn(string $demo) => view('demo', ['demo' => $demo]))
+    ->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo')
+    ->name('demo');
+
 // Demo UI API routes - Unified controller for all demo services
 Route::get('/api/{demo}', [UIDemoController::class, 'show'])
     ->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo')
