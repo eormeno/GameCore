@@ -44,8 +44,10 @@ class ButtonDemoService extends AbstractUIService
         // Toggle between two labels
         if ($currentLabel === 'Click Me!') {
             $this->btn_toggle->label('Clicked! 🎉');
+            $this->btn_toggle->style('success');
         } else {
             $this->btn_toggle->label('Click Me!');
+            $this->btn_toggle->style('primary');
         }
     }
 }
