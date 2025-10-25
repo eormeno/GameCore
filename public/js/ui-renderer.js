@@ -696,6 +696,13 @@ async function loadDemoUI(demoName = null) {
         const uiData = await response.json();
         console.log('UI Data received:', uiData);
         
+        // If reset was requested, update URL to normal demo URL (without /reset)
+        if (window.RESET_DEMO) {
+            const normalUrl = `/demo/${demo}`;
+            window.history.replaceState({}, '', normalUrl);
+            window.RESET_DEMO = false; // Reset the flag
+        }
+        
         // Create and store global renderer
         globalRenderer = new UIRenderer(uiData);
         globalRenderer.render();
