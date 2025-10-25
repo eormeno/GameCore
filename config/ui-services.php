@@ -27,7 +27,7 @@ return [
     |
     */
     
-    \App\Services\Screens\DemoUIService::class,
+    \App\Services\Screens\DemoUiService::class,
     \App\Services\Screens\InputDemoService::class,
     \App\Services\Screens\SelectDemoService::class,
     \App\Services\Screens\CheckboxDemoService::class,

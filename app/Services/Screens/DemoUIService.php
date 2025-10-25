@@ -10,7 +10,7 @@ use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
 use App\Services\UI\Components\LabelBuilder;
 
-class DemoUIService extends AbstractUIService
+class DemoUiService extends AbstractUIService
 {
     // Components that can be modified by event handlers
     protected LabelBuilder $lbl_welcome;
