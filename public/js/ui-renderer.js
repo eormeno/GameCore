@@ -326,20 +326,99 @@ class SelectComponent extends UIComponent {
 
         // Add options
         if (this.config.options) {
-            for (const [value, label] of Object.entries(this.config.options)) {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = label;
-                if (this.config.value === value) {
-                    option.selected = true;
+            // Support both formats:
+            // 1. Object format: {value: label}
+            // 2. Array format: [{value: 'key', label: 'text'}]
+            
+            if (Array.isArray(this.config.options)) {
+                // Array format: [{value, label}]
+                this.config.options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.value;
+                    option.textContent = opt.label;
+                    if (this.config.value === opt.value) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            } else {
+                // Object format: {value: label}
+                for (const [value, label] of Object.entries(this.config.options)) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = label;
+                    if (this.config.value === value) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
                 }
-                select.appendChild(option);
             }
         }
 
         group.appendChild(select);
 
+        // Add change event listener if onChange action is defined
+        if (this.config.on_change) {
+            select.addEventListener('change', () => {
+                this.handleChange(this.config.on_change, select.value);
+            });
+        }
+
         return this.applyCommonAttributes(group);
+    }
+
+    /**
+     * Handle select change event
+     * Sends the selected value to the backend
+     * 
+     * @param {string} action - The action name (snake_case)
+     * @param {string} value - The selected value
+     */
+    async handleChange(action, value) {
+        console.log('Select changed:', action, value);
+        
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            const componentId = this.config._id || parseInt(this.id);
+
+            console.log('Sending change event:', { component_id: componentId, action, value });
+
+            const response = await fetch('/api/ui-event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    component_id: componentId,
+                    event: 'change',
+                    action: action,
+                    parameters: { value: value },
+                }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('✅ Change event executed:', action, result);
+                
+                // Update UI with response
+                if (result && Object.keys(result).length > 0) {
+                    if (globalRenderer) {
+                        globalRenderer.handleUIUpdate(result);
+                    } else {
+                        console.error('❌ Global renderer not initialized');
+                    }
+                }
+            } else {
+                console.error('❌ Change event failed:', response.status, result);
+            }
+        } catch (error) {
+            console.error('❌ Error sending change event:', error);
+        }
     }
 }
 
@@ -606,6 +685,12 @@ class UIRenderer {
                 }
             }
             
+            // Disabled state (for selects and other elements)
+            if (changes.disabled !== undefined) {
+                const targetElement = element.querySelector('select, input, textarea, button') || element;
+                targetElement.disabled = changes.disabled;
+            }
+            
             // Value (inputs)
             if (changes.value !== undefined) {
                 if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
@@ -613,6 +698,59 @@ class UIRenderer {
                 } else {
                     const input = element.querySelector('input, textarea');
                     if (input) input.value = changes.value;
+                }
+            }
+            
+            // Options (selects)
+            if (changes.options !== undefined) {
+                const select = element.querySelector('select') || (element.tagName === 'SELECT' ? element : null);
+                if (select) {
+                    // Clear existing options (except placeholder if exists)
+                    const placeholder = select.querySelector('option[disabled][value=""]');
+                    select.innerHTML = '';
+                    
+                    // Re-add placeholder if it existed
+                    if (placeholder) {
+                        select.appendChild(placeholder);
+                    }
+                    
+                    // Add new options (support both array and object formats)
+                    if (Array.isArray(changes.options)) {
+                        // Array format: [{value, label}]
+                        changes.options.forEach(opt => {
+                            const option = document.createElement('option');
+                            option.value = opt.value;
+                            option.textContent = opt.label;
+                            select.appendChild(option);
+                        });
+                    } else {
+                        // Object format: {value: label}
+                        for (const [value, label] of Object.entries(changes.options)) {
+                            const option = document.createElement('option');
+                            option.value = value;
+                            option.textContent = label;
+                            select.appendChild(option);
+                        }
+                    }
+                }
+            }
+            
+            // Placeholder (selects)
+            if (changes.placeholder !== undefined) {
+                const select = element.querySelector('select') || (element.tagName === 'SELECT' ? element : null);
+                if (select) {
+                    let placeholder = select.querySelector('option[disabled][value=""]');
+                    if (placeholder) {
+                        placeholder.textContent = changes.placeholder;
+                    } else {
+                        // Create placeholder if it doesn't exist
+                        placeholder = document.createElement('option');
+                        placeholder.value = '';
+                        placeholder.textContent = changes.placeholder;
+                        placeholder.disabled = true;
+                        placeholder.selected = true;
+                        select.insertBefore(placeholder, select.firstChild);
+                    }
                 }
             }
             
