@@ -13,6 +13,7 @@
     <script>
         // Pass demo name from Laravel to JavaScript
         window.DEMO_NAME = '{{ $demo }}';
+        window.RESET_DEMO = {{ $reset ? 'true' : 'false' }};
     </script>
     <script src="{{ asset('js/ui-renderer.js') }}"></script>
 </body>

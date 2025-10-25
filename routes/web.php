@@ -7,12 +7,15 @@ use App\Http\Controllers\UIEventController;
 use App\Http\Controllers\UIDemoController;
 
 // Demo route - Dynamic demo viewer
-Route::get('/demo/{demo}', fn(string $demo) => view('demo', ['demo' => $demo]))
-    ->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo')
-    ->name('demo');
+Route::get('/demo/{demo}/{reset?}', function (string $demo, bool $reset = false) {
+    return view('demo', [
+        'demo' => $demo,
+        'reset' => $reset
+    ]);
+})->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo')->name('demo');
 
 // Demo UI API routes - Unified controller for all demo services
-Route::get('/api/{demo}', [UIDemoController::class, 'show'])
+Route::get('/api/{demo}/{reset?}', [UIDemoController::class, 'show'])
     ->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo')
     ->name('api.demo');
 

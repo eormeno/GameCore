@@ -74,8 +74,80 @@ class ButtonComponent extends UIComponent {
     }
 
     handleAction(action, parameters = {}) {
+        // Collect values from inputs in the same container context
+        const contextValues = this.collectContextValues();
+        
+        // Merge collected values with explicit parameters (explicit params take precedence)
+        const mergedParameters = { ...contextValues, ...parameters };
+        
         // Send POST request to backend
-        this.sendEventToBackend('click', action, parameters);
+        this.sendEventToBackend('click', action, mergedParameters);
+    }
+
+    /**
+     * Collect values from all input elements in the same container context
+     * 
+     * @returns {object} Object with input names as keys and their values
+     */
+    collectContextValues() {
+        const values = {};
+        
+        // Find the button element in the DOM
+        const buttonElement = document.querySelector(`[data-component-id="${this.config._id}"]`);
+        if (!buttonElement) {
+            console.log('⚠️ Button element not found for collectContextValues');
+            return values;
+        }
+        
+        // Find the parent container (or fallback to document)
+        let container = buttonElement.closest('.ui-container');
+        if (!container) {
+            console.log('⚠️ No .ui-container found, using document');
+            container = document;
+        } else {
+            console.log('✅ Found container:', container);
+        }
+        
+        // Collect values from text inputs
+        const inputs = container.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), textarea');
+        console.log(`🔍 Found ${inputs.length} text inputs`);
+        inputs.forEach(input => {
+            console.log(`  - Input: type="${input.type}", name="${input.name}", value="${input.value}"`);
+            if (input.name) {
+                values[input.name] = input.value;
+            }
+        });
+        
+        // Collect values from selects
+        const selects = container.querySelectorAll('select');
+        console.log(`🔍 Found ${selects.length} selects`);
+        selects.forEach(select => {
+            if (select.name) {
+                values[select.name] = select.value;
+            }
+        });
+        
+        // Collect values from checkboxes
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        console.log(`🔍 Found ${checkboxes.length} checkboxes`);
+        checkboxes.forEach(checkbox => {
+            if (checkbox.name) {
+                values[checkbox.name] = checkbox.checked;
+            }
+        });
+        
+        // Collect values from radio buttons (only checked ones)
+        const radios = container.querySelectorAll('input[type="radio"]:checked');
+        console.log(`🔍 Found ${radios.length} checked radios`);
+        radios.forEach(radio => {
+            if (radio.name) {
+                values[radio.name] = radio.value;
+            }
+        });
+        
+        console.log('📋 Collected context values:', values);
+        
+        return values;
     }
 
     /**
@@ -601,12 +673,14 @@ async function loadDemoUI(demoName = null) {
     try {
         // Use demo name from window global (set by Laravel) or parameter
         const demo = demoName || window.DEMO_NAME || 'button-demo';
+        // Check if reset flag is set
+        const reset = window.RESET_DEMO ? '/reset' : '';
         
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        console.log(`Fetching UI data from /api/${demo}...`);
-        
-        const response = await fetch(`/api/${demo}`, {
+
+        console.log(`Fetching UI data from /api/${demo}${reset}...`);
+
+        const response = await fetch(`/api/${demo}${reset}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

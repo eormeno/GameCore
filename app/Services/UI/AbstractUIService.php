@@ -209,7 +209,7 @@ abstract class AbstractUIService
         
         // Generate and cache new UI
         $ui = $this->buildBaseUI(...$params)->toJson();
-        Cache::put($key, $ui, 1800); // 30 minutes in seconds
+        Cache::put($key, $ui, env('UI_CACHE_TTL', 1800)); // Default to 30 minutes
         
         return $ui;
     }
@@ -348,7 +348,7 @@ abstract class AbstractUIService
      * 
      * @return void
      */
-    protected function clearStoredUI(): void
+    public function clearStoredUI(): void
     {
         Cache::forget($this->getUIStorageKey());
     }

@@ -66,12 +66,12 @@ class InputDemoService extends AbstractUIService
      * Reads the input value sent from frontend and displays it in the result label.
      * No return needed - AbstractUIService handles diff calculation and response.
      * 
-     * @param array $params Event parameters (should include 'value' from input)
+     * @param array $params Event parameters (should include 'input_text' from input)
      * @return void
      */
     public function onGetValue(array $params): void
     {
-        $inputValue = $params['value'] ?? '';
+        $inputValue = $params['input_text'] ?? '';
         
         if (empty($inputValue)) {
             $this->lbl_result->text('⚠️ Input is empty!')->style('warning');
