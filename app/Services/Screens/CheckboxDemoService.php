@@ -70,12 +70,13 @@ class CheckboxDemoService extends AbstractUIService
 
     /**
      * Handle form submission
+     * Reads checkbox states from frontend parameters
      */
     public function onSubmitSelection(array $params): void
     {
-        // Get current state of checkboxes
-        $jsChecked = $this->chk_javascript->get('checked', false);
-        $pyChecked = $this->chk_python->get('checked', false);
+        // Get checkbox states from frontend parameters (sent by collectContextValues)
+        $jsChecked = $params['chk_javascript'] ?? false;
+        $pyChecked = $params['chk_python'] ?? false;
 
         // Build selections array
         $selections = [];
