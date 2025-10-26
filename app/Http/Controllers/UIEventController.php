@@ -45,12 +45,23 @@ class UIEventController extends Controller
         $parameters = $validated['parameters'] ?? [];
 
         try {
-            // Resolve service class from component ID
-            $serviceClass = UIIdGenerator::getContextFromId($componentId);
+            // Check if there's a caller service ID (for modal callbacks)
+            $callerServiceId = $parameters['_caller_service_id'] ?? null;
+            unset($parameters['_caller_service_id']); // Remove internal parameter
+
+            // Resolve service class from component ID or caller service ID
+            if ($callerServiceId) {
+                // Use the caller service (the one that opened the modal)
+                $serviceClass = UIIdGenerator::getContextFromId($callerServiceId);
+            } else {
+                // Use the component's service (normal flow)
+                $serviceClass = UIIdGenerator::getContextFromId($componentId);
+            }
 
             if (!$serviceClass) {
                 Log::warning('UI Event: Service not found for component', [
                     'component_id' => $componentId,
+                    'caller_service_id' => $callerServiceId,
                     'action' => $action,
                 ]);
 

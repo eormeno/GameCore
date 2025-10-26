@@ -1054,6 +1054,18 @@ class UIContainer implements UIElement
         return $this;
     }
 
+    /**
+     * Center the container horizontally using margin auto
+     * 
+     * @return self For method chaining
+     */
+    public function centerHorizontal(): self
+    {
+        $this->config['margin_left'] = 'auto';
+        $this->config['margin_right'] = 'auto';
+        return $this;
+    }
+
     // ========================================================================
     // POSITION METHODS
     // ========================================================================
@@ -1390,29 +1402,42 @@ class UIContainer implements UIElement
     /**
      * Apply rounded corners
      * 
-     * @param string $radius Radius value (default: 8px)
+     * @param string|int $radius Radius value (e.g., '8px', 8, 'medium') or integer for pixels
      * @return self For method chaining
      */
-    public function rounded(string $radius = '8px'): self
+    public function rounded(string|int $radius = 8): self
     {
+        if (is_int($radius)) {
+            $radius = $radius === 0 ? '0' : "{$radius}px";
+        }
         return $this->borderRadius($radius);
     }
 
     /**
      * Apply shadow effect
      * 
-     * @param string $intensity Shadow intensity (light, medium, heavy, or custom CSS)
+     * @param string|int $intensity Shadow intensity (0=none, 1-3=levels, 'light', 'medium', 'heavy', or custom CSS)
      * @return self For method chaining
      */
-    public function shadow(string $intensity = 'medium'): self
+    public function shadow(string|int $intensity = 1): self
     {
-        $shadows = [
-            'light' => '0 1px 3px rgba(0,0,0,0.1)',
-            'medium' => '0 4px 6px rgba(0,0,0,0.1)',
-            'heavy' => '0 10px 15px rgba(0,0,0,0.2)'
-        ];
-
-        $shadow = $shadows[$intensity] ?? $intensity;
+        if (is_int($intensity)) {
+            $shadows = [
+                0 => 'none',
+                1 => '0 2px 8px rgba(0, 0, 0, 0.1)',
+                2 => '0 4px 16px rgba(0, 0, 0, 0.15)',
+                3 => '0 8px 32px rgba(0, 0, 0, 0.2)',
+            ];
+            $shadow = $shadows[$intensity] ?? $shadows[1];
+        } else {
+            $shadows = [
+                'light' => '0 1px 3px rgba(0,0,0,0.1)',
+                'medium' => '0 4px 6px rgba(0,0,0,0.1)',
+                'heavy' => '0 10px 15px rgba(0,0,0,0.2)'
+            ];
+            $shadow = $shadows[$intensity] ?? $intensity;
+        }
+        
         return $this->boxShadow($shadow);
     }
 

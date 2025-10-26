@@ -932,10 +932,10 @@ class FormBuilder extends UIContainer
      * Add shadow to form
      * Uses parent UIContainer shadow method with predefined intensity
      * 
-     * @param string $intensity Shadow intensity (light, medium, heavy, or custom CSS)
+     * @param string|int $intensity Shadow intensity (0-3, or 'light'|'medium'|'heavy', or custom CSS)
      * @return self For method chaining
      */
-    public function shadow(string $intensity = 'medium'): self
+    public function shadow(string|int $intensity = 1): self
     {
         // Call parent method which sets box_shadow in config
         parent::shadow($intensity);
@@ -949,10 +949,10 @@ class FormBuilder extends UIContainer
      * Add rounded corners to form
      * Uses parent UIContainer rounded method
      * 
-     * @param string $radius Radius value (default: 8px)
+     * @param string|int $radius Radius value (default: 8)
      * @return self For method chaining
      */
-    public function rounded(string $radius = '8px'): self
+    public function rounded(string|int $radius = 8): self
     {
         // Call parent method which sets border_radius in config
         parent::rounded($radius);

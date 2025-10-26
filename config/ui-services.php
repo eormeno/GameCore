@@ -34,6 +34,7 @@ return [
     \App\Services\Screens\FormDemoService::class,
     \App\Services\Screens\ButtonDemoService::class,
     \App\Services\Screens\TableDemoService::class,
+    \App\Services\Screens\ModalDemoService::class,
     \App\Services\Screens\GameLobbyScreenService::class,
     
 ];

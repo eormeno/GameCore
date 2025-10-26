@@ -375,4 +375,29 @@ abstract class AbstractUIService
     {
         return $this->getUIStorageKey() . ':container';
     }
+
+    /**
+     * Get the service component ID
+     * Returns the ID of the main container, which represents this service
+     * Used for modal callbacks to route events back to this service
+     * 
+     * @return int Service component ID
+     */
+    protected function getServiceComponentId(): int
+    {
+        $ui = $this->getStoredUI();
+        
+        // Find the first container (main container that represents the service)
+        foreach ($ui as $id => $component) {
+            if ($component['type'] === 'container') {
+                return (int)$id;
+            }
+        }
+        
+        // Fallback: generate deterministic ID from service class name
+        return \App\Services\UI\Support\UIIdGenerator::generateFromName(
+            static::class, 
+            'service_root'
+        );
+    }
 }

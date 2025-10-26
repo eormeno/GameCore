@@ -27,6 +27,40 @@ class UIComponent {
         if (this.config.name) {
             element.id = this.config.name;
         }
+        
+        // Apply visual styling if specified
+        if (this.config.box_shadow) {
+            element.style.boxShadow = this.config.box_shadow;
+        }
+        if (this.config.border_radius) {
+            element.style.borderRadius = this.config.border_radius;
+        }
+        
+        // Apply layout properties
+        if (this.config.justify_content) {
+            element.style.justifyContent = this.config.justify_content;
+        }
+        if (this.config.align_items) {
+            element.style.alignItems = this.config.align_items;
+        }
+        if (this.config.gap) {
+            element.style.gap = this.config.gap + 'px';
+        }
+        
+        // Apply padding
+        if (this.config.padding !== undefined) {
+            if (typeof this.config.padding === 'number') {
+                element.style.padding = this.config.padding + 'px';
+            } else {
+                element.style.padding = this.config.padding;
+            }
+        }
+        
+        // Apply font size
+        if (this.config.font_size) {
+            element.style.fontSize = this.config.font_size + 'px';
+        }
+        
         return element;
     }
 }
@@ -1044,18 +1078,72 @@ class UIRenderer {
     handleUIUpdate(uiUpdate) {
         console.log('📦 Processing UI updates:', uiUpdate);
         
-        for (const [jsonKey, changes] of Object.entries(uiUpdate)) {
-            const componentId = changes._id;
-            const element = document.querySelector(`[data-component-id="${componentId}"]`);
-            
-            if (element) {
-                // Component exists in DOM → UPDATE
-                console.log(`✏️ Updating component ${componentId}`, changes);
-                this.updateComponent(element, changes);
-            } else {
-                // Component doesn't exist → CREATE (rare in events, more common in initial render)
-                console.log(`➕ Creating new component ${componentId}`, changes);
-                this.addComponent(jsonKey, changes);
+        // Check if there are components with parent='modal' - if so, open modal
+        let hasModalComponents = false;
+        for (const [key, component] of Object.entries(uiUpdate)) {
+            if (component.parent === 'modal') {
+                hasModalComponents = true;
+                break;
+            }
+        }
+        
+        if (hasModalComponents) {
+            // Open modal with these components
+            openModal(uiUpdate);
+            return; // Don't process as regular updates
+        }
+        
+        // Check for special actions
+        if (uiUpdate.action) {
+            switch (uiUpdate.action) {
+                case 'show_modal':
+                    if (uiUpdate.modal) {
+                        openModal(uiUpdate.modal);
+                    }
+                    return; // Don't process as regular updates
+                    
+                case 'close_modal':
+                    closeModal();
+                    break; // Continue to process ui_updates if any
+            }
+        }
+        
+        // Handle UI updates if present
+        if (uiUpdate.ui_updates) {
+            for (const [jsonKey, changes] of Object.entries(uiUpdate.ui_updates)) {
+                const componentId = changes._id;
+                const element = document.querySelector(`[data-component-id="${componentId}"]`);
+                
+                if (element) {
+                    // Component exists in DOM → UPDATE
+                    console.log(`✏️ Updating component ${componentId}`, changes);
+                    this.updateComponent(element, changes);
+                } else {
+                    // Component doesn't exist → CREATE (rare in events, more common in initial render)
+                    console.log(`➕ Creating new component ${componentId}`, changes);
+                    this.addComponent(jsonKey, changes);
+                }
+            }
+        } else if (!hasModalComponents && !uiUpdate.action) {
+            // Fallback: if no ui_updates key and no modal, treat entire object as updates (backward compatibility)
+            for (const [jsonKey, changes] of Object.entries(uiUpdate)) {
+                // Skip special keys
+                if (jsonKey === 'action' || jsonKey === 'modal') {
+                    continue;
+                }
+                
+                const componentId = changes._id;
+                if (!componentId) continue;
+                
+                const element = document.querySelector(`[data-component-id="${componentId}"]`);
+                
+                if (element) {
+                    console.log(`✏️ Updating component ${componentId}`, changes);
+                    this.updateComponent(element, changes);
+                } else {
+                    console.log(`➕ Creating new component ${componentId}`, changes);
+                    this.addComponent(jsonKey, changes);
+                }
             }
         }
     }
@@ -1322,6 +1410,74 @@ window.addEventListener('ui-action', (event) => {
     // Here you can handle actions globally
     // e.g., send to backend, update state, etc.
 });
+
+// ==================== Modal Functions ====================
+
+/**
+ * Open a modal with UI content
+ * @param {Object} uiData - UI configuration for modal content (should have parent='modal')
+ */
+function openModal(uiData) {
+    const overlay = document.getElementById('modal-overlay');
+    const modalContainer = document.getElementById('modal');
+    
+    if (!overlay || !modalContainer) {
+        console.error('Modal containers not found in DOM');
+        return;
+    }
+    
+    // Clear previous content
+    modalContainer.innerHTML = '';
+    
+    // Render modal content using UIRenderer
+    // The uiData should already have parent='modal' from the backend
+    const modalRenderer = new UIRenderer(uiData);
+    modalRenderer.render();
+    
+    // Show modal
+    overlay.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    
+    console.log('✅ Modal opened');
+}
+
+/**
+ * Close the modal
+ */
+function closeModal() {
+    const overlay = document.getElementById('modal-overlay');
+    const modalContainer = document.getElementById('modal');
+    
+    if (!overlay || !modalContainer) {
+        return;
+    }
+    
+    // Clear content
+    modalContainer.innerHTML = '';
+    
+    // Hide modal
+    overlay.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    
+    console.log('✅ Modal closed');
+}
+
+// Close modal when clicking on overlay background
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            // Only close if clicking directly on overlay, not on modal content
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+    }
+});
+
+// Make modal functions globally available
+window.openModal = openModal;
+window.closeModal = closeModal;
 
 // Load UI on page load
 document.addEventListener('DOMContentLoaded', () => {

@@ -8,7 +8,11 @@
     <link rel="stylesheet" href="{{ asset('css/ui-components.css') }}">
 </head>
 <body>
+    <div id="menu"></div>
     <div id="main"></div>
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div id="modal" class="modal-container"></div>
+    </div>
     
     <script>
         // Pass demo name from Laravel to JavaScript
