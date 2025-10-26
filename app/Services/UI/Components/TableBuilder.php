@@ -173,6 +173,7 @@ class TableBuilder extends UIComponent
         // Create data rows with empty cells
         for ($row = 0; $row < $this->rows; $row++) {
             $rowBuilder = $this->createRow("row_$row");
+            $rowBuilder->row($row); // Set row index for ordering
             $this->rowBuilders[$row] = $rowBuilder;
             
             // Create empty cells for this row with column index
@@ -205,6 +206,23 @@ class TableBuilder extends UIComponent
         for ($col = 0; $col < min(count($data), $this->cols); $col++) {
             if (isset($cells[$col])) {
                 $cells[$col]->text($data[$col]);
+            }
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Clear all data rows (set all cells to empty strings)
+     * This is useful for pagination or when reloading data
+     * 
+     * @return self
+     */
+    public function clearRows(): self
+    {
+        for ($row = 0; $row < $this->rows; $row++) {
+            for ($col = 0; $col < $this->cols; $col++) {
+                $this->cells[$row][$col]->text('');
             }
         }
         
@@ -306,6 +324,22 @@ class TableBuilder extends UIComponent
     public function title(string $title): self
     {
         return $this->setConfig('title', $title);
+    }
+
+    /**
+     * Set minimum height for all rows
+     * 
+     * @param int $height Minimum height in pixels
+     * @return self
+     */
+    public function rowMinHeight(int $height): self
+    {
+        // Apply min height to all existing rows
+        foreach ($this->rowBuilders as $row) {
+            $row->minHeight($height);
+        }
+        
+        return $this;
     }
 
     /**

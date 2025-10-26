@@ -10,12 +10,23 @@ use App\Services\UI\UIBuilder;
 /**
  * Table Demo Service
  * 
- * Simple table demonstration with:
- * - Header row with 4 columns (Name, Country, Actions buttons)
- * - 5 data rows with Edit and Remove buttons
+ * Demonstrates table functionality with:
+ * - Dynamic data loading from file
+ * - Header row with columns (Name, Country, Actions)
+ * - Edit and Remove action buttons
  */
 class TableDemoService extends AbstractUIService
 {
+    /**
+     * Load users data from file
+     * 
+     * @return array
+     */
+    private function getUsersData(): array
+    {
+        return require app_path('Data/users_data.php');
+    }
+
     /**
      * Build the table demo UI
      */
@@ -26,48 +37,68 @@ class TableDemoService extends AbstractUIService
             ->layout(LayoutType::VERTICAL)
             ->title('Table Component Demo');
 
-        // Create table with dimensions: 5 rows × 4 columns
-        $table = UIBuilder::table('users_table', 5, 4)
-            ->title('Users Table');
+        // Load users data
+        $users = $this->getUsersData();
+        $userCount = count($users);
+
+        // Define fixed table dimensions (acts as min and max)
+        $tableRows = 10; // Fixed size - like a matrix
+        $tableCols = 4;
+
+        // Instruction label
+        $container->add(
+            UIBuilder::label('lbl_instruction')
+                ->text("📊 Table with {$userCount} users (table size: {$tableRows}×{$tableCols}):")
+                ->style('info')
+        );
+
+        // Create table with FIXED dimensions (matrix-style)
+        // All rows are created initially empty
+        $table = UIBuilder::table('users_table', $tableRows, $tableCols)
+            ->title('Users Table')
+            ->rowMinHeight(50); // Set minimum height for all rows (50px)
 
         // Fill header row
         $table->fillHeaderRow(['Name', 'Country', 'Actions', '']);
 
-        // Fill data rows
-        $table->fillRow(0, [
-            'Alice Johnson',
-            'United States',
-            ['button' => ['label' => 'Edit', 'action' => 'edit_user', 'style' => 'primary', 'parameters' => ['user_id' => 1, 'row' => 0, 'name' => 'Alice Johnson']]],
-            ['button' => ['label' => 'Remove', 'action' => 'remove_user', 'style' => 'danger', 'parameters' => ['user_id' => 1, 'row' => 0]]]
-        ]);
+        // Clear all rows explicitly (ensures all start empty)
+        // This is important for pagination scenarios
+        $table->clearRows();
 
-        $table->fillRow(1, [
-            'Bob Smith',
-            'Canada',
-            ['button' => ['label' => 'Edit', 'action' => 'edit_user', 'style' => 'primary', 'parameters' => ['user_id' => 2, 'row' => 1, 'name' => 'Bob Smith']]],
-            ['button' => ['label' => 'Remove', 'action' => 'remove_user', 'style' => 'danger', 'parameters' => ['user_id' => 2, 'row' => 1]]]
-        ]);
+        $row = 0;
+        // Fill only the rows with actual data
+        foreach ($users as $index => $user) {
+            // Stop if we exceed table capacity
+            if ($row >= $tableRows) {
+                break;
+            }
 
-        $table->fillRow(2, [
-            'Charlie Brown',
-            'United Kingdom',
-            ['button' => ['label' => 'Edit', 'action' => 'edit_user', 'style' => 'primary', 'parameters' => ['user_id' => 3, 'row' => 2, 'name' => 'Charlie Brown']]],
-            ['button' => ['label' => 'Remove', 'action' => 'remove_user', 'style' => 'danger', 'parameters' => ['user_id' => 3, 'row' => 2]]]
-        ]);
+            $table->fillRow($row++, [
+                $user['name'],
+                $user['country'],
+                ['button' => [
+                    'label' => 'Edit',
+                    'action' => 'edit_user',
+                    'style' => 'primary',
+                    'parameters' => [
+                        'user_id' => $user['id'],
+                        'row' => $index,
+                        'name' => $user['name']
+                    ]
+                ]],
+                ['button' => [
+                    'label' => 'Remove',
+                    'action' => 'remove_user',
+                    'style' => 'danger',
+                    'parameters' => [
+                        'user_id' => $user['id'],
+                        'row' => $index
+                    ]
+                ]]
+            ]);
+        }
 
-        $table->fillRow(3, [
-            'Diana Prince',
-            'Germany',
-            ['button' => ['label' => 'Edit', 'action' => 'edit_user', 'style' => 'primary', 'parameters' => ['user_id' => 4, 'row' => 3, 'name' => 'Diana Prince']]],
-            ['button' => ['label' => 'Remove', 'action' => 'remove_user', 'style' => 'danger', 'parameters' => ['user_id' => 4, 'row' => 3]]]
-        ]);
-
-        $table->fillRow(4, [
-            'Ethan Hunt',
-            'Australia',
-            ['button' => ['label' => 'Edit', 'action' => 'edit_user', 'style' => 'primary', 'parameters' => ['user_id' => 5, 'row' => 4, 'name' => 'Ethan Hunt']]],
-            ['button' => ['label' => 'Remove', 'action' => 'remove_user', 'style' => 'danger', 'parameters' => ['user_id' => 5, 'row' => 4]]]
-        ]);
+        // Remaining rows (if any) stay empty - no need to fill explicitly
 
         $container->add($table);
 

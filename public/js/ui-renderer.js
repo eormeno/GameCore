@@ -517,6 +517,14 @@ class TableRowComponent extends UIComponent {
             row.classList.add(this.config.style);
         }
 
+        // Apply minimum height if specified
+        // Note: For <tr> elements, we need to set the height property
+        // The CSS will inherit this to <td> elements
+        if (this.config.min_height) {
+            row.style.height = `${this.config.min_height}px`;
+            row.setAttribute('data-min-height', this.config.min_height);
+        }
+
         return this.applyCommonAttributes(row);
     }
 }
@@ -735,11 +743,20 @@ class UIRenderer {
             });
         }
         
-        // Sort children within each parent by their _order (or column for table cells)
+        // Sort children within each parent by their _order (or column for table cells, or row for table rows)
         for (const [parent, children] of childrenByParent.entries()) {
             children.sort((a, b) => {
                 const compA = this.components.get(a.id);
                 const compB = this.components.get(b.id);
+                
+                // If both are table rows, sort by row index
+                if (compA && compB && 
+                    compA.config.type === 'tablerow' && 
+                    compB.config.type === 'tablerow') {
+                    const rowA = compA.config.row ?? 999999;
+                    const rowB = compB.config.row ?? 999999;
+                    return rowA - rowB;
+                }
                 
                 // If both are table cells or header cells, sort by column
                 if (compA && compB && 

@@ -35,7 +35,33 @@ class TableRowBuilder extends UIComponent
             'selected' => false,
             'style' => 'default',
             'empty' => null,
+            'row' => null, // Row index for ordering
+            'min_height' => null, // Minimum height in pixels
         ];
+    }
+
+    /**
+     * Set the row index (for ordering)
+     * 
+     * @param int $row Row index (0-based)
+     * @return self
+     */
+    public function row(int $row): self
+    {
+        $this->setConfig('row', $row);
+        return $this;
+    }
+
+    /**
+     * Set minimum height for the row
+     * 
+     * @param int $height Minimum height in pixels
+     * @return self
+     */
+    public function minHeight(int $height): self
+    {
+        $this->setConfig('min_height', $height);
+        return $this;
     }
 
     /**

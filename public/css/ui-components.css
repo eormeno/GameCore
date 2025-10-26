@@ -311,6 +311,11 @@ body {
     border-bottom: 1px solid #e9ecef;
 }
 
+/* Support for min-height on rows (applied via inline style) */
+.ui-table-row[style*="min-height"] td {
+    height: inherit;
+}
+
 .ui-table-row:last-child {
     border-bottom: none;
 }
