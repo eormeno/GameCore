@@ -46,11 +46,13 @@ class UIBuilder
      * Create a new table component
      * 
      * @param string|null $name The optional semantic name for the table
+     * @param int $rows Number of data rows (0 for dynamic table)
+     * @param int $cols Number of columns (0 for dynamic table)
      * @return TableBuilder
      */
-    public static function table(?string $name = null): TableBuilder
+    public static function table(?string $name = null, int $rows = 0, int $cols = 0): TableBuilder
     {
-        return new TableBuilder($name);
+        return new TableBuilder($name, $rows, $cols);
     }
 
     /**

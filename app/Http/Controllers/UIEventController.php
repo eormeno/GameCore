@@ -91,7 +91,14 @@ class UIEventController extends Controller
 
             // Finalize event context for AbstractUIService
             if ($usesAbstractService) {
-                $result = $service->finalizeEventContext();
+                $autoDetectedChanges = $service->finalizeEventContext();
+                
+                // If handler returned explicit changes, use those
+                // Otherwise, use auto-detected changes from UI comparison
+                if (empty($result) || !is_array($result)) {
+                    $result = $autoDetectedChanges;
+                }
+                // If handler returned changes, keep them (don't overwrite)
             }
 
             // Ensure result is an array

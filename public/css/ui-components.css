@@ -253,3 +253,178 @@ body {
     cursor: not-allowed;
     opacity: 0.5;
 }
+
+/* ==================== Table Styles ==================== */
+
+/* Table Wrapper */
+.ui-table-wrapper {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+/* Table Title */
+.ui-table-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    margin: 0;
+}
+
+/* Table */
+.ui-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    table-layout: fixed; /* Fixed layout for equal column distribution */
+}
+
+/* Header Row */
+.ui-table-header-row {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Header Cells */
+.ui-table-header-cell {
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    width: auto; /* Auto width for adaptive columns */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Table Rows */
+.ui-table-row {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.ui-table-row:last-child {
+    border-bottom: none;
+}
+
+.ui-table-row:hover {
+    background: #f8f9fa;
+    transform: scale(1.01);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ui-table-row.selected {
+    background: #e3f2fd;
+}
+
+/* Row Styles */
+.ui-table-row.default {
+    background: white;
+}
+
+.ui-table-row.primary {
+    background: #e3f2fd;
+}
+
+.ui-table-row.success {
+    background: #e8f5e9;
+}
+
+.ui-table-row.warning {
+    background: #fff3e0;
+}
+
+.ui-table-row.danger {
+    background: #ffebee;
+}
+
+/* Table Cells */
+.ui-table-cell {
+    padding: 14px 16px;
+    color: #2c3e50;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Cell with image */
+.ui-table-cell-image {
+    max-width: 50px;
+    max-height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+/* Cell with button */
+.ui-table-cell .ui-button {
+    padding: 6px 12px;
+    font-size: 12px;
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* Action columns (buttons) should be centered and compact */
+.ui-table-cell:has(.ui-button) {
+    text-align: center;
+    width: 100px;
+}
+
+/* Zebra striping for better readability */
+.ui-table-row:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.ui-table-row:nth-child(even):hover {
+    background: #e9ecef;
+}
+
+/* Empty state */
+.ui-table-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .ui-table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .ui-table {
+        min-width: 600px;
+    }
+    
+    .ui-table-header-cell,
+    .ui-table-cell {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Loading state */
+.ui-table-wrapper.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Sortable headers */
+.ui-table-header-cell.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.ui-table-header-cell.sortable:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+

@@ -2,13 +2,14 @@
 
 namespace App\Services\UI\Components;
 
-use App\Services\UI\Support\UIIdGenerator;
-
 /**
- * Builder for Table UI components
+ * Table Builder
  * 
- * Tables are structured data display elements with headers and rows.
- * They support sorting, pagination, and custom styling.
+ * A table with fixed dimensions (rows × columns) where:
+ * - Structure is defined upfront
+ * - All cells are initially empty
+ * - Cells are identified by (row, col) coordinates
+ * - Cell names follow pattern: "{row}_{col}"
  */
 class TableBuilder extends UIComponent
 {
@@ -18,21 +19,44 @@ class TableBuilder extends UIComponent
     /** @var TableHeaderRowBuilder|null The header row (optional) */
     private ?TableHeaderRowBuilder $headerRow = null;
 
-    /** @var bool Flag to prevent multiple auto-fill calls */
-    private bool $autoFillCompleted = false;
+    /** @var int Number of data rows (excluding header) */
+    private int $rows;
 
-    public function __construct(?string $name = null)
+    /** @var int Number of columns */
+    private int $cols;
+
+    /** @var array Matrix of cell builders [row][col] */
+    private array $cells = [];
+
+    /** @var array Array of row builders */
+    private array $rowBuilders = [];
+
+    /**
+     * Create a new table
+     * 
+     * @param string|null $name Table name
+     * @param int $rows Number of data rows (0 for dynamic)
+     * @param int $cols Number of columns (0 for dynamic)
+     */
+    public function __construct(?string $name = null, int $rows = 0, int $cols = 0)
     {
         parent::__construct($name);
         
         // Create the rows container
         $this->rowsContainer = new UIContainer('rows');
-        
-        // Set the rows container's parent to this table's ID (parent-child relationship)
         $this->rowsContainer->setParent($this->id);
-        
-        // Set the rows_container attribute to reference the container's ID
         $this->config['rows_container'] = $this->rowsContainer->getId();
+        
+        $this->rows = $rows;
+        $this->cols = $cols;
+        
+        $this->setConfig('rows', $rows);
+        $this->setConfig('cols', $cols);
+        
+        // Initialize empty cells if dimensions are provided
+        if ($rows > 0 && $cols > 0) {
+            $this->initializeEmptyCells();
+        }
     }
 
     protected function getDefaultConfig(): array
@@ -41,7 +65,8 @@ class TableBuilder extends UIComponent
             'title' => '',
             'header_row' => null,
             'pagination' => false,
-            'min_rows' => null,
+            'rows' => 0,
+            'cols' => 0,
         ];
     }
 
@@ -76,39 +101,6 @@ class TableBuilder extends UIComponent
     }
 
     /**
-     * Set the table title
-     * 
-     * @param string $title The table title
-     * @return self For method chaining
-     */
-    public function title(string $title): self
-    {
-        return $this->setConfig('title', $title);
-    }
-
-    /**
-     * Enable or disable pagination
-     * 
-     * @param bool $pagination True to enable pagination
-     * @return self For method chaining
-     */
-    public function pagination(bool $pagination = true): self
-    {
-        return $this->setConfig('pagination', $pagination);
-    }
-
-    /**
-     * Set minimum number of rows to display (fills with empty rows if needed)
-     * 
-     * @param int $minRows Minimum number of rows
-     * @return self For method chaining
-     */
-    public function minRows(int $minRows): self
-    {
-        return $this->setConfig('min_rows', $minRows);
-    }
-
-    /**
      * Create a new table row associated with this table
      * Automatically adds the row to the table
      * 
@@ -136,22 +128,6 @@ class TableBuilder extends UIComponent
     }
 
     /**
-     * Add multiple row components to this table
-     * 
-     * @param array<TableRowBuilder> $rows Array of rows to add
-     * @return self For method chaining
-     */
-    public function addRows(array $rows): self
-    {
-        foreach ($rows as $row) {
-            if ($row instanceof TableRowBuilder) {
-                $this->addRow($row);
-            }
-        }
-        return $this;
-    }
-
-    /**
      * Get the rows container
      * 
      * @return UIContainer
@@ -162,22 +138,206 @@ class TableBuilder extends UIComponent
     }
 
     /**
-     * {@inheritDoc}
+     * Set table dimensions and initialize empty cells
      * 
-     * Override toJson to include the rows container and header row in flat structure
-     * and automatically fill with empty rows if minRows is set
+     * @param int $rows Number of data rows
+     * @param int $cols Number of columns
+     * @return self
      */
+    public function dimensions(int $rows, int $cols): self
+    {
+        $this->rows = $rows;
+        $this->cols = $cols;
+        
+        $this->setConfig('rows', $rows);
+        $this->setConfig('cols', $cols);
+        
+        $this->initializeEmptyCells();
+        
+        return $this;
+    }
+
     /**
-     * {@inheritDoc}
+     * Initialize all cells as empty
+     */
+    private function initializeEmptyCells(): void
+    {
+        // Create header row
+        $headerRow = $this->createHeaderRow('header');
+        
+        // Create empty header cells with column index
+        for ($col = 0; $col < $this->cols; $col++) {
+            $headerRow->createCell("header_$col")->text('')->column($col);
+        }
+        
+        // Create data rows with empty cells
+        for ($row = 0; $row < $this->rows; $row++) {
+            $rowBuilder = $this->createRow("row_$row");
+            $this->rowBuilders[$row] = $rowBuilder;
+            
+            // Create empty cells for this row with column index
+            $this->cells[$row] = [];
+            for ($col = 0; $col < $this->cols; $col++) {
+                $cellName = "{$row}_{$col}";
+                $cell = $rowBuilder->createCell($cellName);
+                $cell->text('')->column($col); // Empty by default with column index
+                $this->cells[$row][$col] = $cell;
+            }
+        }
+    }
+
+    /**
+     * Fill the header row with data
      * 
-     * Override toJson to handle table structure serialization
+     * @param array $data Array of header values (strings)
+     * @return self
+     */
+    public function fillHeaderRow(array $data): self
+    {
+        $headerRow = $this->getHeaderRow();
+        
+        if (!$headerRow) {
+            throw new \LogicException("Table dimensions must be set before filling header row");
+        }
+        
+        $cells = $headerRow->getCells();
+        
+        for ($col = 0; $col < min(count($data), $this->cols); $col++) {
+            if (isset($cells[$col])) {
+                $cells[$col]->text($data[$col]);
+            }
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Fill a data row with values
+     * 
+     * @param int $row Row index (0-based)
+     * @param array $data Array of cell data
+     *                    - string: text content
+     *                    - array with 'text': text content
+     *                    - array with 'button': button config
+     *                    - array with 'url_image': image config
+     * @return self
+     */
+    public function fillRow(int $row, array $data): self
+    {
+        if ($row < 0 || $row >= $this->rows) {
+            throw new \OutOfBoundsException("Row index $row is out of bounds (0-" . ($this->rows - 1) . ")");
+        }
+        
+        for ($col = 0; $col < min(count($data), $this->cols); $col++) {
+            $value = $data[$col];
+            $cell = $this->cells[$row][$col];
+            
+            if (is_string($value)) {
+                // Simple text
+                $cell->text($value);
+            } elseif (is_array($value)) {
+                if (isset($value['text'])) {
+                    $cell->text($value['text']);
+                } elseif (isset($value['button'])) {
+                    $cell->button($value['button']);
+                } elseif (isset($value['url_image'])) {
+                    $cell->urlImage(
+                        $value['url_image'],
+                        $value['alt'] ?? null,
+                        $value['width'] ?? null,
+                        $value['height'] ?? null
+                    );
+                }
+            }
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Get the cell ID for a specific row and column
+     * 
+     * Format: tableId_row_col
+     * Example: 88001_0_1 (table 88001, row 0, col 1)
+     * 
+     * @param int $row Row index (0-based)
+     * @param int $col Column index (0-based)
+     * @return int Cell ID
+     */
+    public function getCellId(int $row, int $col): int
+    {
+        if ($row < 0 || $row >= $this->rows) {
+            throw new \OutOfBoundsException("Row index $row is out of bounds");
+        }
+        
+        if ($col < 0 || $col >= $this->cols) {
+            throw new \OutOfBoundsException("Column index $col is out of bounds");
+        }
+        
+        return $this->cells[$row][$col]->getId();
+    }
+
+    /**
+     * Get a specific cell builder
+     * 
+     * @param int $row Row index (0-based)
+     * @param int $col Column index (0-based)
+     * @return TableCellBuilder
+     */
+    public function getCell(int $row, int $col): TableCellBuilder
+    {
+        if ($row < 0 || $row >= $this->rows) {
+            throw new \OutOfBoundsException("Row index $row is out of bounds");
+        }
+        
+        if ($col < 0 || $col >= $this->cols) {
+            throw new \OutOfBoundsException("Column index $col is out of bounds");
+        }
+        
+        return $this->cells[$row][$col];
+    }
+
+    /**
+     * Set the table title
+     * 
+     * @param string $title The table title
+     * @return self
+     */
+    public function title(string $title): self
+    {
+        return $this->setConfig('title', $title);
+    }
+
+    /**
+     * Enable or disable pagination
+     * 
+     * @param bool $pagination True to enable pagination
+     * @return self
+     */
+    public function pagination(bool $pagination = true): self
+    {
+        return $this->setConfig('pagination', $pagination);
+    }
+
+    /**
+     * Get table dimensions
+     * 
+     * @return array ['rows' => int, 'cols' => int]
+     */
+    public function getDimensions(): array
+    {
+        return [
+            'rows' => $this->rows,
+            'cols' => $this->cols,
+        ];
+    }
+
+    /**
+     * Override toJson to include the rows container and header row in flat structure
      */
     public function toJson(?int $order = null): array
     {
-        // Auto-fill empty rows if minRows is set
-        $this->autoFillEmptyRows();
-        
-        // Get the table's JSON (without the rows container and header row)
+        // Get the table's JSON
         $tableJson = parent::toJson();
         
         // Get the rows container's JSON
@@ -195,59 +355,9 @@ class TableBuilder extends UIComponent
         return $result;
     }
 
-    /**
-     * Automatically fill the table with empty rows if current row count is less than minRows
-     * 
-     * @return void
-     */
-    private function autoFillEmptyRows(): void
+    protected function getExcludedJsonKeys(): array
     {
-        // Prevent multiple calls
-        if ($this->autoFillCompleted) {
-            return;
-        }
-        
-        // Check if minRows is set
-        $minRows = $this->config['min_rows'] ?? null;
-        
-        if ($minRows === null || $minRows <= 0) {
-            $this->autoFillCompleted = true;
-            return; // No minRows set, nothing to do
-        }
-        
-        // Count current rows in the rows container
-        $currentRowCount = count($this->rowsContainer->getChildren());
-        
-        // If we already have enough rows, do nothing
-        if ($currentRowCount >= $minRows) {
-            $this->autoFillCompleted = true;
-            return;
-        }
-        
-        // Calculate how many empty rows we need to add
-        $emptyRowsNeeded = $minRows - $currentRowCount;
-        
-        // Count header cells to determine how many cells per row
-        $headerCount = 0;
-        if ($this->headerRow !== null) {
-            $headerCount = count($this->headerRow->getCells());
-        }
-        
-        // Add empty rows with empty cells
-        for ($i = 0; $i < $emptyRowsNeeded; $i++) {
-            $rowNumber = $currentRowCount + $i + 1;
-            $emptyRow = new TableRowBuilder($this, "empty_row_$rowNumber");
-            $emptyRow->empty(true);
-            
-            // Add empty cells to the row
-            for ($j = 0; $j < $headerCount; $j++) {
-                $emptyRow->createCell()->text('');
-            }
-            
-            $this->addRow($emptyRow);
-        }
-        
-        $this->autoFillCompleted = true;
+        // Don't exclude 'name' - we need it for cell identification
+        return parent::getExcludedJsonKeys();
     }
-
 }

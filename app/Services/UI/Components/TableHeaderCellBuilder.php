@@ -42,6 +42,7 @@ class TableHeaderCellBuilder extends UIComponent
             'background_color' => null,
             'font_weight' => FontWeight::BOLD->value,
             'colspan' => 1,
+            'column' => null,  // Column index for ordering
         ];
     }
 
@@ -123,6 +124,17 @@ class TableHeaderCellBuilder extends UIComponent
     public function tooltip(string $tooltip): self
     {
         return $this->setConfig('tooltip', $tooltip);
+    }
+
+    /**
+     * Set the column index for this cell (for ordering)
+     * 
+     * @param int $column The column index (0-based)
+     * @return self For method chaining
+     */
+    public function column(int $column): self
+    {
+        return $this->setConfig('column', $column);
     }
 
     /**
@@ -218,6 +230,9 @@ class TableHeaderCellBuilder extends UIComponent
         if (!empty($excludeKeys)) {
             $config = array_diff_key($config, array_flip($excludeKeys));
         }
+
+        // CRITICAL: Include component ID in config for frontend lookups
+        $config['_id'] = $this->id;
 
         return [$this->id => $config];
     }

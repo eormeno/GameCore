@@ -12,11 +12,11 @@ Route::get('/demo/{demo}/{reset?}', function (string $demo, bool $reset = false)
         'demo' => $demo,
         'reset' => $reset
     ]);
-})->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo')->name('demo');
+})->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo')->name('demo');
 
 // Demo UI API routes - Unified controller for all demo services
 Route::get('/api/{demo}/{reset?}', [UIDemoController::class, 'show'])
-    ->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo')
+    ->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo')
     ->name('api.demo');
 
 // UI Event Handler

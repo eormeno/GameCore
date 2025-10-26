@@ -463,6 +463,175 @@ class CheckboxComponent extends UIComponent {
     }
 }
 
+// ==================== Table Component ====================
+class TableComponent extends UIComponent {
+    render() {
+        const tableWrapper = document.createElement('div');
+        tableWrapper.className = 'ui-table-wrapper';
+
+        // Add title if exists
+        if (this.config.title) {
+            const title = document.createElement('h3');
+            title.className = 'ui-table-title';
+            title.textContent = this.config.title;
+            tableWrapper.appendChild(title);
+        }
+
+        // Create table element (this is where rows will be mounted)
+        const table = document.createElement('table');
+        table.className = 'ui-table';
+        tableWrapper.appendChild(table);
+
+        // Store the wrapper as main element, but table for children
+        this.tableElement = table;
+
+        return this.applyCommonAttributes(tableWrapper);
+    }
+
+    mount(parentElement) {
+        super.mount(parentElement);
+    }
+}
+
+// ==================== Table Header Row Component ====================
+class TableHeaderRowComponent extends UIComponent {
+    render() {
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'ui-table-header-row';
+
+        return this.applyCommonAttributes(headerRow);
+    }
+}
+
+// ==================== Table Row Component ====================
+class TableRowComponent extends UIComponent {
+    render() {
+        const row = document.createElement('tr');
+        row.className = 'ui-table-row';
+
+        if (this.config.selected) {
+            row.classList.add('selected');
+        }
+
+        if (this.config.style) {
+            row.classList.add(this.config.style);
+        }
+
+        return this.applyCommonAttributes(row);
+    }
+}
+
+// ==================== Table Cell Component ====================
+class TableCellComponent extends UIComponent {
+    render() {
+        const cell = document.createElement('td');
+        cell.className = 'ui-table-cell';
+
+        // Cell types are mutually exclusive (priority order: button > url_image > text)
+        
+        if (this.config.button) {
+            // Button cell - check first!
+            const btn = document.createElement('button');
+            btn.className = `ui-button ${this.config.button.style || 'default'}`;
+            btn.textContent = this.config.button.label || 'Action';
+            
+            // Handle button click
+            if (this.config.button.action) {
+                btn.addEventListener('click', () => {
+                    this.handleButtonClick(
+                        this.config.button.action,
+                        this.config.button.parameters || {}
+                    );
+                });
+            }
+            
+            cell.appendChild(btn);
+        }
+        else if (this.config.url_image) {
+            // Image cell
+            const img = document.createElement('img');
+            img.src = this.config.url_image;
+            img.alt = this.config.alt || '';
+            img.className = 'ui-table-cell-image';
+            if (this.config.image_width) img.style.width = this.config.image_width;
+            if (this.config.image_height) img.style.height = this.config.image_height;
+            cell.appendChild(img);
+        }
+        else if (this.config.text !== undefined && this.config.text !== null) {
+            // Simple text cell
+            cell.textContent = this.config.text;
+        }
+
+        if (this.config.align) {
+            cell.style.textAlign = this.config.align;
+        }
+
+        return this.applyCommonAttributes(cell);
+    }
+
+    /**
+     * Handle button click in cell
+     */
+    async handleButtonClick(action, parameters) {
+        console.log('Table cell button clicked:', action, parameters);
+        
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            const response = await fetch('/api/ui-event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    component_id: this.config._id,
+                    event: 'click',
+                    action: action,
+                    parameters: parameters,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('✅ Cell button action executed:', action, result);
+                
+                if (result && Object.keys(result).length > 0) {
+                    if (globalRenderer) {
+                        globalRenderer.handleUIUpdate(result);
+                    }
+                }
+            } else {
+                console.error('❌ Cell button action failed:', response.status, result);
+            }
+        } catch (error) {
+            console.error('❌ Error executing cell button action:', error);
+        }
+    }
+}
+
+// ==================== Table Header Cell Component ====================
+class TableHeaderCellComponent extends UIComponent {
+    render() {
+        const cell = document.createElement('th');
+        cell.className = 'ui-table-header-cell';
+
+        if (this.config.text !== undefined) {
+            cell.textContent = this.config.text;
+        }
+
+        if (this.config.align) {
+            cell.style.textAlign = this.config.align;
+        }
+
+        return this.applyCommonAttributes(cell);
+    }
+}
+
 // ==================== Component Factory ====================
 class ComponentFactory {
     static create(id, config) {
@@ -479,6 +648,16 @@ class ComponentFactory {
                 return new SelectComponent(id, config);
             case 'checkbox':
                 return new CheckboxComponent(id, config);
+            case 'table':
+                return new TableComponent(id, config);
+            case 'tableheaderrow':
+                return new TableHeaderRowComponent(id, config);
+            case 'tablerow':
+                return new TableRowComponent(id, config);
+            case 'tablecell':
+                return new TableCellComponent(id, config);
+            case 'tableheadercell':
+                return new TableHeaderCellComponent(id, config);
             default:
                 console.warn(`Unknown component type: ${config.type}`);
                 return null;
@@ -556,9 +735,24 @@ class UIRenderer {
             });
         }
         
-        // Sort children within each parent by their _order
+        // Sort children within each parent by their _order (or column for table cells)
         for (const [parent, children] of childrenByParent.entries()) {
-            children.sort((a, b) => a.order - b.order);
+            children.sort((a, b) => {
+                const compA = this.components.get(a.id);
+                const compB = this.components.get(b.id);
+                
+                // If both are table cells or header cells, sort by column
+                if (compA && compB && 
+                    (compA.config.type === 'tablecell' || compA.config.type === 'tableheadercell') &&
+                    (compB.config.type === 'tablecell' || compB.config.type === 'tableheadercell')) {
+                    const colA = compA.config.column ?? 999999;
+                    const colB = compB.config.column ?? 999999;
+                    return colA - colB;
+                }
+                
+                // Otherwise sort by _order
+                return a.order - b.order;
+            });
         }
 
         // Step 4: Mount components in hierarchical order
@@ -607,7 +801,25 @@ class UIRenderer {
 
                         // Wait for parent to be mounted first
                         if (mounted.has(parentComponentKey)) {
-                            component.mount(parentComponent.element);
+                            // Determine mount target
+                            let mountTarget = parentComponent.element;
+                            
+                            // Special case: if parent is a table, mount rows inside <table> element
+                            if (parentComponent.tableElement) {
+                                mountTarget = parentComponent.tableElement;
+                                
+                                // Special case: if child is a container inside a table, it's probably the rows container
+                                // Don't create a DOM element for it, just mark it as mounted and let its children mount to the table
+                                if (component.config.type === 'container') {
+                                    // Make this container "transparent" - its children will mount directly to the table
+                                    component.element = mountTarget; // Point to the table
+                                    mounted.add(id);
+                                    console.log(`    ✅ Transparent container mounted (children will use parent table)`);
+                                    continue;
+                                }
+                            }
+                            
+                            component.mount(mountTarget);
                             mounted.add(id);
                             console.log(`    ✅ Mounted to component "${parentComponentKey}" (_id: ${parentId})`);
                         } else {

@@ -35,6 +35,9 @@ class TableCellBuilder extends UIComponent
         return [
             'text' => null,
             'align' => null,
+            'url_image' => null,
+            'button' => null,
+            'column' => null,  // Column index for ordering
         ];
     }
 
@@ -58,6 +61,52 @@ class TableCellBuilder extends UIComponent
     public function align(Align $align): self
     {
         return $this->setConfig('align', $align->value);
+    }
+
+    /**
+     * Set button configuration for the cell
+     * 
+     * @param array $button Button configuration with keys: label, action, style, parameters
+     * @return self For method chaining
+     */
+    public function button(array $button): self
+    {
+        return $this->setConfig('button', $button);
+    }
+
+    /**
+     * Set the column index for this cell (for ordering)
+     * 
+     * @param int $column The column index (0-based)
+     * @return self For method chaining
+     */
+    public function column(int $column): self
+    {
+        return $this->setConfig('column', $column);
+    }
+
+    /**
+     * Set image URL for the cell
+     * 
+     * @param string $url Image URL
+     * @param string|null $alt Alt text for the image
+     * @param string|null $width Image width
+     * @param string|null $height Image height
+     * @return self For method chaining
+     */
+    public function urlImage(string $url, ?string $alt = null, ?string $width = null, ?string $height = null): self
+    {
+        $this->setConfig('url_image', $url);
+        if ($alt !== null) {
+            $this->setConfig('alt', $alt);
+        }
+        if ($width !== null) {
+            $this->setConfig('image_width', $width);
+        }
+        if ($height !== null) {
+            $this->setConfig('image_height', $height);
+        }
+        return $this;
     }
 
     /**
@@ -133,6 +182,9 @@ class TableCellBuilder extends UIComponent
             $config = array_diff_key($config, array_flip($excludeKeys));
         }
 
+        // CRITICAL: Include component ID in config for frontend lookups
+        $config['_id'] = $this->id;
+
         // Start with this cell
         $result = [$this->id => $config];
 
@@ -146,12 +198,13 @@ class TableCellBuilder extends UIComponent
     }
 
     /**
-     * Exclude 'name' from JSON output
+     * Exclude keys from JSON output
      * 
      * @return array List of keys to exclude
      */
     protected function getExcludedJsonKeys(): array
     {
-        return ['name'];
+        // Don't exclude 'name' - we need it for matrix cell identification
+        return [];
     }
 }
