@@ -68,6 +68,9 @@ class TableBuilder extends UIComponent
             'title' => '',
             'header_row' => null,
             'pagination' => false,
+            'per_page' => 10,
+            'current_page' => 1,
+            'total_items' => 0,
             'rows' => 0,
             'cols' => 0,
             'align' => 'left', // Alignment: left, center, right
@@ -418,12 +421,57 @@ class TableBuilder extends UIComponent
     /**
      * Enable or disable pagination
      * 
-     * @param bool $pagination True to enable pagination
+     * @param bool $enabled True to enable pagination
+     * @param int $perPage Number of items per page
      * @return self
      */
-    public function pagination(bool $pagination = true): self
+    public function pagination(bool $enabled = true, int $perPage = 10): self
     {
-        return $this->setConfig('pagination', $pagination);
+        $this->setConfig('pagination', $enabled);
+        $this->setConfig('per_page', $perPage);
+        return $this;
+    }
+
+    /**
+     * Set the current page
+     * 
+     * @param int $page Current page number (1-based)
+     * @return self
+     */
+    public function currentPage(int $page): self
+    {
+        return $this->setConfig('current_page', max(1, $page));
+    }
+
+    /**
+     * Set the total number of items (for calculating total pages)
+     * 
+     * @param int $total Total number of items
+     * @return self
+     */
+    public function totalItems(int $total): self
+    {
+        return $this->setConfig('total_items', $total);
+    }
+
+    /**
+     * Get pagination info
+     * 
+     * @return array ['current_page' => int, 'per_page' => int, 'total_items' => int, 'total_pages' => int]
+     */
+    public function getPaginationInfo(): array
+    {
+        $perPage = $this->config['per_page'];
+        $totalItems = $this->config['total_items'];
+        $currentPage = $this->config['current_page'];
+        $totalPages = $totalItems > 0 ? (int)ceil($totalItems / $perPage) : 1;
+
+        return [
+            'current_page' => $currentPage,
+            'per_page' => $perPage,
+            'total_items' => $totalItems,
+            'total_pages' => $totalPages,
+        ];
     }
 
     /**

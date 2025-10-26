@@ -44,22 +44,28 @@ class TableDemoService extends AbstractUIService
         $users = $this->getUsersData();
         $userCount = count($users);
 
+        // Pagination settings
+        $perPage = 10;
+        $currentPage = 1;
+
         // Define fixed table dimensions (acts as min and max)
-        $tableRows = 10; // Fixed size - like a matrix
+        $tableRows = $perPage; // Fixed size - like a matrix
         $tableCols = 5;  // Id, Name, Country, Edit, Remove
 
         // Instruction label
         $container->add(
             UIBuilder::label('lbl_instruction')
-                ->text("📊 Table with {$userCount} users (table size: {$tableRows}×{$tableCols}):")
+                ->text("📊 Table with {$userCount} users total (showing {$perPage} per page):")
                 ->style('info')
         );
 
-        // Create table with FIXED dimensions (matrix-style)
-        // All rows are created initially empty
+        // Create table with FIXED dimensions and pagination
         $table = UIBuilder::table('users_table', $tableRows, $tableCols)
             ->title('Users Table')
             ->align('center') // Align table in container: left, center, right
+            ->pagination(true, $perPage) // Enable pagination, 10 per page
+            ->currentPage($currentPage)
+            ->totalItems($userCount)
             ->rowMinHeight(50) // Set minimum height for all rows (50px)
             ->columnWidth(0, 50, 80)      // Id column: min 50px, max 80px
             ->columnWidth(1, 200, 250)    // Name column: min 200px, max 250px
@@ -71,14 +77,33 @@ class TableDemoService extends AbstractUIService
         $table->fillHeaderRow(['Id','Name', 'Country', 'Actions', '']);
 
         // Clear all rows explicitly (ensures all start empty)
-        // This is important for pagination scenarios
         $table->clearRows();
 
+        // Fill with paginated data
+        $this->fillTableWithPage($table, $users, $currentPage, $perPage);
+
+        $container->add($table);
+
+        return $container;
+    }
+
+    /**
+     * Fill table with data for a specific page
+     * 
+     * @param \App\Services\UI\Components\TableBuilder $table
+     * @param array $users All users data
+     * @param int $page Current page (1-based)
+     * @param int $perPage Items per page
+     */
+    private function fillTableWithPage($table, array $users, int $page, int $perPage): void
+    {
+        // Calculate offset
+        $offset = ($page - 1) * $perPage;
+        $pagedUsers = array_slice($users, $offset, $perPage);
+
         $row = 0;
-        // Fill only the rows with actual data
-        foreach ($users as $index => $user) {
-            // Stop if we exceed table capacity
-            if ($row >= $tableRows) {
+        foreach ($pagedUsers as $user) {
+            if ($row >= $perPage) {
                 break;
             }
 
@@ -87,32 +112,26 @@ class TableDemoService extends AbstractUIService
                 $user['name'],
                 $user['country'],
                 ['button' => [
-                    'label' => 'Edit',
+                    'label' => "Edit #{$user['id']}",
                     'action' => 'edit_user',
                     'style' => 'primary',
                     'parameters' => [
                         'user_id' => $user['id'],
-                        'row' => $index,
+                        'row' => $row - 1,
                         'name' => $user['name']
                     ]
                 ]],
                 ['button' => [
-                    'label' => 'Remove',
+                    'label' => "Remove #{$user['id']}",
                     'action' => 'remove_user',
                     'style' => 'danger',
                     'parameters' => [
                         'user_id' => $user['id'],
-                        'row' => $index
+                        'row' => $row - 1
                     ]
                 ]]
             ]);
         }
-
-        // Remaining rows (if any) stay empty - no need to fill explicitly
-
-        $container->add($table);
-
-        return $container;
     }
 
     /**
@@ -215,6 +234,144 @@ class TableDemoService extends AbstractUIService
                 'text' => '-',
                 '_id' => $countryCellId,
             ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Handle page change action
+     * 
+     * @param array $params Action parameters with 'page' key
+     * @return array UI updates
+     */
+    public function onChangePage(array $params): array
+    {
+        $page = $params['page'] ?? 1;
+        $perPage = 10;
+
+        // Get all users
+        $users = $this->getUsersData();
+
+        // Get table from stored UI
+        $storedUI = $this->getStoredUI();
+        $tableId = null;
+        
+        // Find the table component
+        foreach ($storedUI as $id => $component) {
+            if ($component['type'] === 'table' && isset($component['name']) && $component['name'] === 'users_table') {
+                $tableId = $id;
+                break;
+            }
+        }
+
+        if (!$tableId) {
+            return [];
+        }
+
+        // Calculate offset
+        $offset = ($page - 1) * $perPage;
+        $pagedUsers = array_slice($users, $offset, $perPage);
+
+        // Build updates for all cells
+        $result = [];
+        
+        $row = 0;
+        foreach ($pagedUsers as $user) {
+            if ($row >= $perPage) {
+                break;
+            }
+
+            // Update each cell in the row
+            $cellNames = [
+                "{$row}_0" => $user['id'],
+                "{$row}_1" => $user['name'],
+                "{$row}_2" => $user['country'],
+            ];
+
+            foreach ($cellNames as $cellName => $value) {
+                foreach ($storedUI as $id => $component) {
+                    if ($component['type'] === 'tablecell' && 
+                        isset($component['name']) && 
+                        $component['name'] === $cellName) {
+                        $result[$id] = [
+                            'type' => 'tablecell',
+                            'text' => (string)$value,
+                            '_id' => $id,
+                        ];
+                        break;
+                    }
+                }
+            }
+
+            // Update button parameters for Edit and Remove buttons
+            // Column 3: Edit button
+            $editCellName = "{$row}_3";
+            foreach ($storedUI as $id => $component) {
+                if ($component['type'] === 'tablecell' && 
+                    isset($component['name']) && 
+                    $component['name'] === $editCellName) {
+                    $result[$id] = [
+                        'type' => 'tablecell',
+                        'button' => [
+                            'label' => "Edit #{$user['id']}",
+                            'action' => 'edit_user',
+                            'style' => 'primary',
+                            'parameters' => [
+                                'user_id' => $user['id'],
+                                'row' => $row,
+                                'name' => $user['name']
+                            ]
+                        ],
+                        '_id' => $id,
+                    ];
+                    break;
+                }
+            }
+
+            // Column 4: Remove button
+            $removeCellName = "{$row}_4";
+            foreach ($storedUI as $id => $component) {
+                if ($component['type'] === 'tablecell' && 
+                    isset($component['name']) && 
+                    $component['name'] === $removeCellName) {
+                    $result[$id] = [
+                        'type' => 'tablecell',
+                        'button' => [
+                            'label' => "Remove #{$user['id']}",
+                            'action' => 'remove_user',
+                            'style' => 'danger',
+                            'parameters' => [
+                                'user_id' => $user['id'],
+                                'row' => $row
+                            ]
+                        ],
+                        '_id' => $id,
+                    ];
+                    break;
+                }
+            }
+
+            $row++;
+        }
+
+        // Clear remaining rows if less than perPage
+        for ($i = $row; $i < $perPage; $i++) {
+            for ($col = 0; $col < 5; $col++) {
+                $cellName = "{$i}_{$col}";
+                foreach ($storedUI as $id => $component) {
+                    if ($component['type'] === 'tablecell' && 
+                        isset($component['name']) && 
+                        $component['name'] === $cellName) {
+                        $result[$id] = [
+                            'type' => 'tablecell',
+                            'text' => '',
+                            '_id' => $id,
+                        ];
+                        break;
+                    }
+                }
+            }
         }
 
         return $result;

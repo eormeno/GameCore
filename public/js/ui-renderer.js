@@ -487,10 +487,161 @@ class TableComponent extends UIComponent {
         table.className = 'ui-table';
         tableWrapper.appendChild(table);
 
+        // Add pagination controls if enabled
+        if (this.config.pagination) {
+            const paginationDiv = this.createPaginationControls();
+            tableWrapper.appendChild(paginationDiv);
+        }
+
         // Store the wrapper as main element, but table for children
         this.tableElement = table;
 
         return this.applyCommonAttributes(tableWrapper);
+    }
+
+    createPaginationControls() {
+        const paginationDiv = document.createElement('div');
+        paginationDiv.className = 'ui-pagination';
+        paginationDiv.setAttribute('data-component-id', this.id);
+
+        const currentPage = this.config.current_page || 1;
+        const perPage = this.config.per_page || 10;
+        const totalItems = this.config.total_items || 0;
+        const totalPages = totalItems > 0 ? Math.ceil(totalItems / perPage) : 1;
+
+        // Info text
+        const start = (currentPage - 1) * perPage + 1;
+        const end = Math.min(currentPage * perPage, totalItems);
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'ui-pagination-info';
+        infoDiv.textContent = `Showing ${start}-${end} of ${totalItems} items`;
+        paginationDiv.appendChild(infoDiv);
+
+        // Controls
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'ui-pagination-controls';
+
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'ui-pagination-button';
+        prevBtn.textContent = '« Previous';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.addEventListener('click', () => this.changePage(currentPage - 1));
+        controlsDiv.appendChild(prevBtn);
+
+        // Page numbers
+        const pages = this.getPageNumbers(currentPage, totalPages);
+        pages.forEach(page => {
+            if (page === '...') {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.style.padding = '0 8px';
+                controlsDiv.appendChild(ellipsis);
+            } else {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'ui-pagination-button';
+                if (page === currentPage) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.textContent = page;
+                pageBtn.addEventListener('click', () => this.changePage(page));
+                controlsDiv.appendChild(pageBtn);
+            }
+        });
+
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'ui-pagination-button';
+        nextBtn.textContent = 'Next »';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.addEventListener('click', () => this.changePage(currentPage + 1));
+        controlsDiv.appendChild(nextBtn);
+
+        paginationDiv.appendChild(controlsDiv);
+
+        return paginationDiv;
+    }
+
+    getPageNumbers(current, total) {
+        const pages = [];
+        const maxVisible = 5;
+
+        if (total <= maxVisible + 2) {
+            for (let i = 1; i <= total; i++) {
+                pages.push(i);
+            }
+        } else {
+            pages.push(1);
+
+            if (current > 3) {
+                pages.push('...');
+            }
+
+            const start = Math.max(2, current - 1);
+            const end = Math.min(total - 1, current + 1);
+
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+
+            if (current < total - 2) {
+                pages.push('...');
+            }
+
+            pages.push(total);
+        }
+
+        return pages;
+    }
+
+    async changePage(page) {
+        console.log('Changing to page:', page);
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            const response = await fetch('/api/ui-event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    component_id: this.id,
+                    event: 'action',
+                    action: 'change_page',
+                    parameters: { page }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Page change response:', result);
+
+            if (result && globalRenderer) {
+                // Update pagination config
+                this.config.current_page = page;
+                
+                // Re-render pagination controls
+                const oldPagination = this.element.querySelector('.ui-pagination');
+                if (oldPagination) {
+                    const newPagination = this.createPaginationControls();
+                    oldPagination.replaceWith(newPagination);
+                }
+
+                // Apply UI updates from server
+                // The result is already the updates object (id => component)
+                globalRenderer.handleUIUpdate(result);
+            }
+
+        } catch (error) {
+            console.error('Error changing page:', error);
+        }
     }
 
     mount(parentElement) {
@@ -917,6 +1068,54 @@ class UIRenderer {
      */
     updateComponent(element, changes) {
         try {
+            // Button in table cell - needs special handling to update the button inside the cell
+            if (changes.button !== undefined && element.tagName === 'TD') {
+                // Clear the cell and re-render with new button
+                element.innerHTML = '';
+                
+                const btn = document.createElement('button');
+                btn.className = `ui-button ${changes.button.style || 'default'}`;
+                btn.textContent = changes.button.label || 'Action';
+                
+                // Handle button click
+                if (changes.button.action) {
+                    btn.addEventListener('click', async () => {
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                        const componentId = element.getAttribute('data-component-id');
+
+                        try {
+                            const response = await fetch('/api/ui-event', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                                credentials: 'same-origin',
+                                body: JSON.stringify({
+                                    component_id: parseInt(componentId),
+                                    event: 'action',
+                                    action: changes.button.action,
+                                    parameters: changes.button.parameters || {},
+                                }),
+                            });
+
+                            const result = await response.json();
+
+                            if (response.ok && result && globalRenderer) {
+                                globalRenderer.handleUIUpdate(result);
+                            }
+                        } catch (error) {
+                            console.error('Button click error:', error);
+                        }
+                    });
+                }
+                
+                element.appendChild(btn);
+                return;
+            }
+            
             // Text (labels)
             if (changes.text !== undefined) {
                 element.textContent = changes.text;
