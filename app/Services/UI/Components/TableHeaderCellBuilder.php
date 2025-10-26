@@ -43,6 +43,8 @@ class TableHeaderCellBuilder extends UIComponent
             'font_weight' => FontWeight::BOLD->value,
             'colspan' => 1,
             'column' => null,  // Column index for ordering
+            'min_width' => null,  // Minimum width in pixels
+            'max_width' => null,  // Maximum width in pixels
         ];
     }
 
@@ -102,6 +104,24 @@ class TableHeaderCellBuilder extends UIComponent
     public function width(string $width): self
     {
         return $this->setConfig('width', $width);
+    }
+
+    /**
+     * Set width constraints (min and max) for the header cell
+     * 
+     * @param int|null $minWidth Minimum width in pixels
+     * @param int|null $maxWidth Maximum width in pixels
+     * @return self
+     */
+    public function widthConstraints(?int $minWidth = null, ?int $maxWidth = null): self
+    {
+        if ($minWidth !== null) {
+            $this->setConfig('min_width', $minWidth);
+        }
+        if ($maxWidth !== null) {
+            $this->setConfig('max_width', $maxWidth);
+        }
+        return $this;
     }
 
     /**

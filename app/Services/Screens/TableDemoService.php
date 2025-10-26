@@ -14,6 +14,9 @@ use App\Services\UI\UIBuilder;
  * - Dynamic data loading from file
  * - Header row with columns (Name, Country, Actions)
  * - Edit and Remove action buttons
+ * - Column width constraints
+ * 
+ * Version: 1.1 (with column widths)
  */
 class TableDemoService extends AbstractUIService
 {
@@ -43,7 +46,7 @@ class TableDemoService extends AbstractUIService
 
         // Define fixed table dimensions (acts as min and max)
         $tableRows = 10; // Fixed size - like a matrix
-        $tableCols = 4;
+        $tableCols = 5;  // Id, Name, Country, Edit, Remove
 
         // Instruction label
         $container->add(
@@ -56,10 +59,16 @@ class TableDemoService extends AbstractUIService
         // All rows are created initially empty
         $table = UIBuilder::table('users_table', $tableRows, $tableCols)
             ->title('Users Table')
-            ->rowMinHeight(50); // Set minimum height for all rows (50px)
+            ->align('center') // Align table in container: left, center, right
+            ->rowMinHeight(50) // Set minimum height for all rows (50px)
+            ->columnWidth(0, 50, 80)      // Id column: min 50px, max 80px
+            ->columnWidth(1, 200, 250)    // Name column: min 200px, max 250px
+            ->columnWidth(2, 200, 250)    // Country column: min 200px, max 250px
+            ->columnWidth(3, 80, 120)     // Actions column: min 80px, max 120px
+            ->columnWidth(4, 80, 120);    // Remove column: min 80px, max 120px
 
         // Fill header row
-        $table->fillHeaderRow(['Name', 'Country', 'Actions', '']);
+        $table->fillHeaderRow(['Id','Name', 'Country', 'Actions', '']);
 
         // Clear all rows explicitly (ensures all start empty)
         // This is important for pagination scenarios
@@ -74,6 +83,7 @@ class TableDemoService extends AbstractUIService
             }
 
             $table->fillRow($row++, [
+                $user['id'],
                 $user['name'],
                 $user['country'],
                 ['button' => [

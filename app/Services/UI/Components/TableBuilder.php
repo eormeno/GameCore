@@ -31,6 +31,9 @@ class TableBuilder extends UIComponent
     /** @var array Array of row builders */
     private array $rowBuilders = [];
 
+    /** @var array Column width configuration [col => ['min' => int, 'max' => int]] */
+    private array $columnWidths = [];
+
     /**
      * Create a new table
      * 
@@ -67,6 +70,7 @@ class TableBuilder extends UIComponent
             'pagination' => false,
             'rows' => 0,
             'cols' => 0,
+            'align' => 'left', // Alignment: left, center, right
         ];
     }
 
@@ -250,9 +254,9 @@ class TableBuilder extends UIComponent
             $value = $data[$col];
             $cell = $this->cells[$row][$col];
             
-            if (is_string($value)) {
-                // Simple text
-                $cell->text($value);
+            if (is_string($value) || is_numeric($value)) {
+                // Simple text (string or number)
+                $cell->text((string)$value);
             } elseif (is_array($value)) {
                 if (isset($value['text'])) {
                     $cell->text($value['text']);
@@ -327,6 +331,21 @@ class TableBuilder extends UIComponent
     }
 
     /**
+     * Set the table alignment within its parent container
+     * 
+     * @param string $align Alignment: 'left', 'center', or 'right'
+     * @return self
+     */
+    public function align(string $align): self
+    {
+        if (!in_array($align, ['left', 'center', 'right'])) {
+            throw new \InvalidArgumentException("Invalid alignment: $align. Use 'left', 'center', or 'right'.");
+        }
+        
+        return $this->setConfig('align', $align);
+    }
+
+    /**
      * Set minimum height for all rows
      * 
      * @param int $height Minimum height in pixels
@@ -339,6 +358,60 @@ class TableBuilder extends UIComponent
             $row->minHeight($height);
         }
         
+        return $this;
+    }
+
+    /**
+     * Set width constraints for a specific column
+     * 
+     * @param int $col Column index (0-based)
+     * @param int|null $minWidth Minimum width in pixels (null = no min)
+     * @param int|null $maxWidth Maximum width in pixels (null = no max)
+     * @return self
+     */
+    public function columnWidth(int $col, ?int $minWidth = null, ?int $maxWidth = null): self
+    {
+        if ($col < 0 || $col >= $this->cols) {
+            throw new \OutOfBoundsException("Column index $col is out of bounds (0-" . ($this->cols - 1) . ")");
+        }
+
+        $this->columnWidths[$col] = [
+            'min' => $minWidth,
+            'max' => $maxWidth,
+        ];
+
+        // Apply width to all cells in this column (header + data rows)
+        if ($this->headerRow) {
+            $headerCells = $this->headerRow->getCells();
+            if (isset($headerCells[$col])) {
+                $headerCells[$col]->widthConstraints($minWidth, $maxWidth);
+            }
+        }
+
+        // Apply to all data row cells in this column
+        for ($row = 0; $row < $this->rows; $row++) {
+            if (isset($this->cells[$row][$col])) {
+                $this->cells[$row][$col]->width($minWidth, $maxWidth);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set width constraints for all columns at once
+     * 
+     * @param array $widths Array of width configs: [[min, max], [min, max], ...]
+     * @return self
+     */
+    public function columnWidths(array $widths): self
+    {
+        foreach ($widths as $col => $width) {
+            $min = $width['min'] ?? $width[0] ?? null;
+            $max = $width['max'] ?? $width[1] ?? null;
+            $this->columnWidth($col, $min, $max);
+        }
+
         return $this;
     }
 

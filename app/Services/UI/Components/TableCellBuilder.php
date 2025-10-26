@@ -38,7 +38,39 @@ class TableCellBuilder extends UIComponent
             'url_image' => null,
             'button' => null,
             'column' => null,  // Column index for ordering
+            'min_width' => null,  // Minimum width in pixels
+            'max_width' => null,  // Maximum width in pixels
         ];
+    }
+
+    /**
+     * Set the column index (for ordering)
+     * 
+     * @param int $column Column index (0-based)
+     * @return self
+     */
+    public function column(int $column): self
+    {
+        $this->setConfig('column', $column);
+        return $this;
+    }
+
+    /**
+     * Set width constraints for the cell
+     * 
+     * @param int|null $minWidth Minimum width in pixels
+     * @param int|null $maxWidth Maximum width in pixels
+     * @return self
+     */
+    public function width(?int $minWidth = null, ?int $maxWidth = null): self
+    {
+        if ($minWidth !== null) {
+            $this->setConfig('min_width', $minWidth);
+        }
+        if ($maxWidth !== null) {
+            $this->setConfig('max_width', $maxWidth);
+        }
+        return $this;
     }
 
     /**
@@ -72,17 +104,6 @@ class TableCellBuilder extends UIComponent
     public function button(array $button): self
     {
         return $this->setConfig('button', $button);
-    }
-
-    /**
-     * Set the column index for this cell (for ordering)
-     * 
-     * @param int $column The column index (0-based)
-     * @return self For method chaining
-     */
-    public function column(int $column): self
-    {
-        return $this->setConfig('column', $column);
     }
 
     /**

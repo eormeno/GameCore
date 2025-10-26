@@ -469,6 +469,11 @@ class TableComponent extends UIComponent {
         const tableWrapper = document.createElement('div');
         tableWrapper.className = 'ui-table-wrapper';
 
+        // Apply alignment to wrapper
+        if (this.config.align) {
+            tableWrapper.classList.add(`align-${this.config.align}`);
+        }
+
         // Add title if exists
         if (this.config.title) {
             const title = document.createElement('h3');
@@ -574,6 +579,19 @@ class TableCellComponent extends UIComponent {
             cell.style.textAlign = this.config.align;
         }
 
+        // Apply width constraints
+        // For table-layout: fixed, we use width instead of min/max
+        if (this.config.min_width || this.config.max_width) {
+            // Use the minimum width as the actual width for fixed layout
+            const targetWidth = this.config.min_width || this.config.max_width;
+            cell.style.width = `${targetWidth}px`;
+            
+            // Still apply max-width to prevent overflow
+            if (this.config.max_width) {
+                cell.style.maxWidth = `${this.config.max_width}px`;
+            }
+        }
+
         return this.applyCommonAttributes(cell);
     }
 
@@ -634,6 +652,19 @@ class TableHeaderCellComponent extends UIComponent {
 
         if (this.config.align) {
             cell.style.textAlign = this.config.align;
+        }
+
+        // Apply width constraints
+        // For table-layout: fixed, we use width instead of min/max
+        if (this.config.min_width || this.config.max_width) {
+            // Use the minimum width as the actual width for fixed layout
+            const targetWidth = this.config.min_width || this.config.max_width;
+            cell.style.width = `${targetWidth}px`;
+            
+            // Still apply max-width to prevent overflow
+            if (this.config.max_width) {
+                cell.style.maxWidth = `${this.config.max_width}px`;
+            }
         }
 
         return this.applyCommonAttributes(cell);

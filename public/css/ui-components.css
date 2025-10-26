@@ -263,6 +263,24 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     margin: 15px 0;
+    width: fit-content; /* Let wrapper size based on table content */
+    max-width: 100%; /* But don't overflow container */
+}
+
+/* Table wrapper alignment */
+.ui-table-wrapper.align-left {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.ui-table-wrapper.align-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ui-table-wrapper.align-right {
+    margin-left: auto;
+    margin-right: 0;
 }
 
 /* Table Title */
@@ -278,10 +296,10 @@ body {
 
 /* Table */
 .ui-table {
-    width: 100%;
+    width: auto; /* Let table size based on column widths */
     border-collapse: collapse;
     font-size: 14px;
-    table-layout: fixed; /* Fixed layout for equal column distribution */
+    table-layout: fixed; /* Keep fixed for consistent sizing */
 }
 
 /* Header Row */
@@ -359,6 +377,18 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* Cells with min/max width constraints should respect them */
+.ui-table-cell[style*="min-width"],
+.ui-table-cell[style*="max-width"] {
+    width: auto;
+}
+
+/* Header cells with width constraints */
+.ui-table-header-cell[style*="min-width"],
+.ui-table-header-cell[style*="max-width"] {
+    width: auto;
 }
 
 /* Cell with image */

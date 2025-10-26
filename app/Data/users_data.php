@@ -2,31 +2,42 @@
 
 /**
  * Sample users data for table demo
+ * Total: 35 users
  */
 return [
-    [
-        'id' => 1,
-        'name' => 'Alice Johnson',
-        'country' => 'United States',
-    ],
-    [
-        'id' => 2,
-        'name' => 'Bob Smith',
-        'country' => 'Canada',
-    ],
-    [
-        'id' => 3,
-        'name' => 'Charlie Brown',
-        'country' => 'United Kingdom',
-    ],
-    [
-        'id' => 4,
-        'name' => 'Diana Prince',
-        'country' => 'Germany',
-    ],
-    [
-        'id' => 5,
-        'name' => 'Ethan Hunt',
-        'country' => 'Australia',
-    ],
+    ['id' => 1, 'name' => 'Alice Johnson', 'country' => 'United States'],
+    ['id' => 2, 'name' => 'Bob Smith', 'country' => 'Canada'],
+    ['id' => 3, 'name' => 'Charlie Brown', 'country' => 'United Kingdom'],
+    ['id' => 4, 'name' => 'Diana Prince', 'country' => 'Germany'],
+    ['id' => 5, 'name' => 'Ethan Hunt', 'country' => 'Australia'],
+    ['id' => 6, 'name' => 'Fiona Chen', 'country' => 'China'],
+    ['id' => 7, 'name' => 'George Miller', 'country' => 'Ireland'],
+    ['id' => 8, 'name' => 'Hannah Lee', 'country' => 'South Korea'],
+    ['id' => 9, 'name' => 'Ivan Petrov', 'country' => 'Russia'],
+    ['id' => 10, 'name' => 'Julia Martinez', 'country' => 'Spain'],
+    ['id' => 11, 'name' => 'Kevin O\'Brien', 'country' => 'Ireland'],
+    ['id' => 12, 'name' => 'Laura Silva', 'country' => 'Brazil'],
+    ['id' => 13, 'name' => 'Michael Anderson', 'country' => 'Sweden'],
+    ['id' => 14, 'name' => 'Nina Kowalski', 'country' => 'Poland'],
+    ['id' => 15, 'name' => 'Oscar Rodriguez', 'country' => 'Mexico'],
+    ['id' => 16, 'name' => 'Patricia Wilson', 'country' => 'New Zealand'],
+    ['id' => 17, 'name' => 'Quinn Taylor', 'country' => 'South Africa'],
+    ['id' => 18, 'name' => 'Rachel Green', 'country' => 'Israel'],
+    ['id' => 19, 'name' => 'Samuel Dubois', 'country' => 'France'],
+    ['id' => 20, 'name' => 'Tara Patel', 'country' => 'India'],
+    ['id' => 21, 'name' => 'Ulrich Schmidt', 'country' => 'Austria'],
+    ['id' => 22, 'name' => 'Victoria Lopez', 'country' => 'Argentina'],
+    ['id' => 23, 'name' => 'William Zhang', 'country' => 'Singapore'],
+    ['id' => 24, 'name' => 'Xenia Volkov', 'country' => 'Ukraine'],
+    ['id' => 25, 'name' => 'Yuki Tanaka', 'country' => 'Japan'],
+    ['id' => 26, 'name' => 'Zachary Brown', 'country' => 'United States'],
+    ['id' => 27, 'name' => 'Amelia Clarke', 'country' => 'United Kingdom'],
+    ['id' => 28, 'name' => 'Benjamin Ross', 'country' => 'Canada'],
+    ['id' => 29, 'name' => 'Carolina Moreno', 'country' => 'Chile'],
+    ['id' => 30, 'name' => 'Daniel Kim', 'country' => 'South Korea'],
+    ['id' => 31, 'name' => 'Emma Watson', 'country' => 'United Kingdom'],
+    ['id' => 32, 'name' => 'Francesco Rossi', 'country' => 'Italy'],
+    ['id' => 33, 'name' => 'Grace Nguyen', 'country' => 'Vietnam'],
+    ['id' => 34, 'name' => 'Henrik Larsson', 'country' => 'Norway'],
+    ['id' => 35, 'name' => 'Isabella Santos', 'country' => 'Portugal'],
 ];
