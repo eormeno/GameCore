@@ -123,6 +123,18 @@ class MenuDropdownBuilder
     }
 
     /**
+     * Set the caller service ID for action callbacks
+     * 
+     * @param string $serviceId Service component ID
+     * @return self
+     */
+    public function callerServiceId(string $serviceId): self
+    {
+        $this->config['_caller_service_id'] = $serviceId;
+        return $this;
+    }
+
+    /**
      * Build and return the menu configuration
      * 
      * @return array

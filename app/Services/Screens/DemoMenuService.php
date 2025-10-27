@@ -5,6 +5,7 @@ namespace App\Services\Screens;
 use App\Services\UI\UIBuilder;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
+use App\Services\UI\Modals\ConfirmDialogService;
 
 /**
  * Demo Menu Service
@@ -26,9 +27,13 @@ class DemoMenuService extends AbstractUIService
 
     public function getUI(...$params): array
     {
+        // Get service ID to receive callbacks
+        $serviceId = $this->getServiceComponentId();
+
         // Build menu using UIBuilder
         $menu = UIBuilder::menuDropdown('main_menu')
-            ->parent('menu'); // Render in #menu div
+            ->parent('menu') // Render in #menu div
+            ->callerServiceId($serviceId); // Set service for action callbacks
 
         // Demos submenu
         $menu->submenu('Demos', '🎮', function($submenu) {
@@ -53,12 +58,60 @@ class DemoMenuService extends AbstractUIService
 
         $menu->separator();
 
-        // Settings
-        $menu->link('Settings', '/demo/settings', '⚙️');
+        // Settings (with action)
+        $menu->item('Settings', 'show_settings_confirm', [], '⚙️');
         
         // About
         $menu->link('About', '/demo/about', 'ℹ️');
 
         return $menu->build();
+    }
+
+    /**
+     * Handler for Settings confirmation dialog
+     */
+    public function onShowSettingsConfirm(array $params): array
+    {
+        // Get this service ID to receive the callback
+        $serviceId = $this->getServiceComponentId();
+
+        // Build confirmation dialog using ConfirmDialogService
+        $confirmService = app(ConfirmDialogService::class);
+        $modalUI = $confirmService->getUI(
+            title: "⚙️ Configuración",
+            message: "¿Quieres resetear la configuración?",
+            icon: 'question',
+            confirmAction: 'reset_settings',
+            confirmParams: [],
+            confirmLabel: 'Resetear',
+            cancelAction: 'cancel_settings',
+            cancelLabel: 'Cancelar',
+            callerServiceId: $serviceId
+        );
+
+        return $modalUI;
+    }
+
+    /**
+     * Handler for cancel button (closes modal)
+     */
+    public function onCancelSettings(array $params): array
+    {
+        return [
+            'action' => 'close_modal',
+            'modal_id' => 'confirm_dialog'
+        ];
+    }
+
+    /**
+     * Handler for reset button (demo - just shows alert)
+     */
+    public function onResetSettings(array $params): array
+    {
+        return [
+            'action' => 'close_modal',
+            'modal_id' => 'confirm_dialog',
+            'message' => '✅ Configuración reseteada correctamente (demo)'
+        ];
     }
 }

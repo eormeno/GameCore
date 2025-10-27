@@ -63,6 +63,88 @@ class UIComponent {
         
         return element;
     }
+
+    /**
+     * Send UI event to backend
+     * 
+     * @param {string} event - Event type (click, change, etc.)
+     * @param {string} action - Action name (snake_case)
+     * @param {object} parameters - Event parameters
+     */
+    async sendEventToBackend(event, action, parameters = {}) {
+        try {
+            // Get CSRF token from meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            // Use internal component ID (_id), not the JSON key
+            const componentId = this.config._id || parseInt(this.id);
+
+            console.log('Sending event:', { component_id: componentId, action, csrfToken });
+
+            const response = await fetch('/api/ui-event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    component_id: componentId,
+                    event: event,
+                    action: action,
+                    parameters: parameters,
+                }),
+            });
+
+            const result = await response.json();
+
+            // ÉXITO: response.ok = true (status 200-299)
+            if (response.ok) {
+                console.log('✅ Action executed:', action, result);
+                
+                // Handle UI updates using global renderer
+                if (result && Object.keys(result).length > 0) {
+                    if (globalRenderer) {
+                        globalRenderer.handleUIUpdate(result);
+                    } else {
+                        console.error('❌ Global renderer not initialized');
+                    }
+                }
+                
+                // Show success message if provided
+                if (result.message) {
+                    this.showNotification(result.message, 'success');
+                }
+
+                // Handle redirects if provided
+                if (result.redirect) {
+                    window.location.href = result.redirect;
+                }
+            } else {
+                // ERROR: response.ok = false (status 400+)
+                console.error('❌ Action failed:', action, result);
+                this.showNotification(result.error || 'Action failed', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Network error:', error);
+            this.showNotification('Network error: ' + error.message, 'error');
+        }
+    }
+
+    /**
+     * Show notification to user
+     * 
+     * @param {string} message - Message to display
+     * @param {string} type - Type (success, error, info, warning)
+     */
+    showNotification(message, type = 'info') {
+        // Simple console notification for now
+        // TODO: Implement proper UI notification system
+        const emoji = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' }[type] || 'ℹ️';
+        console.log(`${emoji} ${message}`);
+    }
 }
 
 // ==================== Container Component ====================
@@ -182,88 +264,6 @@ class ButtonComponent extends UIComponent {
         console.log('📋 Collected context values:', values);
         
         return values;
-    }
-
-    /**
-     * Send UI event to backend
-     * 
-     * @param {string} event - Event type (click, change, etc.)
-     * @param {string} action - Action name (snake_case)
-     * @param {object} parameters - Event parameters
-     */
-    async sendEventToBackend(event, action, parameters = {}) {
-        try {
-            // Get CSRF token from meta tag
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
-            // Use internal component ID (_id), not the JSON key
-            const componentId = this.config._id || parseInt(this.id);
-
-            console.log('Sending event:', { component_id: componentId, action, csrfToken });
-
-            const response = await fetch('/api/ui-event', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({
-                    component_id: componentId,
-                    event: event,
-                    action: action,
-                    parameters: parameters,
-                }),
-            });
-
-            const result = await response.json();
-
-            // ÉXITO: response.ok = true (status 200-299)
-            if (response.ok) {
-                console.log('✅ Action executed:', action, result);
-                
-                // Handle UI updates using global renderer
-                if (result && Object.keys(result).length > 0) {
-                    if (globalRenderer) {
-                        globalRenderer.handleUIUpdate(result);
-                    } else {
-                        console.error('❌ Global renderer not initialized');
-                    }
-                }
-                
-                // Show success message if provided
-                if (result.message) {
-                    this.showNotification(result.message, 'success');
-                }
-
-                // Handle redirects if provided
-                if (result.redirect) {
-                    window.location.href = result.redirect;
-                }
-            } else {
-                // ERROR: response.ok = false (status 400+)
-                console.error('❌ Action failed:', action, result);
-                this.showNotification(result.error || 'Action failed', 'error');
-            }
-        } catch (error) {
-            console.error('❌ Network error:', error);
-            this.showNotification('Network error: ' + error.message, 'error');
-        }
-    }
-
-    /**
-     * Show notification to user
-     * 
-     * @param {string} message - Message to display
-     * @param {string} type - Type (success, error, info, warning)
-     */
-    showNotification(message, type = 'info') {
-        // Simple console notification for now
-        // TODO: Implement proper UI notification system
-        const emoji = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' }[type] || 'ℹ️';
-        console.log(`${emoji} ${message}`);
     }
 }
 
@@ -1566,7 +1566,23 @@ class MenuDropdownComponent extends UIComponent {
         if (item.action) {
             menuItem.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.sendEventToBackend('click', item.action, item.params || {});
+                
+                // Close menu
+                document.querySelectorAll('.menu-dropdown-content.show').forEach(m => {
+                    m.classList.remove('show');
+                });
+                document.querySelectorAll('.menu-dropdown-trigger.active').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Merge item params with caller service id from menu config
+                const params = {
+                    ...(item.params || {}),
+                    _caller_service_id: this.config._caller_service_id
+                };
+                
+                // Send event to backend using arrow function to preserve 'this'
+                this.sendEventToBackend('click', item.action, params);
             });
         }
         
