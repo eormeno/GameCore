@@ -156,7 +156,7 @@ class TableDemoService extends AbstractUIService
         $storedUI = $this->getStoredUI();
 
         // Find the cell by name pattern: "{row}_{col}"
-        $cellName = "{$row}_0"; // Column 0 = name
+        $cellName = "{$row}_1"; // Column 1 = name
         $nameCellId = null;
 
         foreach ($storedUI as $id => $component) {
@@ -198,11 +198,18 @@ class TableDemoService extends AbstractUIService
         $storedUI = $this->getStoredUI();
 
         // Find name cell (column 0) and country cell (column 1)
-        $nameCellName = "{$row}_0";
-        $countryCellName = "{$row}_1";
+        $idCellName = "{$row}_0";
+        $nameCellName = "{$row}_1";
+        $countryCellName = "{$row}_2";
 
+        $editButtonCellName = "{$row}_3";
+        $removeButtonCellName = "{$row}_4";
+
+        $idCellId = null;
         $nameCellId = null;
         $countryCellId = null;
+        $editButtonCellId = null;
+        $removeButtonCellId = null;
 
         foreach ($storedUI as $id => $component) {
             if ($component['type'] === 'tablecell') {
@@ -210,15 +217,29 @@ class TableDemoService extends AbstractUIService
                     $nameCellId = $id;
                 } elseif (isset($component['name']) && $component['name'] === $countryCellName) {
                     $countryCellId = $id;
+                } elseif (isset($component['name']) && $component['name'] === $idCellName) {
+                    $idCellId = $id;
+                } elseif (isset($component['name']) && $component['name'] === $editButtonCellName) {
+                    $editButtonCellId = $id;
+                } elseif (isset($component['name']) && $component['name'] === $removeButtonCellName) {
+                    $removeButtonCellId = $id;
                 }
 
-                if ($nameCellId && $countryCellId) {
+                if ($nameCellId && $countryCellId && $idCellId && $editButtonCellId && $removeButtonCellId) {
                     break;
                 }
             }
         }
 
         $result = [];
+
+        if ($idCellId) {
+            $result[$idCellId] = [
+                'type' => 'tablecell',
+                'text' => '-',
+                '_id' => $idCellId,
+            ];
+        }
 
         if ($nameCellId) {
             $result[$nameCellId] = [
@@ -233,6 +254,22 @@ class TableDemoService extends AbstractUIService
                 'type' => 'tablecell',
                 'text' => '-',
                 '_id' => $countryCellId,
+            ];
+        }
+
+        if ($editButtonCellId) {
+            $result[$editButtonCellId] = [
+                'type' => 'tablecell',
+                'text' => '-',
+                '_id' => $editButtonCellId,
+            ];
+        }
+
+        if ($removeButtonCellId) {
+            $result[$removeButtonCellId] = [
+                'type' => 'tablecell',
+                'text' => '-',
+                '_id' => $removeButtonCellId,
             ];
         }
 
