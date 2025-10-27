@@ -882,6 +882,8 @@ class ComponentFactory {
                 return new TableCellComponent(id, config);
             case 'tableheadercell':
                 return new TableHeaderCellComponent(id, config);
+            case 'menu_dropdown':
+                return new MenuDropdownComponent(id, config);
             default:
                 console.warn(`Unknown component type: ${config.type}`);
                 return null;
@@ -1479,7 +1481,154 @@ document.addEventListener('DOMContentLoaded', () => {
 window.openModal = openModal;
 window.closeModal = closeModal;
 
+// ==================== Menu Dropdown Component ====================
+class MenuDropdownComponent extends UIComponent {
+    render() {
+        const menuContainer = document.createElement('div');
+        menuContainer.className = 'menu-dropdown';
+        
+        // Trigger button
+        const trigger = document.createElement('button');
+        trigger.className = 'menu-dropdown-trigger';
+        trigger.innerHTML = '☰ Menu';
+        
+        // Dropdown content
+        const content = document.createElement('div');
+        content.className = 'menu-dropdown-content';
+        
+        // Build menu items
+        if (this.config.items && this.config.items.length > 0) {
+            this.config.items.forEach(item => {
+                content.appendChild(this.renderMenuItem(item));
+            });
+        }
+        
+        // Toggle menu on click
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isActive = content.classList.contains('show');
+            
+            // Close all other menus
+            document.querySelectorAll('.menu-dropdown-content.show').forEach(m => {
+                m.classList.remove('show');
+            });
+            document.querySelectorAll('.menu-dropdown-trigger.active').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            if (!isActive) {
+                content.classList.add('show');
+                trigger.classList.add('active');
+            }
+        });
+        
+        menuContainer.appendChild(trigger);
+        menuContainer.appendChild(content);
+        
+        return this.applyCommonAttributes(menuContainer);
+    }
+    
+    renderMenuItem(item) {
+        // Separator
+        if (item.type === 'separator') {
+            const separator = document.createElement('div');
+            separator.className = 'menu-separator';
+            return separator;
+        }
+        
+        // Regular item or submenu parent
+        const menuItem = document.createElement(item.url ? 'a' : 'button');
+        menuItem.className = 'menu-item';
+        
+        if (item.submenu && item.submenu.length > 0) {
+            menuItem.classList.add('has-submenu');
+        }
+        
+        // Icon
+        if (item.icon) {
+            const icon = document.createElement('span');
+            icon.className = 'icon';
+            icon.textContent = item.icon;
+            menuItem.appendChild(icon);
+        }
+        
+        // Label
+        const label = document.createElement('span');
+        label.textContent = item.label;
+        menuItem.appendChild(label);
+        
+        // Handle URL navigation
+        if (item.url) {
+            menuItem.href = item.url;
+        }
+        
+        // Handle action
+        if (item.action) {
+            menuItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.sendEventToBackend('click', item.action, item.params || {});
+            });
+        }
+        
+        // Render submenu if exists
+        if (item.submenu && item.submenu.length > 0) {
+            const submenu = document.createElement('div');
+            submenu.className = 'submenu';
+            
+            item.submenu.forEach(subitem => {
+                submenu.appendChild(this.renderMenuItem(subitem));
+            });
+            
+            menuItem.appendChild(submenu);
+        }
+        
+        return menuItem;
+    }
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', () => {
+    document.querySelectorAll('.menu-dropdown-content.show').forEach(m => {
+        m.classList.remove('show');
+    });
+    document.querySelectorAll('.menu-dropdown-trigger.active').forEach(t => {
+        t.classList.remove('active');
+    });
+});
+
+/**
+ * Load menu UI
+ */
+async function loadMenuUI() {
+    if (!window.MENU_SERVICE) {
+        console.log('ℹ️ No MENU_SERVICE defined, skipping menu load');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/${window.MENU_SERVICE}/${window.RESET_DEMO ? '1' : '0'}`);
+        const uiData = await response.json();
+        
+        console.log('📊 Menu UI Data received:', uiData);
+        
+        const menuContainer = document.getElementById('menu');
+        if (!menuContainer) {
+            console.error('❌ Menu container #menu not found');
+            return;
+        }
+        
+        // Render menu
+        const menuRenderer = new UIRenderer(uiData);
+        menuRenderer.render();
+        
+        console.log('✅ Menu loaded successfully');
+    } catch (error) {
+        console.error('❌ Error loading menu:', error);
+    }
+}
+
 // Load UI on page load
 document.addEventListener('DOMContentLoaded', () => {
+    loadMenuUI();
     loadDemoUI();
 });

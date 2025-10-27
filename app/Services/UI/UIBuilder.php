@@ -11,6 +11,7 @@ use App\Services\UI\Components\InputBuilder;
 use App\Services\UI\Components\SelectBuilder;
 use App\Services\UI\Components\CheckboxBuilder;
 use App\Services\UI\Components\FormBuilder;
+use App\Services\UI\Components\MenuDropdownBuilder;
 
 /**
  * Factory class for creating UI components
@@ -120,5 +121,16 @@ class UIBuilder
     public static function container(?string $name = null): UIContainer
     {
         return new UIContainer($name);
+    }
+
+    /**
+     * Create a new menu dropdown component
+     * 
+     * @param string $name The semantic name for the menu
+     * @return MenuDropdownBuilder
+     */
+    public static function menuDropdown(string $name): MenuDropdownBuilder
+    {
+        return new MenuDropdownBuilder($name);
     }
 }
