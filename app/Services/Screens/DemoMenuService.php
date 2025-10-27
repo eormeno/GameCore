@@ -2,8 +2,8 @@
 
 namespace App\Services\Screens;
 
+use App\Services\UI\UIBuilder;
 use App\Services\UI\AbstractUIService;
-use App\Services\UI\Components\MenuDropdownBuilder;
 use App\Services\UI\Components\UIContainer;
 
 /**
@@ -15,18 +15,20 @@ class DemoMenuService extends AbstractUIService
 {
     protected function buildBaseUI(...$params): UIContainer
     {
-        // For menu, we return a simple container that will hold the menu dropdown
-        // The actual menu is built separately and returned as raw config
-        $container = new UIContainer('menu_container');
-        return $container;
+        // Menu doesn't use a container, but AbstractUIService requires this method.
+        // Returning empty container - actual menu is built in getUI()
+        return UIBuilder::container('_menu_placeholder');
+        // Explicación: Este método buildBaseUI es necesario para cumplir con la interfaz
+        // de AbstractUIService, pero en este caso no se utiliza para construir el menú real.
+        // En su lugar, devolvemos un contenedor vacío llamado '_menu_placeholder' como marcador de posición.
+        // El menú real se construye en el método getUI().
     }
 
     public function getUI(...$params): array
     {
-        $menu = new MenuDropdownBuilder('main_menu');
-        
-        // Set parent to render in #menu div
-        $menu->parent('menu');
+        // Build menu using UIBuilder
+        $menu = UIBuilder::menuDropdown('main_menu')
+            ->parent('menu'); // Render in #menu div
 
         // Demos submenu
         $menu->submenu('Demos', '🎮', function($submenu) {
@@ -46,7 +48,7 @@ class DemoMenuService extends AbstractUIService
         $menu->submenu('Components', '🧩', function($submenu) {
             $submenu->link('Cards', '/demo/cards', '🃏');
             $submenu->link('Alerts', '/demo/alerts', '⚠️');
-            $submenu->link('Tabs', '/demo/tabs', '�');
+            $submenu->link('Tabs', '/demo/tabs', '📑');
         });
 
         $menu->separator();
