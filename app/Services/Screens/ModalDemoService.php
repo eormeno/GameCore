@@ -5,6 +5,7 @@ namespace App\Services\Screens;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
 use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\Enums\DialogType;
 use App\Services\UI\Modals\ConfirmDialogService;
 use App\Services\UI\UIBuilder;
 
@@ -65,12 +66,12 @@ class ModalDemoService extends AbstractUIService
         // Get this service's ID to receive the callback
         $serviceId = $this->getServiceComponentId();
 
-        // Build confirmation dialog
+        // Build confirmation dialog using DialogType
         $confirmService = app(ConfirmDialogService::class);
         $modalUI = $confirmService->getUI(
+            type: DialogType::CONFIRM,
             title: "Confirm Action",
             message: "Are you sure you want to proceed with this action?",
-            icon: 'question',
             confirmAction: 'handle_confirm',
             confirmParams: ['action_type' => 'demo_action'],
             confirmLabel: 'Yes, Proceed',

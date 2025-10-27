@@ -1428,13 +1428,52 @@ function openModal(uiData) {
         return;
     }
     
-    // Clear previous content
+    // Clear previous content and any existing timers
     modalContainer.innerHTML = '';
+    if (window.modalTimeoutId) {
+        clearInterval(window.modalTimeoutId);
+        window.modalTimeoutId = null;
+    }
     
     // Render modal content using UIRenderer
     // The uiData should already have parent='modal' from the backend
     const modalRenderer = new UIRenderer(uiData);
     modalRenderer.render();
+    
+    // Check if this is a timeout dialog
+    // Look for the container with parent='modal' that has timeout metadata
+    let timeoutConfig = null;
+    
+    for (const [key, component] of Object.entries(uiData)) {
+        if (component.parent === 'modal' && component._timeout && component._timeout_ms) {
+            timeoutConfig = component;
+            console.log('🔍 Found timeout config in component:', key);
+            break;
+        }
+    }
+    
+    if (timeoutConfig) {
+        const timeoutMs = timeoutConfig._timeout_ms;
+        const showCountdown = timeoutConfig._show_countdown ?? true;
+        const timeoutAction = timeoutConfig._timeout_action || 'close_modal';
+        const callerServiceId = timeoutConfig._caller_service_id;
+        const timeUnitLabel = timeoutConfig._time_unit_label || 'segundos';
+        
+        console.log(`⏱️ Timeout dialog detected:`);
+        console.log(`  - Duration: ${timeoutMs}ms (${timeoutConfig._timeout} ${timeUnitLabel})`);
+        console.log(`  - Show countdown: ${showCountdown}`);
+        console.log(`  - Time unit: ${timeoutConfig._time_unit}`);
+        console.log(`  - Timeout action: ${timeoutAction}`);
+        
+        if (showCountdown) {
+            startModalCountdown(timeoutMs, timeoutConfig._timeout, timeoutConfig._time_unit, timeUnitLabel, timeoutAction, callerServiceId);
+        } else {
+            // Just set the timeout without showing countdown
+            window.modalTimeoutId = setTimeout(() => {
+                executeTimeoutAction(timeoutAction, callerServiceId);
+            }, timeoutMs);
+        }
+    }
     
     // Show modal
     overlay.classList.remove('hidden');
@@ -1454,6 +1493,12 @@ function closeModal() {
         return;
     }
     
+    // Clear any active timeout
+    if (window.modalTimeoutId) {
+        clearInterval(window.modalTimeoutId);
+        window.modalTimeoutId = null;
+    }
+    
     // Clear content
     modalContainer.innerHTML = '';
     
@@ -1462,6 +1507,138 @@ function closeModal() {
     document.body.classList.remove('modal-open');
     
     console.log('✅ Modal closed');
+}
+
+/**
+ * Start countdown timer for modal
+ */
+function startModalCountdown(totalMs, initialValue, timeUnit, timeUnitLabel, timeoutAction, callerServiceId) {
+    console.log('🚀 Starting countdown timer...');
+    console.log(`  - Total: ${totalMs}ms`);
+    console.log(`  - Initial: ${initialValue} ${timeUnitLabel}`);
+    console.log(`  - Unit: ${timeUnit}`);
+    
+    // Wait a bit for the DOM to be fully rendered
+    setTimeout(() => {
+        // Try to find countdown label by ID (name property creates id attribute)
+        let countdownLabel = document.getElementById('countdown');
+        
+        if (!countdownLabel) {
+            // Fallback: Try by querySelector
+            countdownLabel = document.querySelector('#modal .ui-label.h2');
+            console.log('⚠️ Countdown not found by ID, using fallback selector');
+        }
+        
+        if (!countdownLabel) {
+            console.error('❌ Countdown label not found!');
+            console.log('📋 Modal HTML:', document.querySelector('#modal')?.innerHTML || 'Modal not found');
+            return;
+        }
+        
+        console.log('✅ Countdown label found!');
+        console.log('📝 Element:', countdownLabel);
+        console.log('📝 Initial text:', countdownLabel.textContent);
+        
+        const startTime = Date.now();
+        const endTime = startTime + totalMs;
+        
+        let updateCount = 0;
+        
+        // Update countdown every 100ms for smooth updates
+        window.modalTimeoutId = setInterval(() => {
+            const remaining = endTime - Date.now();
+            updateCount++;
+            
+            if (remaining <= 0) {
+                clearInterval(window.modalTimeoutId);
+                window.modalTimeoutId = null;
+                console.log(`⏱️ Timeout completed after ${updateCount} updates`);
+                console.log('🎬 Executing action:', timeoutAction);
+                executeTimeoutAction(timeoutAction, callerServiceId);
+            } else {
+                // Calculate remaining time in the original unit
+                const remainingValue = Math.ceil(getRemainingValue(remaining, timeUnit));
+                const label = remainingValue === 1 ? getSingularLabel(timeUnit) : timeUnitLabel;
+                const newText = `${remainingValue} ${label}`;
+                
+                // Update the label
+                countdownLabel.textContent = newText;
+                
+                // Log every second for debugging (every 10 updates at 100ms)
+                if (updateCount % 10 === 0) {
+                    console.log(`⏱️ Countdown: ${newText} (remaining: ${remaining}ms)`);
+                }
+            }
+        }, 100);
+        
+        console.log('✅ Countdown timer started successfully!');
+    }, 150); // Wait 150ms for DOM rendering
+}
+
+/**
+ * Get remaining value in the specified time unit
+ */
+function getRemainingValue(remainingMs, timeUnit) {
+    switch(timeUnit) {
+        case 'seconds': return remainingMs / 1000;
+        case 'minutes': return remainingMs / (60 * 1000);
+        case 'hours': return remainingMs / (60 * 60 * 1000);
+        case 'days': return remainingMs / (24 * 60 * 60 * 1000);
+        default: return remainingMs / 1000;
+    }
+}
+
+/**
+ * Get singular label for time unit
+ */
+function getSingularLabel(timeUnit) {
+    switch(timeUnit) {
+        case 'seconds': return 'segundo';
+        case 'minutes': return 'minuto';
+        case 'hours': return 'hora';
+        case 'days': return 'día';
+        default: return 'segundo';
+    }
+}
+
+/**
+ * Execute action when timeout completes
+ */
+async function executeTimeoutAction(action, callerServiceId) {
+    if (action === 'close_modal') {
+        closeModal();
+    } else {
+        // Execute custom action via backend
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            
+            const response = await fetch('/api/ui-event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    component_id: callerServiceId,
+                    event: 'timeout',
+                    action: action,
+                    parameters: {},
+                }),
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && globalRenderer) {
+                globalRenderer.handleUIUpdate(result);
+            }
+        } catch (error) {
+            console.error('❌ Error executing timeout action:', error);
+            closeModal();
+        }
+    }
 }
 
 // Close modal when clicking on overlay background
