@@ -271,7 +271,16 @@ class ButtonComponent extends UIComponent {
 class LabelComponent extends UIComponent {
     render() {
         const label = document.createElement('span');
-        label.className = `ui-label ${this.config.style || 'default'}`;
+        
+        // Apply base class and style
+        let classes = `ui-label ${this.config.style || 'default'}`;
+        
+        // Apply text alignment class
+        if (this.config.text_align) {
+            classes += ` text-${this.config.text_align}`;
+        }
+        
+        label.className = classes;
         label.textContent = this.config.text || '';
 
         return this.applyCommonAttributes(label);

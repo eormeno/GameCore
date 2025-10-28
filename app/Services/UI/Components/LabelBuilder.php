@@ -220,6 +220,26 @@ class LabelBuilder extends UIComponent
     }
 
     /**
+     * Set text alignment to left
+     * 
+     * @return $this For method chaining
+     */
+    public function left(): self
+    {
+        return $this->setConfig('text_align', 'left');
+    }
+
+    /**
+     * Set text alignment to right
+     * 
+     * @return $this For method chaining
+     */
+    public function right(): self
+    {
+        return $this->setConfig('text_align', 'right');
+    }
+
+    /**
      * Set custom line height
      * 
      * @param string $height The line height (e.g., '1.5', '24px')

@@ -18,8 +18,9 @@ class LandingDemoService extends AbstractUIService
 
         $container->add(
             UIBuilder::label('welcome')
-                ->text('Bienvenido a GameCore UI Framework')
+                ->text('🚀 Bienvenido a GameCore UI Framework')
                 ->style('h1')
+                ->center()
         );
 
         return $container;

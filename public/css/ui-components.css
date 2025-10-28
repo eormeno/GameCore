@@ -142,6 +142,90 @@ body {
     border: 1px solid #bee5eb;
 }
 
+/* Typography Styles for Labels */
+.ui-label.h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 16px 0 12px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    line-height: 1.2;
+}
+
+.ui-label.h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #34495e;
+    margin: 14px 0 10px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    line-height: 1.3;
+}
+
+.ui-label.h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #34495e;
+    margin: 12px 0 8px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    line-height: 1.4;
+}
+
+.ui-label.h4 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #34495e;
+    margin: 10px 0 6px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    line-height: 1.4;
+}
+
+.ui-label.h5 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #34495e;
+    margin: 8px 0 4px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    line-height: 1.4;
+}
+
+.ui-label.h6 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #34495e;
+    margin: 6px 0 4px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    line-height: 1.4;
+}
+
+/* Text Alignment */
+.ui-label.text-left {
+    text-align: left;
+}
+
+.ui-label.text-center {
+    text-align: center;
+}
+
+.ui-label.text-right {
+    text-align: right;
+}
+
+.ui-label.text-justify {
+    text-align: justify;
+}
+
 /* Input Styles */
 .ui-input-group {
     display: flex;
