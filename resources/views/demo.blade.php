@@ -8,8 +8,10 @@
     <link rel="stylesheet" href="{{ asset('css/ui-components.css') }}">
 </head>
 <body>
-    <div id="menu"></div>
-    <div id="main"></div>
+    <header id="top-menu-bar">
+        <div id="menu"></div>
+    </header>
+    <main id="main"></main>
     <div id="modal-overlay" class="modal-overlay hidden">
         <div id="modal" class="modal-container"></div>
     </div>

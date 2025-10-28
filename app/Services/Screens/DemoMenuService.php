@@ -32,10 +32,13 @@ class DemoMenuService extends AbstractUIService
         // Get service ID to receive callbacks
         $serviceId = $this->getServiceComponentId();
 
-        // Build menu using UIBuilder
+        // Build menu using UIBuilder with modern design
         $menu = UIBuilder::menuDropdown('main_menu')
             ->parent('menu') // Render in #menu div
-            ->callerServiceId($serviceId); // Set service for action callbacks
+            ->callerServiceId($serviceId) // Set service for action callbacks
+            ->trigger('🎮 GameCore Menu', '⚡', 'primary') // Custom trigger
+            ->position('bottom-left')
+            ->width(260);
 
         // Home link
         $menu->link('Home', '/demo', '🏠');

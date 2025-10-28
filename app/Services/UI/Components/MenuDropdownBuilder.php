@@ -135,6 +135,48 @@ class MenuDropdownBuilder
     }
 
     /**
+     * Customize the trigger button
+     * 
+     * @param string $label Button text
+     * @param string|null $icon Button icon
+     * @param string $style Button style (primary, secondary, etc.)
+     * @return self
+     */
+    public function trigger(string $label = '☰ Menu', ?string $icon = null, string $style = 'default'): self
+    {
+        $this->config['trigger'] = [
+            'label' => $label,
+            'icon' => $icon,
+            'style' => $style
+        ];
+        return $this;
+    }
+
+    /**
+     * Set menu positioning
+     * 
+     * @param string $position 'bottom-left', 'bottom-right', 'top-left', 'top-right'
+     * @return self
+     */
+    public function position(string $position = 'bottom-left'): self
+    {
+        $this->config['position'] = $position;
+        return $this;
+    }
+
+    /**
+     * Set menu width
+     * 
+     * @param int $width Width in pixels
+     * @return self
+     */
+    public function width(int $width = 240): self
+    {
+        $this->config['width'] = $width . 'px';
+        return $this;
+    }
+
+    /**
      * Build and return the menu configuration
      * 
      * @return array

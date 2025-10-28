@@ -1673,14 +1673,39 @@ class MenuDropdownComponent extends UIComponent {
         const menuContainer = document.createElement('div');
         menuContainer.className = 'menu-dropdown';
         
-        // Trigger button
+        // Trigger button with customization
         const trigger = document.createElement('button');
         trigger.className = 'menu-dropdown-trigger';
-        trigger.innerHTML = '☰ Menu';
         
-        // Dropdown content
+        // Custom trigger configuration
+        const triggerConfig = this.config.trigger || {};
+        const triggerLabel = triggerConfig.label || '☰ Menu';
+        const triggerIcon = triggerConfig.icon;
+        const triggerStyle = triggerConfig.style || 'default';
+        
+        trigger.className += ` menu-trigger-${triggerStyle}`;
+        
+        // Build trigger content
+        let triggerContent = '';
+        if (triggerIcon) {
+            triggerContent += `<span class="trigger-icon">${triggerIcon}</span>`;
+        }
+        triggerContent += `<span class="trigger-label">${triggerLabel}</span>`;
+        
+        trigger.innerHTML = triggerContent;
+        
+        // Dropdown content with customization
         const content = document.createElement('div');
         content.className = 'menu-dropdown-content';
+        
+        // Apply position class
+        const position = this.config.position || 'bottom-left';
+        content.classList.add(`position-${position}`);
+        
+        // Apply custom width
+        if (this.config.width) {
+            content.style.minWidth = this.config.width;
+        }
         
         // Build menu items
         if (this.config.items && this.config.items.length > 0) {
@@ -1689,22 +1714,43 @@ class MenuDropdownComponent extends UIComponent {
             });
         }
         
-        // Toggle menu on click
+        // Toggle menu on click with improved UX
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             const isActive = content.classList.contains('show');
             
-            // Close all other menus
-            document.querySelectorAll('.menu-dropdown-content.show').forEach(m => {
-                m.classList.remove('show');
-            });
-            document.querySelectorAll('.menu-dropdown-trigger.active').forEach(t => {
-                t.classList.remove('active');
-            });
+            // Close all other menus first
+            this.closeAllMenus();
             
             if (!isActive) {
                 content.classList.add('show');
                 trigger.classList.add('active');
+                
+                // Add smooth entrance animation
+                content.style.animationDuration = '0.3s';
+                
+                // Focus management for accessibility
+                const firstMenuItem = content.querySelector('.menu-item:not([disabled])');
+                if (firstMenuItem) {
+                    setTimeout(() => firstMenuItem.focus(), 100);
+                }
+            }
+        });
+        
+        // Close menu when clicking outside (improved for submenus)
+        document.addEventListener('click', (e) => {
+            // Check if click is outside the entire menu system (including submenus)
+            if (!menuContainer.contains(e.target) && 
+                !e.target.closest('.submenu')) {
+                this.closeMenu(content, trigger);
+            }
+        });
+        
+        // Close menu on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && content.classList.contains('show')) {
+                this.closeMenu(content, trigger);
+                trigger.focus();
             }
         });
         
@@ -1748,18 +1794,19 @@ class MenuDropdownComponent extends UIComponent {
             menuItem.href = item.url;
         }
         
-        // Handle action
+        // Handle action with improved UX
         if (item.action) {
             menuItem.addEventListener('click', (e) => {
                 e.preventDefault();
                 
-                // Close menu
-                document.querySelectorAll('.menu-dropdown-content.show').forEach(m => {
-                    m.classList.remove('show');
-                });
-                document.querySelectorAll('.menu-dropdown-trigger.active').forEach(t => {
-                    t.classList.remove('active');
-                });
+                // Visual feedback
+                menuItem.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    menuItem.style.transform = '';
+                }, 150);
+                
+                // Close all menus
+                this.closeAllMenus();
                 
                 // Merge item params with caller service id from menu config
                 const params = {
@@ -1767,36 +1814,94 @@ class MenuDropdownComponent extends UIComponent {
                     _caller_service_id: this.config._caller_service_id
                 };
                 
-                // Send event to backend using arrow function to preserve 'this'
+                // Send event to backend
                 this.sendEventToBackend('click', item.action, params);
+            });
+            
+            // Keyboard navigation support
+            menuItem.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    menuItem.click();
+                }
             });
         }
         
         // Render submenu if exists
         if (item.submenu && item.submenu.length > 0) {
+            console.log(`🔄 Rendering submenu for "${item.label}" with ${item.submenu.length} items`);
+            
             const submenu = document.createElement('div');
             submenu.className = 'submenu';
+            submenu.style.display = 'none'; // Ensure it starts hidden
             
             item.submenu.forEach(subitem => {
                 submenu.appendChild(this.renderMenuItem(subitem));
             });
             
             menuItem.appendChild(submenu);
+            
+            let hideTimeout = null;
+            
+            const showSubmenu = () => {
+                if (hideTimeout) {
+                    clearTimeout(hideTimeout);
+                    hideTimeout = null;
+                }
+                submenu.style.setProperty('display', 'block', 'important');
+                submenu.style.setProperty('opacity', '1', 'important');
+                submenu.style.setProperty('visibility', 'visible', 'important'); 
+                submenu.classList.add('show');
+            };
+            
+            const hideSubmenu = () => {
+                submenu.style.setProperty('display', 'none', 'important');
+                submenu.style.setProperty('opacity', '0', 'important');
+                submenu.style.setProperty('visibility', 'hidden', 'important');
+                submenu.classList.remove('show');
+            };
+            
+            menuItem.addEventListener('mouseenter', (e) => {
+                showSubmenu();
+            });
+            
+            menuItem.addEventListener('mouseleave', (e) => {
+                hideTimeout = setTimeout(hideSubmenu, 200);
+            });
+            
+            // Keep submenu visible when hovering over it
+            submenu.addEventListener('mouseenter', () => {
+                showSubmenu();
+            });
+            
+            submenu.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(hideSubmenu, 200);
+            });
         }
         
         return menuItem;
     }
+    
+    /**
+     * Close all open menus
+     */
+    closeAllMenus() {
+        document.querySelectorAll('.menu-dropdown-content.show').forEach(content => {
+            content.classList.remove('show');
+        });
+        document.querySelectorAll('.menu-dropdown-trigger.active').forEach(trigger => {
+            trigger.classList.remove('active');
+        });
+    }
+    
+    /**
+     * Close specific menu
+     */
+    closeMenu(content, trigger) {
+        content.classList.remove('show');
+        trigger.classList.remove('active');
+    }
 }
-
-// Close menu when clicking outside
-document.addEventListener('click', () => {
-    document.querySelectorAll('.menu-dropdown-content.show').forEach(m => {
-        m.classList.remove('show');
-    });
-    document.querySelectorAll('.menu-dropdown-trigger.active').forEach(t => {
-        t.classList.remove('active');
-    });
-});
 
 /**
  * Load menu UI

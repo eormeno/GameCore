@@ -45,7 +45,7 @@ class TableDemoService extends AbstractUIService
         $userCount = count($users);
 
         // Pagination settings
-        $perPage = 10;
+        $perPage = 5;
         $currentPage = 1;
 
         // Define fixed table dimensions (acts as min and max)
@@ -66,7 +66,7 @@ class TableDemoService extends AbstractUIService
             ->pagination(true, $perPage) // Enable pagination, 10 per page
             ->currentPage($currentPage)
             ->totalItems($userCount)
-            ->rowMinHeight(50) // Set minimum height for all rows (50px)
+            ->rowMinHeight(20) // Set minimum height for all rows (30px)
             ->columnWidth(0, 50, 80)      // Id column: min 50px, max 80px
             ->columnWidth(1, 200, 250)    // Name column: min 200px, max 250px
             ->columnWidth(2, 200, 250)    // Country column: min 200px, max 250px
@@ -285,7 +285,7 @@ class TableDemoService extends AbstractUIService
     public function onChangePage(array $params): array
     {
         $page = $params['page'] ?? 1;
-        $perPage = 10;
+        $perPage = 5;   // TODO: Sync with table settings
 
         // Get all users
         $users = $this->getUsersData();
