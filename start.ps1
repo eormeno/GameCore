@@ -42,6 +42,16 @@ if ($args -contains '-r') {
 #     php artisan games
 # }
 
+# Check if port 8000 is already in use
+$portInUse = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
+
+if ($portInUse) {
+    Write-Host "Server is already running on port 8000"
+    Write-Host "Opening browser to http://127.0.0.1:8000/demo"
+    Start-Process "http://127.0.0.1:8000/demo"
+    exit
+}
+
 # Clear cache before starting the server
 Write-Host "Clearing cache..."
 php artisan cache:clear
