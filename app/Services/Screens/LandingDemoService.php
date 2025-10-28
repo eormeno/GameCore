@@ -11,10 +11,11 @@ class LandingDemoService extends AbstractUIService
 {
     protected function buildBaseUI(...$params): UIContainer
     {
-        $container = UIBuilder::container('main');
-        $container->parent('main');
-        $container->layout(LayoutType::VERTICAL);
-        $container->padding(20);
+        $container = UIBuilder::container('main')
+            ->parent('main')
+            ->layout(LayoutType::VERTICAL)
+            ->shadow(false)
+            ->padding(20);
 
         $container->add(
             UIBuilder::label('welcome')
