@@ -6,17 +6,25 @@ use App\Http\Controllers\LogViewerController;
 use App\Http\Controllers\UIEventController;
 use App\Http\Controllers\UIDemoController;
 
+// Demo route - Default landing demo
+Route::get('/demo', function () {
+    return view('demo', [
+        'demo' => 'landing-demo',
+        'reset' => false
+    ]);
+});
+
 // Demo route - Dynamic demo viewer
 Route::get('/demo/{demo}/{reset?}', function (string $demo, bool $reset = false) {
     return view('demo', [
         'demo' => $demo,
         'reset' => $reset
     ]);
-})->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu')->name('demo');
+})->where('demo', 'landing-demo|demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu')->name('demo');
 
 // Demo UI API routes - Unified controller for all demo services
 Route::get('/api/{demo}/{reset?}', [UIDemoController::class, 'show'])
-    ->where('demo', 'demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu')
+    ->where('demo', 'landing-demo|demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu')
     ->name('api.demo');
 
 // UI Event Handler

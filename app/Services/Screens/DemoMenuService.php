@@ -37,6 +37,11 @@ class DemoMenuService extends AbstractUIService
             ->parent('menu') // Render in #menu div
             ->callerServiceId($serviceId); // Set service for action callbacks
 
+        // Home link
+        $menu->link('Home', '/demo', '🏠');
+        
+        $menu->separator();
+
         // Demos submenu
         $menu->submenu('Demos', '🎮', function($submenu) {
             $submenu->link('Demo UI', '/demo/demo-ui', '🎨');
