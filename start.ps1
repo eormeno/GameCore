@@ -42,4 +42,14 @@ if ($args -contains '-r') {
 #     php artisan games
 # }
 
-$artisan = Start-Process -FilePath "powershell.exe" -ArgumentList "-Command", "php artisan serve" -PassThru -NoNewWindow
+# Clear cache before starting the server
+Write-Host "Clearing cache..."
+php artisan cache:clear
+
+# Open browser to the demo page
+Write-Host "Opening browser to http://127.0.0.1:8000/demo"
+Start-Process "http://127.0.0.1:8000/demo"
+
+# Start the Laravel server (this will block the terminal)
+Write-Host "Starting Laravel server..."
+php artisan serve
