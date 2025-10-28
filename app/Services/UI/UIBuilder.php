@@ -12,6 +12,7 @@ use App\Services\UI\Components\SelectBuilder;
 use App\Services\UI\Components\CheckboxBuilder;
 use App\Services\UI\Components\FormBuilder;
 use App\Services\UI\Components\MenuDropdownBuilder;
+use App\Services\UI\Components\CardBuilder;
 
 /**
  * Factory class for creating UI components
@@ -132,5 +133,16 @@ class UIBuilder
     public static function menuDropdown(string $name): MenuDropdownBuilder
     {
         return new MenuDropdownBuilder($name);
+    }
+
+    /**
+     * Create a new card component
+     * 
+     * @param string|null $name The optional semantic name for the card
+     * @return CardBuilder
+     */
+    public static function card(?string $name = null): CardBuilder
+    {
+        return new CardBuilder($name);
     }
 }
