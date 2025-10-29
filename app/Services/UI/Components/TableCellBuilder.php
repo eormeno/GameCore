@@ -40,6 +40,8 @@ class TableCellBuilder extends UIComponent
             'column' => null,  // Column index for ordering
             'min_width' => null,  // Minimum width in pixels
             'max_width' => null,  // Maximum width in pixels
+            'min_height' => null,  // Minimum height in pixels, inherited from row
+            'padding' => null,  // Padding in pixels for more compact cells
         ];
     }
 
@@ -70,6 +72,18 @@ class TableCellBuilder extends UIComponent
         if ($maxWidth !== null) {
             $this->setConfig('max_width', $maxWidth);
         }
+        return $this;
+    }
+
+    /**
+     * Set padding for the cell
+     * 
+     * @param int $padding Padding in pixels for more compact cells
+     * @return self For method chaining
+     */
+    public function padding(int $padding): self
+    {
+        $this->setConfig('padding', $padding);
         return $this;
     }
 
@@ -186,6 +200,14 @@ class TableCellBuilder extends UIComponent
     {
         // Get base config and filter nulls
         $config = array_filter($this->config, fn($value) => $value !== null);
+
+        // Inherit min_height from parent row if not set
+        if (!isset($config['min_height']) || $config['min_height'] === null) {
+            $rowConfig = $this->row->getRowConfig();
+            if (isset($rowConfig['min_height']) && $rowConfig['min_height'] !== null) {
+                $config['min_height'] = $rowConfig['min_height'];
+            }
+        }
 
         // Remove 'visible' if it's true (default value)
         if (isset($config['visible']) && $config['visible'] === true) {

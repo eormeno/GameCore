@@ -34,9 +34,10 @@ class UsersDataTableModel extends AbstractDataTableModel
         return [
             'id' => ['label' => 'Id', 'width' => [50, 80]],
             'name' => ['label' => 'Name', 'width' => [200, 250]],
-            'country' => ['label' => 'Country', 'width' => [200, 250]],
-            'actions' => ['label' => 'Actions', 'width' => [80, 120]],
-            'remove' => ['label' => '', 'width' => [80, 120]]
+            'country' => ['label' => 'País', 'width' => [200, 250]],
+            'actions' => ['label' => 'Acciones', 'width' => [80, 120]],
+            'remove' => ['label' => '', 'width' => [80, 120]],
+            'otra' => ['label' => 'Otra', 'width' => [100, 150]]
         ];
     }
 
@@ -130,5 +131,23 @@ class UsersDataTableModel extends AbstractDataTableModel
         // For demo purposes, we just return true
         // In a real implementation, this would delete from database
         return true;
+    }
+
+    /**
+     * Get the configuration for "removed" user display
+     * 
+     * Customizes how removed users appear in the table.
+     * 
+     * @return array Configuration for removed user display
+     */
+    public function getRemovedRowConfig(): array
+    {
+        return [
+            'primary_message' => '[USER REMOVED]',  // Custom message for users
+            'secondary_message' => '---',           // Custom placeholder
+            'id_placeholder' => '❌',               // Visual indicator for ID
+            'button_placeholder' => '⛔',           // Visual indicator for buttons
+            'empty_placeholder' => '',              // Empty cells
+        ];
     }
 }

@@ -63,7 +63,8 @@ $this->onRemoveRow([
 
 **Core Methods:**
 - `onEditRow(array $params): array` - Generic row editing
-- `onRemoveRow(array $params): array` - Generic row removal
+- `onRemoveRow(array $params): array` - Generic row removal  
+- `onChangeTablePage(array $params): array` - Generic page navigation
 
 **Required Implementation:**
 - `getDataModelForTable(string $tableName)` - Must be implemented by using class
@@ -85,8 +86,16 @@ $this->onRemoveRow([
 [
     'table_name' => 'string',    // Required: Table identifier
     'id' => 'mixed',             // Required: Row identifier to remove
-    'description' => 'string',   // Optional: Removal feedback (default: '[REMOVED]')
+    'description' => 'string',   // Optional: Removal feedback (overridden by model config)
     'row' => 'int'               // Optional: Row index for UI updates
+]
+```
+
+**Change Page Parameters:**
+```php
+[
+    'table_name' => 'string',    // Required: Table identifier
+    'page' => 'int'              // Required: Target page number (1-based)
 ]
 ```
 
@@ -196,7 +205,44 @@ class MultiTableDemoService extends AbstractUIService
 
 ## Advanced Features
 
-### 1. Custom Field Mapping
+### 1. Configurable Removal Display
+
+Data models can now provide their own removal configuration through `getRemovedRowConfig()`:
+
+```php
+public function getRemovedRowConfig(): array
+{
+    return [
+        'primary_message' => '[USER REMOVED]',  // Custom message
+        'secondary_message' => '---',           // Secondary placeholder
+        'id_placeholder' => '❌',               // Visual indicator for ID
+        'button_placeholder' => '⛔',           // Visual indicator for buttons
+        'empty_placeholder' => '',              // Empty cells
+    ];
+}
+```
+
+The model also provides `getRemovalValues(int $columnCount)` to generate removal values for all columns automatically.
+
+### 2. Generic Pagination
+
+The trait now handles page navigation generically:
+
+```php
+// Navigate to page 3 of any table
+$this->onChangeTablePage([
+    'table_name' => 'users_table',
+    'page' => 3
+]);
+
+// Works with any table
+$this->onChangeTablePage([
+    'table_name' => 'products_table', 
+    'page' => 1
+]);
+```
+
+### 3. Custom Field Mapping
 
 Override `getCellNameForData()` to map data fields to cell positions:
 
@@ -216,39 +262,46 @@ protected function getCellNameForData(int $pageRow, string $dataKey, $dataModel)
 }
 ```
 
-### 2. Custom Removal Display
+### 4. Custom Column Mapping
 
-Override `getRemovalValuesForRow()` to customize removal appearance:
+Override `getColumnMappingForModel()` to map data fields to table columns:
 
 ```php
-protected function getRemovalValuesForRow(int $columnCount, string $description): array
+protected function getColumnMappingForModel($dataModel): array
 {
-    $values = [];
-    for ($i = 0; $i < $columnCount; $i++) {
-        if ($i === 0) {
-            $values[$i] = '❌'; // Custom icon for ID column
-        } elseif ($i === 1) {
-            $values[$i] = $description; // Description in main column
-        } else {
-            $values[$i] = '---'; // Custom placeholder
-        }
-    }
-    return $values;
+    return [
+        'id' => 0,          // ID in column 0
+        'name' => 1,        // Name in column 1  
+        'title' => 1,       // Product title also in column 1
+        'country' => 2,     // Country in column 2
+        'category' => 2,    // Product category in column 2
+        'actions' => 3,     // Action buttons in column 3
+        'remove' => 4,      // Remove button in column 4
+    ];
 }
 ```
 
-### 3. Data Model Compatibility
+### 5. Data Model Compatibility
 
 The trait works with any data model that provides these methods:
 
 ```php
 interface DataTableModelInterface
 {
+    // Basic operations
     public function updateUser($id, array $data): void;    // Legacy
     public function removeUser($id): void;                 // Legacy
     public function updateRow($id, array $data): void;     // Generic
     public function removeRow($id): void;                  // Generic
+    
+    // Pagination support
     public function getPerPage(): int;
+    public function setCurrentPage(int $page): void;
+    public function getFormattedPageData(): array;
+    
+    // Configurable removal (optional)
+    public function getRemovedRowConfig(): array;
+    public function getRemovalValues(int $columnCount): array;
 }
 ```
 
@@ -284,12 +337,25 @@ interface DataTableModelInterface
 ### Pattern 1: Direct Generic Usage
 
 ```php
-// Frontend calls directly with generic parameters
-$response = $service->onEditRow([
+// Edit any row in any table
+$service->onEditRow([
     'table_name' => 'users_table',
     'id' => 123,
     'data' => ['name' => 'New Name'],
     'row' => 0
+]);
+
+// Remove any row from any table
+$service->onRemoveRow([
+    'table_name' => 'products_table',
+    'id' => 456,
+    'row' => 2
+]);
+
+// Navigate any table to any page
+$service->onChangeTablePage([
+    'table_name' => 'orders_table',
+    'page' => 3
 ]);
 ```
 
@@ -319,6 +385,14 @@ public function onEditUser(array $params): array
         'id' => $params['user_id'],
         'data' => ['name' => $params['name'] . ' [EDITED]'],
         'row' => $params['row']
+    ]);
+}
+
+public function onChangePage(array $params): array
+{
+    return $this->onChangeTablePage([
+        'table_name' => 'users_table',
+        'page' => $params['page'] ?? 1
     ]);
 }
 ```

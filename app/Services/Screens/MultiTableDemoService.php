@@ -224,24 +224,51 @@ class MultiTableDemoService extends AbstractUIService
     }
 
     /**
-     * Override to customize removal values per table
+     * Example: Navigate users table to specific page
      * 
-     * @param int $columnCount
-     * @param string $description
+     * @param array $params
      * @return array
      */
-    protected function getRemovalValuesForRow(int $columnCount, string $description): array
+    public function navigateUsersPage(array $params): array
     {
-        $values = [];
-        for ($i = 0; $i < $columnCount; $i++) {
-            if ($i === 0) {
-                $values[$i] = '-'; // ID column
-            } elseif ($i === 1) {
-                $values[$i] = $description; // Main content column
-            } else {
-                $values[$i] = '-'; // Other columns
-            }
-        }
-        return $values;
+        return $this->onChangeTablePage([
+            'table_name' => 'users_table',
+            'page' => $params['page'] ?? 1
+        ]);
+    }
+
+    /**
+     * Example: Navigate products table to specific page
+     * 
+     * @param array $params
+     * @return array
+     */
+    public function navigateProductsPage(array $params): array
+    {
+        return $this->onChangeTablePage([
+            'table_name' => 'products_table',
+            'page' => $params['page'] ?? 1
+        ]);
+    }
+
+    /**
+     * Override column mapping for multi-table support
+     * 
+     * @param mixed $dataModel
+     * @return array
+     */
+    protected function getColumnMappingForModel($dataModel): array
+    {
+        // Can customize mapping based on model type or other criteria
+        return [
+            'id' => 0,
+            'name' => 1,        // User name
+            'title' => 1,       // Product title  
+            'country' => 2,     // User country
+            'category' => 2,    // Product category
+            'price' => 3,       // Product price
+            'actions' => 3,     // Action buttons
+            'remove' => 4,      // Remove button
+        ];
     }
 }

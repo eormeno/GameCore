@@ -21,6 +21,8 @@ class ButtonDemoService extends AbstractUIService
         $container = UIBuilder::container('main')
             ->parent('main')
             ->layout(LayoutType::VERTICAL)
+            ->alignContent('center')
+            ->alignItems('center')
             ->title('Button Demo - Click Me!');
 
         // Single button that changes its own label

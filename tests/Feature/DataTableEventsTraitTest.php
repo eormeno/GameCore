@@ -159,9 +159,9 @@ class DataTableEventsTraitTest extends TestCase
     /**
      * @test
      */
-    public function it_supports_custom_removal_descriptions()
+    public function it_uses_model_configured_removal_over_custom_description()
     {
-        // Arrange
+        // Arrange - provide custom description that should be overridden by model config
         $customDescription = '[CUSTOM REMOVAL MESSAGE]';
         $params = [
             'table_name' => 'users_table',
@@ -176,16 +176,16 @@ class DataTableEventsTraitTest extends TestCase
         // Assert
         $this->assertNotEmpty($result);
         
-        // Find the main content cell (column 1) and verify custom description
-        $foundCustomDescription = false;
+        // The model configuration should override the custom description
+        $foundModelConfiguredMessage = false;
         foreach ($result as $update) {
-            if (isset($update['text']) && $update['text'] === $customDescription) {
-                $foundCustomDescription = true;
+            if (isset($update['text']) && $update['text'] === '[USER REMOVED]') {
+                $foundModelConfiguredMessage = true;
                 break;
             }
         }
         
-        $this->assertTrue($foundCustomDescription, 'Custom removal description should appear in UI updates');
+        $this->assertTrue($foundModelConfiguredMessage, 'Model-configured removal message should override custom description');
     }
 
     /**
@@ -211,7 +211,7 @@ class DataTableEventsTraitTest extends TestCase
     /**
      * @test
      */
-    public function it_uses_default_removal_description_when_not_provided()
+    public function it_uses_model_configured_removal_when_no_description_provided()
     {
         // Arrange - omit description parameter
         $params = [
@@ -227,15 +227,15 @@ class DataTableEventsTraitTest extends TestCase
         // Assert
         $this->assertNotEmpty($result);
         
-        // Should use default '[REMOVED]' description
-        $foundDefaultDescription = false;
+        // Should use model-configured message, not default '[REMOVED]'
+        $foundModelConfiguredMessage = false;
         foreach ($result as $update) {
-            if (isset($update['text']) && $update['text'] === '[REMOVED]') {
-                $foundDefaultDescription = true;
+            if (isset($update['text']) && $update['text'] === '[USER REMOVED]') {
+                $foundModelConfiguredMessage = true;
                 break;
             }
         }
         
-        $this->assertTrue($foundDefaultDescription, 'Default removal description should be used');
+        $this->assertTrue($foundModelConfiguredMessage, 'Model-configured removal message should be used even when description not provided');
     }
 }

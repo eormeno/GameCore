@@ -197,4 +197,49 @@ abstract class AbstractDataTableModel
         }
         return $this;
     }
+
+    /**
+     * Get the configuration for "removed" row display
+     * 
+     * Returns an array that defines how removed rows should appear.
+     * Services can override this to customize the removal appearance.
+     * 
+     * @return array Configuration for removed row display
+     */
+    public function getRemovedRowConfig(): array
+    {
+        return [
+            'primary_message' => '[REMOVED]',   // Main removal message
+            'secondary_message' => '-',         // Secondary placeholder
+            'id_placeholder' => '-',            // ID column placeholder
+            'button_placeholder' => '-',        // Button column placeholder
+            'empty_placeholder' => '',          // Empty cell placeholder
+        ];
+    }
+
+    /**
+     * Get removal values for all columns based on configuration
+     * 
+     * @param int $columnCount The number of columns
+     * @return array Values for each column when row is removed
+     */
+    public function getRemovalValues(int $columnCount): array
+    {
+        $config = $this->getRemovedRowConfig();
+        $values = [];
+        
+        for ($i = 0; $i < $columnCount; $i++) {
+            if ($i === 0) {
+                $values[$i] = $config['id_placeholder']; // ID column
+            } elseif ($i === 1) {
+                $values[$i] = $config['primary_message']; // Main content column
+            } elseif ($i >= $columnCount - 2) {
+                $values[$i] = $config['button_placeholder']; // Button columns (usually last 2)
+            } else {
+                $values[$i] = $config['secondary_message']; // Data columns
+            }
+        }
+        
+        return $values;
+    }
 }

@@ -70,7 +70,7 @@ class TableDemoService extends AbstractUIService
         $table = UIBuilder::tableWithModel('users_table', $dataModel)
             ->title('Users Table')
             ->align('center')
-            ->rowMinHeight(20);
+            ->rowMinHeight(35); // Further reduced for more compact rows
 
         $container->add($table);
 
@@ -124,116 +124,40 @@ class TableDemoService extends AbstractUIService
     }
 
     /**
-     * Handle page change action
+     * Handle page change action (legacy compatibility)
+     * 
+     * Maps to the generic onChangePage method with proper parameters.
      * 
      * @param array $params Action parameters with 'page' key
      * @return array UI updates
      */
     public function onChangePage(array $params): array
     {
-        $page = $params['page'] ?? 1;
-        
-        // Update data model with new page
-        $dataModel = $this->getDataModel();
-        $dataModel->setCurrentPage($page);
-        $formattedData = $dataModel->getFormattedPageData();
-        
-        // Get stored UI to find cells
-        $storedUI = $this->getStoredUI();
-        $result = [];
-        
-        // Update data cells
-        $row = 0;
-        foreach ($formattedData as $rowData) {
-            if ($row >= $dataModel->getPerPage()) {
-                break;
-            }
+        // Map legacy parameters to generic format
+        $genericParams = [
+            'table_name' => 'users_table',
+            'page' => $params['page'] ?? 1
+        ];
 
-            // Update each cell in the row
-            $cellData = [
-                "{$row}_0" => $rowData['id'],
-                "{$row}_1" => $rowData['name'],
-                "{$row}_2" => $rowData['country'],
-            ];
-
-            foreach ($cellData as $cellName => $value) {
-                foreach ($storedUI as $id => $component) {
-                    if ($component['type'] === 'tablecell' && 
-                        isset($component['name']) && 
-                        $component['name'] === $cellName) {
-                        $result[$id] = [
-                            'type' => 'tablecell',
-                            'text' => (string)$value,
-                            '_id' => $id,
-                        ];
-                        break;
-                    }
-                }
-            }
-
-            // Update button cells
-            $this->updateButtonCell($storedUI, $result, "{$row}_3", $rowData['actions']);
-            $this->updateButtonCell($storedUI, $result, "{$row}_4", $rowData['remove']);
-
-            $row++;
-        }
-
-        // Clear remaining rows if less than perPage
-        $this->clearRemainingRows($storedUI, $result, $row, $dataModel->getPerPage());
-
-        return $result;
+        return $this->onChangeTablePage($genericParams);
     }
 
     /**
-     * Update a button cell in the result array
+     * Get the default row height for the users table
      * 
-     * @param array $storedUI
-     * @param array &$result
-     * @param string $cellName
-     * @param array $buttonData
-     */
-    private function updateButtonCell(array $storedUI, array &$result, string $cellName, array $buttonData): void
-    {
-        foreach ($storedUI as $id => $component) {
-            if ($component['type'] === 'tablecell' && 
-                isset($component['name']) && 
-                $component['name'] === $cellName) {
-                $result[$id] = [
-                    'type' => 'tablecell',
-                    'button' => $buttonData['button'],
-                    '_id' => $id,
-                ];
-                break;
-            }
-        }
-    }
-
-    /**
-     * Clear remaining empty rows
+     * Override to ensure consistent row heights across all states
+     * (data rows, removed rows, and empty rows).
      * 
-     * @param array $storedUI
-     * @param array &$result
-     * @param int $startRow
-     * @param int $totalRows
+     * @param string|null $tableName The table name
+     * @return int The default minimum height in pixels
      */
-    private function clearRemainingRows(array $storedUI, array &$result, int $startRow, int $totalRows): void
+    protected function getDefaultRowHeight(?string $tableName = null): int
     {
-        for ($i = $startRow; $i < $totalRows; $i++) {
-            for ($col = 0; $col < 5; $col++) {
-                $cellName = "{$i}_{$col}";
-                foreach ($storedUI as $id => $component) {
-                    if ($component['type'] === 'tablecell' && 
-                        isset($component['name']) && 
-                        $component['name'] === $cellName) {
-                        $result[$id] = [
-                            'type' => 'tablecell',
-                            'text' => '',
-                            '_id' => $id,
-                        ];
-                        break;
-                    }
-                }
-            }
+        if ($tableName === 'users_table') {
+            return 24; // Further reduced height for more compact rows
         }
+        
+        // Call the trait's default implementation
+        return 30; // Default height for any other table
     }
 }

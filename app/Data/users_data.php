@@ -40,4 +40,7 @@ return [
     ['id' => 33, 'name' => 'Grace Nguyen', 'country' => 'Vietnam'],
     ['id' => 34, 'name' => 'Henrik Larsson', 'country' => 'Norway'],
     ['id' => 35, 'name' => 'Isabella Santos', 'country' => 'Portugal'],
+    ['id' => 36, 'name' => 'Jack Wilson', 'country' => 'New Zealand'],
+    ['id' => 37, 'name' => 'Katrina Müller', 'country' => 'Switzerland'],
+    ['id' => 38, 'name' => 'Liam Johnson', 'country' => 'Australia'],
 ];

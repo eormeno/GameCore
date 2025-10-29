@@ -259,19 +259,19 @@ class TableBuilder extends UIComponent
             
             if (is_string($value) || is_numeric($value)) {
                 // Simple text (string or number)
-                $cell->text((string)$value);
+                $cell->text((string)$value)->padding(4); // Compact padding for text cells
             } elseif (is_array($value)) {
                 if (isset($value['text'])) {
-                    $cell->text($value['text']);
+                    $cell->text($value['text'])->padding(4); // Compact padding for text cells
                 } elseif (isset($value['button'])) {
-                    $cell->button($value['button']);
+                    $cell->button($value['button'])->padding(2); // Even more compact for buttons
                 } elseif (isset($value['url_image'])) {
                     $cell->urlImage(
                         $value['url_image'],
                         $value['alt'] ?? null,
                         $value['width'] ?? null,
                         $value['height'] ?? null
-                    );
+                    )->padding(2); // Compact for images
                 }
             }
         }

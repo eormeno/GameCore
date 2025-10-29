@@ -65,6 +65,16 @@ class TableRowBuilder extends UIComponent
     }
 
     /**
+     * Get the row configuration (public accessor for cells)
+     * 
+     * @return array The row configuration
+     */
+    public function getRowConfig(): array
+    {
+        return $this->getConfig();
+    }
+
+    /**
      * Create and add a new cell to this row
      * 
      * @param string|null $name Optional name for the cell

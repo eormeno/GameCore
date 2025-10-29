@@ -197,14 +197,14 @@ trait DataTableEventsTrait
         // Get column count to clear all cells in the row
         $columnCount = $this->getColumnCountForTable($tableName, $dataModel);
         
-        // Default removal values for each column
-        $removalValues = $this->getRemovalValuesForRow($columnCount, $description);
+        // Get removal values using model configuration
+        $removalValues = $this->getRemovalValuesForRow($columnCount, $description, $dataModel);
         
         // Update all cells in the row
         for ($col = 0; $col < $columnCount; $col++) {
             $cellName = "{$pageRow}_{$col}";
             $value = $removalValues[$col] ?? '-';
-            $this->updateCellInResponse($storedUI, $result, $cellName, $value);
+            $this->updateCellInResponse($storedUI, $result, $cellName, $value, $tableName);
         }
 
         return $result;
@@ -257,14 +257,22 @@ trait DataTableEventsTrait
     /**
      * Get removal values for all columns in a row
      * 
-     * Services can override this to customize removal display.
+     * Uses the data model's removal configuration if available,
+     * otherwise falls back to the provided description.
      * 
      * @param int $columnCount The number of columns
-     * @param string $description The removal description
+     * @param string $description The removal description (fallback)
+     * @param mixed $dataModel The data model instance
      * @return array Values for each column
      */
-    protected function getRemovalValuesForRow(int $columnCount, string $description): array
+    protected function getRemovalValuesForRow(int $columnCount, string $description, $dataModel = null): array
     {
+        // Try to get removal values from the data model
+        if ($dataModel && method_exists($dataModel, 'getRemovalValues')) {
+            return $dataModel->getRemovalValues($columnCount);
+        }
+
+        // Fallback to default behavior with description
         $values = [];
         for ($i = 0; $i < $columnCount; $i++) {
             if ($i === 0) {
@@ -279,28 +287,276 @@ trait DataTableEventsTrait
     }
 
     /**
-     * Update a cell in the UI response
+     * Handle page change action for any data table
+     * 
+     * @param array $params Action parameters:
+     *   - table_name: string - Name/ID of the table
+     *   - page: int - Target page number
+     * @return array UI updates
+     */
+    public function onChangeTablePage(array $params): array
+    {
+        $tableName = $params['table_name'] ?? null;
+        $page = $params['page'] ?? 1;
+
+        if (!$tableName) {
+            return [];
+        }
+
+        // Get the data model for this table
+        $dataModel = $this->getDataModelForTable($tableName);
+        if (!$dataModel) {
+            return [];
+        }
+
+        // Update data model with new page
+        if (method_exists($dataModel, 'setCurrentPage')) {
+            $dataModel->setCurrentPage($page);
+        }
+
+        // Get formatted data for the new page
+        if (!method_exists($dataModel, 'getFormattedPageData')) {
+            return [];
+        }
+
+        $formattedData = $dataModel->getFormattedPageData();
+        $storedUI = $this->getStoredUI();
+        $result = [];
+        
+        // Update data cells
+        $row = 0;
+        foreach ($formattedData as $rowData) {
+            if ($row >= $this->getPerPageForTable($tableName, $dataModel)) {
+                break;
+            }
+
+            // Update each cell in the row using column mapping
+            $this->updateRowCells($storedUI, $result, $row, $rowData, $dataModel, $tableName);
+            $row++;
+        }
+
+        // Clear remaining rows if less than perPage
+        $totalRows = $this->getPerPageForTable($tableName, $dataModel);
+        $columnCount = $this->getColumnCountForTable($tableName, $dataModel);
+        $this->clearRemainingRows($storedUI, $result, $row, $totalRows, $columnCount, $tableName);
+
+        return $result;
+    }
+
+    /**
+     * Update all cells in a row with new data
+     * 
+     * @param array $storedUI The stored UI components
+     * @param array &$result The result array to update
+     * @param int $row The row index
+     * @param array $rowData The new row data
+     * @param mixed $dataModel The data model instance
+     * @param string|null $tableName The table name for height consistency
+     * @return void
+     */
+    protected function updateRowCells(array $storedUI, array &$result, int $row, array $rowData, $dataModel, ?string $tableName = null): void
+    {
+        // Get column mapping for this data model
+        $columnMapping = $this->getColumnMappingForModel($dataModel);
+        
+        foreach ($rowData as $fieldName => $value) {
+            $columnIndex = $columnMapping[$fieldName] ?? null;
+            
+            if ($columnIndex !== null) {
+                $cellName = "{$row}_{$columnIndex}";
+                
+                if (is_array($value) && isset($value['button'])) {
+                    // Handle button cells
+                    $this->updateButtonCell($storedUI, $result, $cellName, $value, $tableName);
+                } else {
+                    // Handle text cells
+                    $this->updateCellInResponse($storedUI, $result, $cellName, $value, $tableName);
+                }
+            }
+        }
+    }
+
+    /**
+     * Update a button cell in the result array
      * 
      * @param array $storedUI The stored UI components
      * @param array &$result The result array to update
      * @param string $cellName The cell identifier
-     * @param mixed $value The new value
+     * @param array $buttonData The button configuration
+     * @param string|null $tableName The table name for height consistency
      * @return void
      */
-    protected function updateCellInResponse(array $storedUI, array &$result, string $cellName, $value): void
+    protected function updateButtonCell(array $storedUI, array &$result, string $cellName, array $buttonData, ?string $tableName = null): void
     {
         foreach ($storedUI as $id => $component) {
             if ($component['type'] === 'tablecell' && 
                 isset($component['name']) && 
                 $component['name'] === $cellName) {
                 
-                $result[$id] = [
+                $cellUpdate = [
+                    'type' => 'tablecell',
+                    'button' => $buttonData['button'],
+                    '_id' => $id,
+                ];
+
+                // Preserve height consistency for button cells too
+                $this->preserveHeightProperties($component, $cellUpdate, $tableName);
+                
+                $result[$id] = $cellUpdate;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Clear remaining empty rows
+     * 
+     * @param array $storedUI The stored UI components
+     * @param array &$result The result array to update
+     * @param int $startRow Starting row index to clear
+     * @param int $totalRows Total number of rows in the table
+     * @param int $columnCount Number of columns in the table
+     * @param string|null $tableName The table name for height consistency
+     * @return void
+     */
+    protected function clearRemainingRows(array $storedUI, array &$result, int $startRow, int $totalRows, int $columnCount, ?string $tableName = null): void
+    {
+        for ($i = $startRow; $i < $totalRows; $i++) {
+            for ($col = 0; $col < $columnCount; $col++) {
+                $cellName = "{$i}_{$col}";
+                $this->updateCellInResponse($storedUI, $result, $cellName, '', $tableName);
+            }
+        }
+    }
+
+    /**
+     * Get per-page count for a table
+     * 
+     * @param string $tableName The table identifier
+     * @param mixed $dataModel The data model instance
+     * @return int The per-page count
+     */
+    protected function getPerPageForTable(string $tableName, $dataModel): int
+    {
+        if (method_exists($dataModel, 'getPerPage')) {
+            return $dataModel->getPerPage();
+        }
+        
+        // Default fallback
+        return 10;
+    }
+
+    /**
+     * Get column mapping for a data model
+     * 
+     * Maps data field names to column indices for UI updates.
+     * Services can override this for custom mapping.
+     * 
+     * @param mixed $dataModel The data model instance
+     * @return array Field name to column index mapping
+     */
+    protected function getColumnMappingForModel($dataModel): array
+    {
+        // Default mapping for common fields
+        return [
+            'id' => 0,
+            'name' => 1,
+            'title' => 1,
+            'country' => 2,
+            'category' => 2,
+            'email' => 2,
+            'actions' => 3,
+            'status' => 3,
+            'remove' => 4,
+            'delete' => 4,
+        ];
+    }
+
+    /**
+     * Update a cell in the UI response
+     * 
+     * @param array $storedUI The stored UI components
+     * @param array &$result The result array to update
+     * @param string $cellName The cell identifier
+     * @param mixed $value The new value
+     * @param string $tableName The table name (optional, for height consistency)
+     * @return void
+     */
+    protected function updateCellInResponse(array $storedUI, array &$result, string $cellName, $value, string $tableName = null): void
+    {
+        foreach ($storedUI as $id => $component) {
+            if ($component['type'] === 'tablecell' && 
+                isset($component['name']) && 
+                $component['name'] === $cellName) {
+                
+                $cellUpdate = [
                     'type' => 'tablecell',
                     'text' => (string)$value,
                     '_id' => $id,
                 ];
+
+                // Preserve height consistency - maintain original cell height properties
+                $this->preserveHeightProperties($component, $cellUpdate, $tableName);
+                
+                $result[$id] = $cellUpdate;
                 break;
             }
         }
+    }
+
+    /**
+     * Preserve height properties from the original cell to maintain consistent row heights
+     * 
+     * @param array $originalComponent The original cell component
+     * @param array &$cellUpdate The cell update being prepared
+     * @param string|null $tableName The table name for context
+     * @return void
+     */
+    protected function preserveHeightProperties(array $originalComponent, array &$cellUpdate, ?string $tableName = null): void
+    {
+        // Preserve minimum height if it was set
+        if (isset($originalComponent['min_height'])) {
+            $cellUpdate['min_height'] = $originalComponent['min_height'];
+        }
+        
+        // Preserve height if it was set
+        if (isset($originalComponent['height'])) {
+            $cellUpdate['height'] = $originalComponent['height'];
+        }
+        
+        // Preserve padding for compact cells
+        if (isset($originalComponent['padding'])) {
+            $cellUpdate['padding'] = $originalComponent['padding'];
+        }
+        
+        // Preserve any other height-related properties
+        $heightProperties = ['max_height', 'line_height', 'padding_top', 'padding_bottom'];
+        foreach ($heightProperties as $property) {
+            if (isset($originalComponent[$property])) {
+                $cellUpdate[$property] = $originalComponent[$property];
+            }
+        }
+
+        // If no height properties exist, apply default minimum height for consistency
+        if (!isset($cellUpdate['min_height']) && !isset($cellUpdate['height'])) {
+            $defaultMinHeight = $this->getDefaultRowHeight($tableName);
+            if ($defaultMinHeight > 0) {
+                $cellUpdate['min_height'] = $defaultMinHeight;
+            }
+        }
+    }
+
+    /**
+     * Get the default row height for a table
+     * 
+     * Services can override this to provide table-specific default heights.
+     * 
+     * @param string|null $tableName The table name
+     * @return int The default minimum height in pixels
+     */
+    protected function getDefaultRowHeight(?string $tableName = null): int
+    {
+        // Default minimum height for all tables
+        return 30; // pixels
     }
 }
