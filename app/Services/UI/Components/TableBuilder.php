@@ -455,6 +455,81 @@ class TableBuilder extends UIComponent
     }
 
     /**
+     * Configure table using a data model
+     * The data model should provide methods like:
+     * - getColumns(): array of column definitions
+     * - getPaginationInfo(): pagination information
+     * - getFormattedPageData(): formatted data for current page
+     * 
+     * @param mixed $dataModel The data model instance
+     * @return self
+     */
+    public function dataModel($dataModel): self
+    {
+        if (!$dataModel) {
+            return $this;
+        }
+
+        // Get columns and pagination configuration
+        $columns = null;
+        if (method_exists($dataModel, 'getColumns')) {
+            $columns = $dataModel->getColumns();
+            $this->cols = count($columns);
+            $this->setConfig('cols', $this->cols);
+        }
+
+        if (method_exists($dataModel, 'getPaginationInfo')) {
+            $paginationInfo = $dataModel->getPaginationInfo();
+            $this->rows = $paginationInfo['per_page'];
+            $this->setConfig('rows', $this->rows);
+            $this->setConfig('pagination', true);
+            $this->setConfig('per_page', $paginationInfo['per_page']);
+            $this->setConfig('current_page', $paginationInfo['current_page']);
+            $this->setConfig('total_items', $paginationInfo['total_items']);
+        }
+
+        // Initialize cells now that we have dimensions
+        if ($this->rows > 0 && $this->cols > 0) {
+            $this->initializeEmptyCells();
+
+            // Configure column widths AFTER cells are initialized
+            if ($columns) {
+                $columnIndex = 0;
+                foreach ($columns as $column) {
+                    if (isset($column['width'])) {
+                        $this->columnWidth($columnIndex, $column['width'][0], $column['width'][1]);
+                    }
+                    $columnIndex++;
+                }
+            }
+
+            // Fill header row
+            if ($columns) {
+                $headers = array_column($columns, 'label');
+                $this->fillHeaderRow($headers);
+            }
+
+            // Fill data rows
+            if (method_exists($dataModel, 'getFormattedPageData')) {
+                $formattedData = $dataModel->getFormattedPageData();
+                $row = 0;
+                foreach ($formattedData as $rowData) {
+                    if ($row >= $this->rows) {
+                        break;
+                    }
+
+                    // Convert associative array to indexed array for fillRow
+                    $rowValues = array_values($rowData);
+                    $this->fillRow($row, $rowValues);
+                    $row++;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Get pagination info
      * 
      * @return array ['current_page' => int, 'per_page' => int, 'total_items' => int, 'total_pages' => int]
