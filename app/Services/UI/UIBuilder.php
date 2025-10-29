@@ -13,6 +13,7 @@ use App\Services\UI\Components\CheckboxBuilder;
 use App\Services\UI\Components\FormBuilder;
 use App\Services\UI\Components\MenuDropdownBuilder;
 use App\Services\UI\Components\CardBuilder;
+use App\Services\UI\Components\ImageUploadBuilder;
 
 /**
  * Factory class for creating UI components
@@ -144,5 +145,16 @@ class UIBuilder
     public static function card(?string $name = null): CardBuilder
     {
         return new CardBuilder($name);
+    }
+
+    /**
+     * Create a new image upload component
+     * 
+     * @param string|null $name The optional semantic name for the upload
+     * @return ImageUploadBuilder
+     */
+    public static function imageUpload(?string $name = null): ImageUploadBuilder
+    {
+        return new ImageUploadBuilder($name);
     }
 }

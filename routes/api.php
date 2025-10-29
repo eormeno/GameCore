@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameAppController;
 use App\Http\Controllers\DatabaseTableController;
 use App\Http\Controllers\DebugController;
+use App\Http\Controllers\ImageUploadController;
 
 Route::get('/', fn() => response()->json(['status' => 1]))->name('root');
 
@@ -13,6 +14,10 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/game-app', [GameAppController::class, 'all'])->name('all');
 Route::get('/game-app/{gameApp}/public/{resourceName?}', [GameAppController::class, 'publicRes'])->name('public');
+
+// Image upload routes
+Route::post('/ui-upload', [ImageUploadController::class, 'upload'])->name('ui.upload');
+Route::delete('/ui-upload', [ImageUploadController::class, 'delete'])->name('ui.upload.delete');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);

@@ -118,11 +118,15 @@ abstract class UIComponent implements UIElement
     /**
      * Extract the component type from the class name
      * Example: "ButtonBuilder" -> "button"
+     * Example: "ImageUploadBuilder" -> "image_upload"
      */
     private function getTypeFromClassName(): string
     {
         $className = (new \ReflectionClass($this))->getShortName();
-        return strtolower(str_replace('Builder', '', $className));
+        $cleanName = str_replace('Builder', '', $className);
+        
+        // Convert PascalCase to snake_case
+        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $cleanName));
     }
 
     /**

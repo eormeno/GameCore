@@ -37,5 +37,6 @@ return [
     \App\Services\Screens\ModalDemoService::class,
     \App\Services\Screens\DemoMenuService::class,
     \App\Services\Screens\GameLobbyScreenService::class,
+    \App\Services\Screens\ImageUploadDemoService::class,
     
 ];

@@ -20,11 +20,11 @@ Route::get('/demo/{demo}/{reset?}', function (string $demo, bool $reset = false)
         'demo' => $demo,
         'reset' => $reset
     ]);
-})->where('demo', 'landing-demo|demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu')->name('demo');
+})->where('demo', 'landing-demo|demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu|image-upload-demo')->name('demo');
 
 // Demo UI API routes - Unified controller for all demo services
 Route::get('/api/{demo}/{reset?}', [UIDemoController::class, 'show'])
-    ->where('demo', 'landing-demo|demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu')
+    ->where('demo', 'landing-demo|demo-ui|input-demo|select-demo|checkbox-demo|form-demo|button-demo|table-demo|modal-demo|demo-menu|image-upload-demo')
     ->name('api.demo');
 
 // UI Event Handler

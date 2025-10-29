@@ -140,10 +140,68 @@ class UIComponent {
      * @param {string} type - Type (success, error, info, warning)
      */
     showNotification(message, type = 'info') {
-        // Simple console notification for now
-        // TODO: Implement proper UI notification system
         const emoji = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' }[type] || 'ℹ️';
         console.log(`${emoji} ${message}`);
+        
+        // Create visual notification toast
+        const toast = document.createElement('div');
+        toast.className = `ui-notification ui-notification-${type}`;
+        toast.innerHTML = `${emoji} ${message}`;
+        
+        // Add to body
+        document.body.appendChild(toast);
+        
+        // Position and animate
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 350px;
+            word-wrap: break-word;
+        `;
+        
+        // Apply theme-specific styles
+        const themes = {
+            success: { bg: '#d4edda', color: '#155724', border: '#c3e6cb' },
+            error: { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' },
+            warning: { bg: '#fff3cd', color: '#856404', border: '#ffeeba' },
+            info: { bg: '#d1ecf1', color: '#0c5460', border: '#bee5eb' }
+        };
+        
+        const theme = themes[type] || themes.info;
+        toast.style.backgroundColor = theme.bg;
+        toast.style.color = theme.color;
+        toast.style.border = `1px solid ${theme.border}`;
+        
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+        
+        // Add toast animations to page if not exists
+        if (!document.querySelector('#toast-animations')) {
+            const style = document.createElement('style');
+            style.id = 'toast-animations';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 }
 
@@ -1047,6 +1105,417 @@ class CardComponent extends UIComponent {
     }
 }
 
+// ==================== Image Upload Component ====================
+class ImageUploadComponent extends UIComponent {
+    constructor(id, config) {
+        super(id, config);
+        this.uploadedFiles = [];
+        this.isUploading = false;
+        this.dragCounter = 0;
+    }
+
+    render() {
+        const wrapper = document.createElement('div');
+        wrapper.className = this.getUploadClasses();
+
+        // Label
+        if (this.config.label) {
+            const label = document.createElement('label');
+            label.className = 'ui-upload-label';
+            label.textContent = this.config.label;
+            wrapper.appendChild(label);
+        }
+
+        // Upload area
+        const uploadArea = this.createUploadArea();
+        wrapper.appendChild(uploadArea);
+
+        // Preview area
+        if (this.config.show_preview) {
+            const previewArea = document.createElement('div');
+            previewArea.className = 'ui-upload-preview';
+            previewArea.id = `preview-${this.id}`;
+            wrapper.appendChild(previewArea);
+        }
+
+        // Progress area
+        if (this.config.show_progress) {
+            const progressArea = document.createElement('div');
+            progressArea.className = 'ui-upload-progress hidden';
+            progressArea.id = `progress-${this.id}`;
+            progressArea.innerHTML = `
+                <div class="ui-upload-progress-bar">
+                    <div class="ui-upload-progress-fill"></div>
+                </div>
+                <div class="ui-upload-progress-text">0%</div>
+            `;
+            wrapper.appendChild(progressArea);
+        }
+
+        return this.applyCommonAttributes(wrapper);
+    }
+
+    getUploadClasses() {
+        let classes = 'ui-upload';
+        
+        if (this.config.style) classes += ` ui-upload-${this.config.style}`;
+        if (this.config.variant) classes += ` ui-upload-${this.config.variant}`;
+        if (this.config.size) classes += ` ui-upload-${this.config.size}`;
+        if (this.config.theme) classes += ` ui-upload-theme-${this.config.theme}`;
+        
+        return classes;
+    }
+
+    createUploadArea() {
+        const area = document.createElement('div');
+        area.className = 'ui-upload-area';
+        
+        // Hidden file input
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = this.config.accept || 'image/*';
+        fileInput.multiple = this.config.max_files > 1;
+        fileInput.className = 'ui-upload-input';
+        fileInput.id = `input-${this.id}`;
+        
+        // Upload content
+        const content = document.createElement('div');
+        content.className = 'ui-upload-content';
+        
+        if (this.config.variant === 'dropzone') {
+            content.innerHTML = `
+                <div class="ui-upload-icon">📁</div>
+                <div class="ui-upload-text">${this.config.placeholder}</div>
+                <button type="button" class="ui-button primary ui-upload-button">
+                    ${this.config.upload_button_text}
+                </button>
+            `;
+        } else {
+            content.innerHTML = `
+                <button type="button" class="ui-button primary ui-upload-button">
+                    ${this.config.upload_button_text}
+                </button>
+            `;
+        }
+
+        area.appendChild(fileInput);
+        area.appendChild(content);
+
+        // Event listeners
+        this.setupEventListeners(area, fileInput);
+
+        return area;
+    }
+
+    setupEventListeners(area, fileInput) {
+        const button = area.querySelector('.ui-upload-button');
+        
+        // Button click
+        button.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            this.handleFiles(e.target.files);
+        });
+
+        // Drag and drop (if enabled)
+        if (this.config.drag_drop && this.config.variant === 'dropzone') {
+            this.setupDragDrop(area);
+        }
+    }
+
+    setupDragDrop(area) {
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            area.addEventListener(eventName, this.preventDefaults, false);
+            document.body.addEventListener(eventName, this.preventDefaults, false);
+        });
+
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            area.addEventListener(eventName, () => {
+                this.dragCounter++;
+                area.classList.add('ui-upload-dragover');
+            }, false);
+        });
+
+        ['dragleave', 'dragend'].forEach(eventName => {
+            area.addEventListener(eventName, () => {
+                this.dragCounter--;
+                if (this.dragCounter === 0) {
+                    area.classList.remove('ui-upload-dragover');
+                }
+            }, false);
+        });
+
+        // Handle dropped files
+        area.addEventListener('drop', (e) => {
+            this.dragCounter = 0;
+            area.classList.remove('ui-upload-dragover');
+            const files = e.dataTransfer.files;
+            this.handleFiles(files);
+        }, false);
+    }
+
+    preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    handleFiles(files) {
+        const fileArray = Array.from(files);
+        
+        // Validate file count
+        if (fileArray.length > this.config.max_files) {
+            this.showError(this.config.messages.too_many_files);
+            return;
+        }
+
+        // Validate each file
+        const validFiles = [];
+        for (const file of fileArray) {
+            if (this.validateFile(file)) {
+                validFiles.push(file);
+            }
+        }
+
+        if (validFiles.length === 0) return;
+
+        // Show preview
+        if (this.config.show_preview) {
+            this.showPreview(validFiles);
+        }
+
+        // Auto upload if enabled
+        if (this.config.auto_upload) {
+            this.uploadFiles(validFiles);
+        } else {
+            this.uploadedFiles = validFiles;
+        }
+    }
+
+    validateFile(file) {
+        // Check file size
+        if (file.size > this.config.max_file_size) {
+            this.showError(this.config.messages.file_too_large);
+            return false;
+        }
+
+        // Check file type
+        const accept = this.config.accept;
+        if (accept && accept !== '*/*') {
+            const isValid = accept.split(',').some(type => {
+                type = type.trim();
+                if (type.startsWith('.')) {
+                    return file.name.toLowerCase().endsWith(type.toLowerCase());
+                }
+                return file.type.match(type.replace('*', '.*'));
+            });
+            
+            if (!isValid) {
+                this.showError(this.config.messages.invalid_type);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    showPreview(files) {
+        const previewArea = document.getElementById(`preview-${this.id}`);
+        if (!previewArea) return;
+
+        previewArea.innerHTML = '';
+
+        files.forEach((file, index) => {
+            const preview = document.createElement('div');
+            preview.className = 'ui-upload-preview-item';
+            
+            const img = document.createElement('img');
+            img.className = 'ui-upload-preview-image';
+            
+            const info = document.createElement('div');
+            info.className = 'ui-upload-preview-info';
+            info.innerHTML = `
+                <div class="ui-upload-preview-name">${file.name}</div>
+                <div class="ui-upload-preview-size">${this.formatFileSize(file.size)}</div>
+            `;
+
+            // Remove button
+            if (this.config.allow_remove) {
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'ui-upload-preview-remove';
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', () => {
+                    preview.remove();
+                    this.uploadedFiles = this.uploadedFiles.filter((_, i) => i !== index);
+                });
+                preview.appendChild(removeBtn);
+            }
+
+            preview.appendChild(img);
+            preview.appendChild(info);
+            previewArea.appendChild(preview);
+
+            // Load image preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async uploadFiles(files) {
+        if (this.isUploading) return;
+        
+        this.isUploading = true;
+        const progressArea = document.getElementById(`progress-${this.id}`);
+        
+        if (progressArea) {
+            progressArea.classList.remove('hidden');
+        }
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                await this.uploadSingleFile(file, i, files.length);
+            }
+            
+            // Notify backend of completion with success confirmation
+            if (this.config.callback_action) {
+                await this.sendEventToBackend('upload_complete', this.config.callback_action, {
+                    files_count: this.uploadedFiles.length,
+                    files: this.uploadedFiles.map(f => ({
+                        name: f.name,
+                        size: f.size,
+                        type: f.type,
+                        url: f.url,
+                        path: f.uploadPath
+                    }))
+                });
+            }
+            
+            // Show local success message
+            this.showUploadSuccess(this.uploadedFiles.length);
+            
+        } catch (error) {
+            this.showError(this.config.messages.upload_failed);
+            console.error('Upload error:', error);
+        } finally {
+            this.isUploading = false;
+            if (progressArea) {
+                setTimeout(() => progressArea.classList.add('hidden'), 2000);
+            }
+        }
+    }
+
+    async uploadSingleFile(file, index, total) {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('storage_path', this.config.storage_path);
+            formData.append('prefix', this.config.prefix || '');
+            formData.append('component_id', this.config._id);
+            formData.append('callback_action', this.config.callback_action || '');
+            formData.append('_caller_service_id', this.config._caller_service_id || '');
+
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = ((index + (e.loaded / e.total)) / total) * 100;
+                    this.updateProgress(percentComplete);
+                }
+            });
+
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        this.uploadedFiles.push({
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            uploadPath: response.path,
+                            url: response.url
+                        });
+                        resolve(response);
+                    } catch (e) {
+                        reject(e);
+                    }
+                } else {
+                    reject(new Error(`HTTP ${xhr.status}`));
+                }
+            });
+
+            xhr.addEventListener('error', reject);
+            xhr.open('POST', this.config.upload_url);
+            
+            // Add CSRF token
+            const token = document.querySelector('meta[name="csrf-token"]');
+            if (token) {
+                xhr.setRequestHeader('X-CSRF-TOKEN', token.getAttribute('content'));
+            }
+            
+            xhr.send(formData);
+        });
+    }
+
+    updateProgress(percent) {
+        const progressArea = document.getElementById(`progress-${this.id}`);
+        if (!progressArea) return;
+
+        const fill = progressArea.querySelector('.ui-upload-progress-fill');
+        const text = progressArea.querySelector('.ui-upload-progress-text');
+        
+        if (fill) fill.style.width = `${percent}%`;
+        if (text) text.textContent = `${Math.round(percent)}%`;
+    }
+
+    showError(message) {
+        // Simple error display - could be enhanced with toast notifications
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'ui-upload-error';
+        errorDiv.textContent = message;
+        
+        const wrapper = this.element || document.querySelector(`[data-component-id="${this.config._id}"]`);
+        if (wrapper) {
+            wrapper.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+    }
+
+    showUploadSuccess(fileCount) {
+        // Show success message
+        const successDiv = document.createElement('div');
+        successDiv.className = 'ui-upload-success';
+        const message = fileCount === 1 
+            ? '✅ Imagen subida correctamente!' 
+            : `✅ ${fileCount} imágenes subidas correctamente!`;
+        successDiv.textContent = message;
+        
+        const wrapper = this.element || document.querySelector(`[data-component-id="${this.config._id}"]`);
+        if (wrapper) {
+            wrapper.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 4000);
+        }
+        
+        // Also show in console
+        console.log(`🎉 Upload Success: ${message}`);
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+}
+
 // ==================== Component Factory ====================
 class ComponentFactory {
     static create(id, config) {
@@ -1077,6 +1546,8 @@ class ComponentFactory {
                 return new MenuDropdownComponent(id, config);
             case 'card':
                 return new CardComponent(id, config);
+            case 'image_upload':
+                return new ImageUploadComponent(id, config);
             default:
                 console.warn(`Unknown component type: ${config.type}`);
                 return null;

@@ -55,6 +55,7 @@ class DemoMenuService extends AbstractUIService
             $submenu->link('Input Demo', '/demo/input-demo', '⌨️');
             $submenu->link('Select Demo', '/demo/select-demo', '📋');
             $submenu->link('Checkbox Demo', '/demo/checkbox-demo', '☑️');
+            $submenu->link('Image Upload Demo', '/demo/image-upload-demo', '📷');
         });
 
         $menu->separator();
