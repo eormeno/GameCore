@@ -7,6 +7,7 @@ use App\Services\UI\Components\UIContainer;
 use App\Services\UI\DataTable\UsersDataTableModel;
 use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\UIBuilder;
+use App\Traits\DataTableEventsTrait;
 
 /**
  * Table Demo Service
@@ -21,6 +22,8 @@ use App\Services\UI\UIBuilder;
  */
 class TableDemoService extends AbstractUIService
 {
+    use DataTableEventsTrait;
+    
     private UsersDataTableModel $dataModel;
 
     /**
@@ -34,6 +37,22 @@ class TableDemoService extends AbstractUIService
             $this->dataModel = new UsersDataTableModel(5, 1); // 5 per page, start at page 1
         }
         return $this->dataModel;
+    }
+
+    /**
+     * Get the data model for a specific table (required by DataTableEventsTrait)
+     * 
+     * @param string $tableName The table identifier
+     * @return mixed|null The data model instance or null if not found
+     */
+    protected function getDataModelForTable(string $tableName)
+    {
+        // For this demo service, we only have one table: 'users_table'
+        if ($tableName === 'users_table') {
+            return $this->getDataModel();
+        }
+        
+        return null;
     }
 
     /**
@@ -61,104 +80,47 @@ class TableDemoService extends AbstractUIService
 
 
     /**
-     * Handle edit user action
+     * Handle edit user action (legacy compatibility)
+     * 
+     * Maps to the generic onEditRow method with proper parameters.
      * 
      * @param array $params Action parameters
      * @return array UI updates
      */
     public function onEditUser(array $params): array
     {
-        $userId = $params['user_id'] ?? null;
-        $row = $params['row'] ?? null;
-        $userName = $params['name'] ?? 'Unknown';
+        // Map legacy parameters to generic format
+        $genericParams = [
+            'table_name' => 'users_table',
+            'id' => $params['user_id'] ?? null,
+            'row' => $params['row'] ?? null,
+            'data' => [
+                'name' => ($params['name'] ?? 'Unknown') . ' [EDITED]'
+            ]
+        ];
 
-        if ($userId === null || $row === null) {
-            return [];
-        }
-
-        // Use the data model to update the user (simulation)
-        $dataModel = $this->getDataModel();
-        $dataModel->updateUser($userId, ['name' => $userName . ' [EDITED]']);
-
-        // Find the name cell and update it
-        $storedUI = $this->getStoredUI();
-        $currentPage = $dataModel->getCurrentPage();
-        $perPage = $dataModel->getPerPage();
-        
-        // Calculate the row position on current page
-        $pageRow = $row % $perPage;
-        $cellName = "{$pageRow}_1"; // Column 1 = name
-        
-        foreach ($storedUI as $id => $component) {
-            if ($component['type'] === 'tablecell' && 
-                isset($component['name']) && 
-                $component['name'] === $cellName) {
-                return [
-                    $id => [
-                        'type' => 'tablecell',
-                        'text' => $userName . ' [EDITED]',
-                        '_id' => $id,
-                    ]
-                ];
-            }
-        }
-
-        return [];
+        return $this->onEditRow($genericParams);
     }
 
     /**
-     * Handle remove user action
+     * Handle remove user action (legacy compatibility)
+     * 
+     * Maps to the generic onRemoveRow method with proper parameters.
      * 
      * @param array $params Action parameters
      * @return array UI updates
      */
     public function onRemoveUser(array $params): array
     {
-        $userId = $params['user_id'] ?? null;
-        $row = $params['row'] ?? null;
-
-        if ($userId === null || $row === null) {
-            return [];
-        }
-
-        // Use the data model to remove the user (simulation)
-        $dataModel = $this->getDataModel();
-        $dataModel->removeUser($userId);
-
-        // Calculate the row position on current page
-        $perPage = $dataModel->getPerPage();
-        $pageRow = $row % $perPage;
-
-        // Get the stored UI and find cells for this row
-        $storedUI = $this->getStoredUI();
-        $result = [];
-
-        // Define cell names for this row
-        $cellNames = [
-            "{$pageRow}_0" => '-',           // ID
-            "{$pageRow}_1" => '[REMOVED]',   // Name
-            "{$pageRow}_2" => '-',           // Country
-            "{$pageRow}_3" => '-',           // Edit button
-            "{$pageRow}_4" => '-'            // Remove button
+        // Map legacy parameters to generic format
+        $genericParams = [
+            'table_name' => 'users_table',
+            'id' => $params['user_id'] ?? null,
+            'row' => $params['row'] ?? null,
+            'description' => '[REMOVED]'
         ];
 
-        // Update all cells in the row
-        foreach ($cellNames as $cellName => $newValue) {
-            foreach ($storedUI as $id => $component) {
-                if ($component['type'] === 'tablecell' && 
-                    isset($component['name']) && 
-                    $component['name'] === $cellName) {
-                    $result[$id] = [
-                        'type' => 'tablecell',
-                        'text' => $newValue,
-                        '_id' => $id,
-                    ];
-                    break;
-                }
-            }
-        }
-
-        return $result;
+        return $this->onRemoveRow($genericParams);
     }
 
     /**
