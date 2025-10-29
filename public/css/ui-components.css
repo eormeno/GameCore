@@ -1602,6 +1602,166 @@ body.modal-open #menu {
     gap: 8px;
 }
 
+/* Canceled Messages */
+.ui-upload-canceled {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-radius: 4px;
+    font-size: 14px;
+    animation: slideInDown 0.3s ease;
+}
+
+/* File Removal Messages */
+.ui-upload-removal-message {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    animation: slideInDown 0.3s ease;
+}
+
+.ui-upload-temp-removed {
+    background: #e2e3e5;
+    color: #495057;
+    border: 1px solid #ced4da;
+}
+
+.ui-upload-confirmed-removed {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Preview Action Buttons */
+.ui-upload-preview-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 2px;
+    backdrop-filter: blur(4px);
+}
+
+.ui-upload-action-btn {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    margin-left: 2px;
+}
+
+.ui-upload-confirm-btn {
+    background: #28a745;
+    color: white;
+}
+
+.ui-upload-confirm-btn:hover {
+    background: #218838;
+    transform: scale(1.1);
+}
+
+.ui-upload-cancel-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.ui-upload-cancel-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.ui-upload-delete-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.ui-upload-delete-btn:hover {
+    background: #545b62;
+    transform: scale(1.1);
+}
+
+.ui-upload-protected-btn {
+    background: #ffc107;
+    color: #212529;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.ui-upload-protected-btn:disabled {
+    background: #ffc107;
+    color: #212529;
+    cursor: not-allowed;
+}
+
+/* Preview States */
+.ui-upload-preview-confirmed {
+    border: 2px solid #28a745;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.3);
+}
+
+.ui-upload-preview-confirmed::after {
+    content: '✅';
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: #28a745;
+    color: white;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Status Messages */
+.ui-upload-status-message {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    animation: slideInDown 0.3s ease;
+}
+
+.ui-upload-temp-completed {
+    background: #e7f3ff;
+    color: #0066cc;
+    border: 1px solid #b3d9ff;
+}
+
+.ui-upload-individual-confirmed {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.ui-upload-all-confirmed {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    font-weight: 500;
+}
+
+.ui-upload-completed {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    font-weight: 500;
+    text-align: center;
+    padding: 12px;
+    margin-top: 8px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .ui-upload-area {

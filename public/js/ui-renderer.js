@@ -1283,16 +1283,15 @@ class ImageUploadComponent extends UIComponent {
 
         if (validFiles.length === 0) return;
 
-        // Show preview
-        if (this.config.show_preview) {
-            this.showPreview(validFiles);
-        }
-
-        // Auto upload if enabled
-        if (this.config.auto_upload) {
+        // Auto upload if enabled (always enabled in our case)
+        if (this.config.auto_upload !== false) {
             this.uploadFiles(validFiles);
         } else {
             this.uploadedFiles = validFiles;
+            // Show preview only if not auto-uploading
+            if (this.config.show_preview) {
+                this.showPreview();
+            }
         }
     }
 
@@ -1323,13 +1322,14 @@ class ImageUploadComponent extends UIComponent {
         return true;
     }
 
-    showPreview(files) {
+    showPreview() {
         const previewArea = document.getElementById(`preview-${this.id}`);
         if (!previewArea) return;
 
         previewArea.innerHTML = '';
 
-        files.forEach((file, index) => {
+        // Use uploadedFiles instead of the raw File objects
+        this.uploadedFiles.forEach((uploadedFile, index) => {
             const preview = document.createElement('div');
             preview.className = 'ui-upload-preview-item';
             
@@ -1339,32 +1339,27 @@ class ImageUploadComponent extends UIComponent {
             const info = document.createElement('div');
             info.className = 'ui-upload-preview-info';
             info.innerHTML = `
-                <div class="ui-upload-preview-name">${file.name}</div>
-                <div class="ui-upload-preview-size">${this.formatFileSize(file.size)}</div>
+                <div class="ui-upload-preview-name">${uploadedFile.name}</div>
+                <div class="ui-upload-preview-size">${this.formatFileSize(uploadedFile.size)}</div>
             `;
 
-            // Remove button
-            if (this.config.allow_remove) {
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'ui-upload-preview-remove';
-                removeBtn.innerHTML = '×';
-                removeBtn.addEventListener('click', () => {
-                    preview.remove();
-                    this.uploadedFiles = this.uploadedFiles.filter((_, i) => i !== index);
-                });
-                preview.appendChild(removeBtn);
-            }
+            // Action buttons based on file state
+            const actionsContainer = document.createElement('div');
+            actionsContainer.className = 'ui-upload-preview-actions';
+            
+            this.createActionButtons(actionsContainer, uploadedFile, index, preview);
+            preview.appendChild(actionsContainer);
 
             preview.appendChild(img);
             preview.appendChild(info);
             previewArea.appendChild(preview);
 
-            // Load image preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            // Load image preview - use temp URL for immediate display
+            if (uploadedFile.tempUrl) {
+                img.src = uploadedFile.tempUrl;
+            } else if (uploadedFile.finalUrl) {
+                img.src = uploadedFile.finalUrl;
+            }
         });
     }
 
@@ -1384,22 +1379,13 @@ class ImageUploadComponent extends UIComponent {
                 await this.uploadSingleFile(file, i, files.length);
             }
             
-            // Notify backend of completion with success confirmation
-            if (this.config.callback_action) {
-                await this.sendEventToBackend('upload_complete', this.config.callback_action, {
-                    files_count: this.uploadedFiles.length,
-                    files: this.uploadedFiles.map(f => ({
-                        name: f.name,
-                        size: f.size,
-                        type: f.type,
-                        url: f.url,
-                        path: f.uploadPath
-                    }))
-                });
+            // Show preview after all uploads complete
+            if (this.config.show_preview !== false) {
+                this.showPreview();
             }
             
-            // Show local success message
-            this.showUploadSuccess(this.uploadedFiles.length);
+            // Show upload completed message for temporary files
+            this.showTemporaryUploadCompleted();
             
         } catch (error) {
             this.showError(this.config.messages.upload_failed);
@@ -1439,8 +1425,11 @@ class ImageUploadComponent extends UIComponent {
                             name: file.name,
                             size: file.size,
                             type: file.type,
-                            uploadPath: response.path,
-                            url: response.url
+                            tempPath: response.temp_path,
+                            tempUrl: response.temp_url,
+                            finalPath: response.final_path,
+                            finalUrl: response.final_url,
+                            isTemporary: response.is_temporary
                         });
                         resolve(response);
                     } catch (e) {
@@ -1488,13 +1477,66 @@ class ImageUploadComponent extends UIComponent {
         }
     }
 
+    showTemporaryUploadCompleted() {
+        const count = this.uploadedFiles.length;
+        const message = count === 1 
+            ? '📤 Imagen subida temporalmente. Usa los iconos ✅❌ para confirmar o cancelar.' 
+            : `📤 ${count} imágenes subidas temporalmente. Usa los iconos ✅❌ en cada imagen.`;
+        
+        this.showStatusMessage(message, 'ui-upload-temp-completed');
+    }
+
+
+
+    async confirmSingleFile(file) {
+        const response = await fetch('/api/ui-upload/confirm', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+            },
+            body: JSON.stringify({
+                temp_path: file.tempPath,
+                final_path: file.finalPath
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        file.isTemporary = false;
+        file.url = result.final_url;
+        file.path = result.final_path;
+    }
+
+    async cancelSingleFile(file) {
+        const response = await fetch('/api/ui-upload/cancel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+            },
+            body: JSON.stringify({
+                temp_path: file.tempPath
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    }
+
+
+
     showUploadSuccess(fileCount) {
         // Show success message
         const successDiv = document.createElement('div');
         successDiv.className = 'ui-upload-success';
         const message = fileCount === 1 
-            ? '✅ Imagen subida correctamente!' 
-            : `✅ ${fileCount} imágenes subidas correctamente!`;
+            ? '✅ Upload confirmado correctamente!' 
+            : `✅ ${fileCount} uploads confirmados correctamente!`;
         successDiv.textContent = message;
         
         const wrapper = this.element || document.querySelector(`[data-component-id="${this.config._id}"]`);
@@ -1503,8 +1545,239 @@ class ImageUploadComponent extends UIComponent {
             setTimeout(() => successDiv.remove(), 4000);
         }
         
-        // Also show in console
-        console.log(`🎉 Upload Success: ${message}`);
+        console.log(`🎉 Upload Confirmed: ${message}`);
+    }
+
+    showUploadCanceled() {
+        const cancelDiv = document.createElement('div');
+        cancelDiv.className = 'ui-upload-canceled';
+        cancelDiv.textContent = '🗑️ Uploads cancelados';
+        
+        const wrapper = this.element || document.querySelector(`[data-component-id="${this.config._id}"]`);
+        if (wrapper) {
+            wrapper.appendChild(cancelDiv);
+            setTimeout(() => cancelDiv.remove(), 3000);
+        }
+        
+        console.log('🗑️ Uploads canceled');
+    }
+
+    async removeFile(index, previewElement) {
+        const file = this.uploadedFiles[index];
+        if (!file) return;
+
+        try {
+            if (file.isTemporary) {
+                // Estado TEMPORAL: Eliminar archivo temporal del servidor
+                console.log('🗑️ Removing temporary file:', file.name);
+                await this.cancelSingleFile(file);
+                
+                // Mostrar mensaje de eliminación temporal
+                this.showTemporaryFileRemoved(file.name);
+            } else {
+                // Estado CONFIRMADO: Eliminar archivo final del servidor
+                console.log('🗑️ Removing confirmed file:', file.name);
+                await this.deleteConfirmedFile(file);
+                
+                // Mostrar mensaje de eliminación confirmada
+                this.showConfirmedFileRemoved(file.name);
+            }
+
+            // Remover de la lista y del DOM
+            this.uploadedFiles.splice(index, 1);
+            previewElement.remove();
+
+            // Si no quedan archivos, limpiar mensajes
+            if (this.uploadedFiles.length === 0) {
+                this.clearStatusMessages();
+                
+                // Si es upload simple, mostrar nuevamente la zona de upload
+                if (this.config.max_files === 1) {
+                    this.showUploadArea();
+                }
+            }
+
+        } catch (error) {
+            console.error('❌ Error removing file:', error);
+            this.showError(`Error al eliminar ${file.name}: ${error.message}`);
+        }
+    }
+
+    async deleteConfirmedFile(file) {
+        const path = file.finalPath || file.path || file.uploadPath;
+        
+        const response = await fetch('/api/ui-upload', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+            },
+            body: JSON.stringify({
+                path: path
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    }
+
+    showTemporaryFileRemoved(fileName) {
+        const message = `🗑️ ${fileName} eliminado (temporal)`;
+        this.showRemovalMessage(message, 'ui-upload-temp-removed');
+    }
+
+    showConfirmedFileRemoved(fileName) {
+        const message = `🗑️ ${fileName} eliminado del servidor`;
+        this.showRemovalMessage(message, 'ui-upload-confirmed-removed');
+    }
+
+    showRemovalMessage(message, className) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ui-upload-removal-message ${className}`;
+        messageDiv.textContent = message;
+        
+        const wrapper = this.element || document.querySelector(`[data-component-id="${this.config._id}"]`);
+        if (wrapper) {
+            wrapper.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+        
+        console.log(message);
+    }
+
+    createActionButtons(container, file, index, previewElement) {
+        if (file.isTemporary) {
+            // Estado TEMPORAL: Mostrar iconos de confirmar y cancelar
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = 'ui-upload-action-btn ui-upload-confirm-btn';
+            confirmBtn.innerHTML = '✅';
+            confirmBtn.title = 'Confirmar esta imagen';
+            confirmBtn.addEventListener('click', async () => {
+                await this.confirmSingleFileFromPreview(index, previewElement);
+            });
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'ui-upload-action-btn ui-upload-cancel-btn';
+            cancelBtn.innerHTML = '❌';
+            cancelBtn.title = 'Cancelar esta imagen';
+            cancelBtn.addEventListener('click', async () => {
+                await this.removeFile(index, previewElement);
+            });
+
+            container.appendChild(confirmBtn);
+            container.appendChild(cancelBtn);
+
+        } else {
+            // Estado CONFIRMADO: Sin opciones de eliminación (protegido)
+            const protectedBtn = document.createElement('button');
+            protectedBtn.className = 'ui-upload-action-btn ui-upload-protected-btn';
+            protectedBtn.innerHTML = '�';
+            protectedBtn.title = 'Archivo confirmado y protegido';
+            protectedBtn.disabled = true;
+
+            container.appendChild(protectedBtn);
+        }
+    }
+
+    async confirmSingleFileFromPreview(index, previewElement) {
+        const file = this.uploadedFiles[index];
+        if (!file || !file.isTemporary) return;
+
+        try {
+            // Confirmar archivo en servidor
+            await this.confirmSingleFile(file);
+            
+            // Actualizar iconos del preview
+            const actionsContainer = previewElement.querySelector('.ui-upload-preview-actions');
+            if (actionsContainer) {
+                actionsContainer.innerHTML = '';
+                this.createActionButtons(actionsContainer, file, index, previewElement);
+            }
+
+            // Agregar indicador visual de confirmación
+            previewElement.classList.add('ui-upload-preview-confirmed');
+            
+            // Mostrar mensaje de confirmación individual
+            this.showIndividualConfirmation(file.name);
+
+            // Si es upload simple (max_files = 1), ocultar la zona de upload
+            if (this.config.max_files === 1) {
+                this.hideUploadArea();
+            }
+
+            // Verificar si hay que enviar callback (cuando todos estén confirmados)
+            this.checkForCompleteConfirmation();
+
+        } catch (error) {
+            console.error('❌ Error confirming file:', error);
+            this.showError(`Error al confirmar ${file.name}: ${error.message}`);
+        }
+    }
+
+    async checkForCompleteConfirmation() {
+        const pendingFiles = this.uploadedFiles.filter(f => f.isTemporary);
+        
+        if (pendingFiles.length === 0 && this.uploadedFiles.length > 0) {
+            // Todos los archivos han sido confirmados
+            if (this.config.callback_action) {
+                await this.sendEventToBackend('upload_complete', this.config.callback_action, {
+                    files_count: this.uploadedFiles.length,
+                    files: this.uploadedFiles.map(f => ({
+                        name: f.name,
+                        size: f.size,
+                        type: f.type,
+                        url: f.finalUrl || f.url,
+                        path: f.finalPath || f.path
+                    }))
+                });
+            }
+
+            // Mostrar mensaje de completado
+            this.showAllFilesConfirmed();
+        }
+    }
+
+    showIndividualConfirmation(fileName) {
+        const message = `✅ ${fileName} confirmado`;
+        this.showStatusMessage(message, 'ui-upload-individual-confirmed');
+    }
+
+    showAllFilesConfirmed() {
+        const count = this.uploadedFiles.length;
+        const message = count === 1 
+            ? '🎉 Imagen confirmada y procesada!' 
+            : `🎉 ${count} imágenes confirmadas y procesadas!`;
+        this.showStatusMessage(message, 'ui-upload-all-confirmed');
+    }
+
+    showStatusMessage(message, className) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ui-upload-status-message ${className}`;
+        messageDiv.textContent = message;
+        
+        const wrapper = this.element || document.querySelector(`[data-component-id="${this.config._id}"]`);
+        if (wrapper) {
+            wrapper.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+        
+        console.log(message);
+    }
+
+    clearStatusMessages() {
+        const wrapper = this.element || document.querySelector(`[data-component-id="${this.config._id}"]`);
+        if (wrapper) {
+            const messages = wrapper.querySelectorAll('.ui-upload-status-message');
+            messages.forEach(msg => msg.remove());
+        }
+    }
+
+    clearPreviews() {
+        const previewArea = document.getElementById(`preview-${this.id}`);
+        if (previewArea) {
+            previewArea.innerHTML = '';
+        }
     }
 
     formatFileSize(bytes) {
@@ -1513,6 +1786,40 @@ class ImageUploadComponent extends UIComponent {
         const sizes = ['B', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    hideUploadArea() {
+        // Ocultar la zona de drag & drop y el botón "Seleccionar imágenes"
+        const uploadArea = this.element.querySelector('.ui-upload-area');
+        const selectButton = this.element.querySelector('.ui-upload-select-btn');
+        
+        if (uploadArea) {
+            uploadArea.style.display = 'none';
+        }
+        
+        if (selectButton) {
+            selectButton.style.display = 'none';
+        }
+
+        // Opcional: Mostrar mensaje indicando que ya se confirmó una imagen
+        this.showStatusMessage('✅ Imagen confirmada. Upload completado.', 'ui-upload-completed');
+    }
+
+    showUploadArea() {
+        // Mostrar nuevamente la zona de drag & drop y el botón "Seleccionar imágenes"
+        const uploadArea = this.element.querySelector('.ui-upload-area');
+        const selectButton = this.element.querySelector('.ui-upload-select-btn');
+        
+        if (uploadArea) {
+            uploadArea.style.display = 'block';
+        }
+        
+        if (selectButton) {
+            selectButton.style.display = 'inline-block';
+        }
+
+        // Limpiar mensajes de completado
+        this.clearStatusMessages();
     }
 }
 
@@ -1535,12 +1842,16 @@ class ComponentFactory {
             case 'table':
                 return new TableComponent(id, config);
             case 'tableheaderrow':
+            case 'table_header_row':
                 return new TableHeaderRowComponent(id, config);
             case 'tablerow':
+            case 'table_row':
                 return new TableRowComponent(id, config);
             case 'tablecell':
+            case 'table_cell':
                 return new TableCellComponent(id, config);
             case 'tableheadercell':
+            case 'table_header_cell':
                 return new TableHeaderCellComponent(id, config);
             case 'menu_dropdown':
                 return new MenuDropdownComponent(id, config);
@@ -1718,7 +2029,12 @@ class UIRenderer {
                                 }
                             }
                             
-                            component.mount(mountTarget);
+                            // Special handling for table cells to maintain column order
+                            if (component.config.type === 'table_cell' || component.config.type === 'table_header_cell') {
+                                this.mountTableCell(component, mountTarget, component.config.column || 0);
+                            } else {
+                                component.mount(mountTarget);
+                            }
                             mounted.add(id);
                             console.log(`    ✅ Mounted to component "${parentComponentKey}" (_id: ${parentId})`);
                         } else {
@@ -2013,6 +2329,45 @@ class UIRenderer {
         } catch (error) {
             console.error(`❌ Error adding component:`, error);
         }
+    }
+
+    /**
+     * Mount a table cell in the correct column position
+     * 
+     * @param {UIComponent} cellComponent - The cell component to mount
+     * @param {HTMLElement} rowElement - The row element to mount to
+     * @param {number} columnIndex - The column index (0-based)
+     */
+    mountTableCell(cellComponent, rowElement, columnIndex) {
+        const cellElement = cellComponent.render();
+        
+        // Find the correct position to insert the cell
+        const existingCells = Array.from(rowElement.children);
+        let insertPosition = existingCells.length; // Default: append at end
+        
+        // Find the correct position based on column index
+        for (let i = 0; i < existingCells.length; i++) {
+            const existingCell = existingCells[i];
+            const existingColumnIndex = parseInt(existingCell.dataset.columnIndex) || 0;
+            
+            if (columnIndex < existingColumnIndex) {
+                insertPosition = i;
+                break;
+            }
+        }
+        
+        // Mark the cell with its column index for future reference
+        cellElement.dataset.columnIndex = columnIndex;
+        
+        // Insert at the correct position
+        if (insertPosition >= existingCells.length) {
+            rowElement.appendChild(cellElement);
+        } else {
+            rowElement.insertBefore(cellElement, existingCells[insertPosition]);
+        }
+        
+        // Set the component's element reference
+        cellComponent.element = cellElement;
     }
 }
 

@@ -39,7 +39,7 @@ class ImageUploadDemoService extends AbstractUIService
             ->border(true)
             ->justifyContent('center')
             ->alignItems('center')
-            ->shadow(false);
+            ->shadow(true);
 
         $examplesContainer->add(
             UIBuilder::imageUpload('basic_upload')

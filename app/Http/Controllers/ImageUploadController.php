@@ -32,13 +32,17 @@ class ImageUploadController extends Controller
             $componentId = $request->input('component_id');
             $callbackAction = $request->input('callback_action');
             $callerServiceId = $request->input('_caller_service_id');
+            $isTemporary = $request->input('temporary', true); // Default to temporary
 
             // Generate file name
             $fileName = $this->generateFileName($file, $prefix);
-            $fullPath = $storagePath . '/' . $fileName;
+            
+            // Use temporary path for initial upload
+            $tempPath = 'temp/uploads/' . $fileName;
+            $finalPath = $storagePath . '/' . $fileName;
 
-            // Store the file
-            $path = $file->storeAs($storagePath, $fileName, 'public');
+            // Store in temporary location first
+            $path = $file->storeAs('temp/uploads', $fileName, 'public');
             
             if (!$path) {
                 return response()->json([
@@ -50,11 +54,14 @@ class ImageUploadController extends Controller
             $fileInfo = [
                 'original_name' => $file->getClientOriginalName(),
                 'file_name' => $fileName,
-                'path' => $path,
-                'url' => Storage::url($path),
+                'temp_path' => $path,
+                'final_path' => $finalPath,
+                'temp_url' => Storage::url($path),
+                'final_url' => Storage::url($finalPath),
                 'size' => $file->getSize(),
                 'mime_type' => $file->getMimeType(),
-                'component_id' => $componentId
+                'component_id' => $componentId,
+                'is_temporary' => true
             ];
 
             // Call backend callback if specified
@@ -70,12 +77,15 @@ class ImageUploadController extends Controller
 
             return response()->json([
                 'success' => true,
-                'path' => $path,
-                'url' => Storage::url($path),
+                'temp_path' => $path,
+                'temp_url' => Storage::url($path),
+                'final_path' => $finalPath,
+                'final_url' => Storage::url($finalPath),
                 'file_name' => $fileName,
                 'original_name' => $file->getClientOriginalName(),
                 'size' => $file->getSize(),
-                'mime_type' => $file->getMimeType()
+                'mime_type' => $file->getMimeType(),
+                'is_temporary' => true
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -228,6 +238,95 @@ class ImageUploadController extends Controller
                     'message' => '✅ Archivos procesados correctamente!',
                     'data' => ['action' => $action]
                 ];
+        }
+    }
+
+    /**
+     * Confirm temporary upload and move to final location
+     */
+    public function confirm(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'temp_path' => 'required|string',
+                'final_path' => 'required|string'
+            ]);
+
+            $tempPath = $request->input('temp_path');
+            $finalPath = $request->input('final_path');
+            
+            if (!Storage::disk('public')->exists($tempPath)) {
+                return response()->json([
+                    'error' => 'Temporary file not found'
+                ], 404);
+            }
+
+            // Move file from temporary to final location
+            if (Storage::disk('public')->move($tempPath, $finalPath)) {
+                Log::info('Upload confirmed', [
+                    'temp_path' => $tempPath,
+                    'final_path' => $finalPath
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Upload confirmed successfully',
+                    'final_path' => $finalPath,
+                    'final_url' => Storage::url($finalPath)
+                ]);
+            }
+
+            return response()->json([
+                'error' => 'Failed to move file to final location'
+            ], 500);
+
+        } catch (\Exception $e) {
+            Log::error('Upload confirmation failed', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Confirmation failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel temporary upload and delete file
+     */
+    public function cancel(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'temp_path' => 'required|string'
+            ]);
+
+            $tempPath = $request->input('temp_path');
+            
+            if (Storage::disk('public')->exists($tempPath)) {
+                Storage::disk('public')->delete($tempPath);
+                
+                Log::info('Upload cancelled', ['temp_path' => $tempPath]);
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Upload cancelled successfully'
+                ]);
+            }
+
+            return response()->json([
+                'error' => 'Temporary file not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Upload cancellation failed', [
+                'temp_path' => $request->input('temp_path'),
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Cancellation failed: ' . $e->getMessage()
+            ], 500);
         }
     }
 

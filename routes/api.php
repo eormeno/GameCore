@@ -17,6 +17,8 @@ Route::get('/game-app/{gameApp}/public/{resourceName?}', [GameAppController::cla
 
 // Image upload routes
 Route::post('/ui-upload', [ImageUploadController::class, 'upload'])->name('ui.upload');
+Route::post('/ui-upload/confirm', [ImageUploadController::class, 'confirm'])->name('ui.upload.confirm');
+Route::post('/ui-upload/cancel', [ImageUploadController::class, 'cancel'])->name('ui.upload.cancel');
 Route::delete('/ui-upload', [ImageUploadController::class, 'delete'])->name('ui.upload.delete');
 
 Route::middleware('auth:sanctum')->group(function () {
