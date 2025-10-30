@@ -38,7 +38,7 @@ if netstat -tuln 2>/dev/null | grep -q ":8000 " || ss -tuln 2>/dev/null | grep -
         # WSL - use Windows command
         cmd.exe /c start "http://127.0.0.1:8000/demo"
     elif command -v xdg-open > /dev/null; then
-        xdg-open "http://127.0.0.1:8000/demo"
+        firefox "http://127.0.0.1:8000/demo" &
     elif command -v start > /dev/null; then
         start "http://127.0.0.1:8000/demo"
     else
@@ -57,7 +57,7 @@ if grep -q Microsoft /proc/version 2>/dev/null || [ -n "$WSL_DISTRO_NAME" ]; the
     # WSL - use Windows command
     cmd.exe /c start "http://127.0.0.1:8000/demo"
 elif command -v xdg-open > /dev/null; then
-    xdg-open "http://127.0.0.1:8000/demo"
+    firefox "http://127.0.0.1:8000/demo" &
 elif command -v start > /dev/null; then
     start "http://127.0.0.1:8000/demo"
 else
