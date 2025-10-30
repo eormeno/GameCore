@@ -1333,9 +1333,6 @@ class UIRenderer {
                 const element = document.querySelector(`[data-component-id="${componentId}"]`);
                 
                 if (element) {
-                    // remove type and _id from changes to avoid unnecessary updates
-                    delete changes.type;
-                    delete changes._id;
                     console.log(`✏️ Updating ${componentId}`, changes);
                     this.updateComponent(element, changes);
                 } else {

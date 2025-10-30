@@ -229,6 +229,7 @@ abstract class AbstractUIService
         // Always get JSON from cache and reconstruct container
         // This ensures we get the latest state after events modify it
         $jsonUI = $this->getStoredUI();
+        Log::info(json_encode($jsonUI));
 
         // Reconstruct container from JSON
         return $this->reconstructContainerFromJson($jsonUI);
@@ -250,6 +251,8 @@ abstract class AbstractUIService
                 break;
             }
         }
+
+        // TODO: Trabajando en esto
 
         if (!$containerData) {
             // No cached container, build fresh
@@ -293,7 +296,7 @@ abstract class AbstractUIService
     protected function recreateComponentFromJson(array $data)
     {
         $type = $data['type'];
-        $name = $data['name'] ?? null;  // Changed from '_name' to 'name'
+        $name = $data['name'] ?? null;
         $originalId = $data['_id'] ?? null;
 
         if (!$name || !$originalId) {
@@ -307,10 +310,12 @@ abstract class AbstractUIService
             'input' => UIBuilder::input($name),
             'select' => UIBuilder::select($name),
             'checkbox' => UIBuilder::checkbox($name),
+            'table' => UIBuilder::table($name),
             default => null
         };
 
         if (!$component) {
+            Log::warning("Failed to recreate component from JSON", ['data' => $data]);
             return null;
         }
 

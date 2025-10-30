@@ -7,8 +7,10 @@ use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
 use App\Services\UI\Support\UIStateManager;
+use App\Services\UI\Components\TableBuilder;
 use App\Services\UI\Traits\DataTableEventsTrait;
 use App\Services\UI\DataTable\UsersDataTableModel;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Table Demo Service
@@ -24,8 +26,9 @@ use App\Services\UI\DataTable\UsersDataTableModel;
 class TableDemoService extends AbstractUIService
 {
     use DataTableEventsTrait;
-    
+
     private UsersDataTableModel $dataModel;
+    protected TableBuilder $users_table;
 
     /**
      * Get the data model instance
@@ -45,7 +48,7 @@ class TableDemoService extends AbstractUIService
             'current_page',
             1 // default
         );
-        
+
         return new UsersDataTableModel(2, $currentPage);
     }
 
@@ -61,7 +64,7 @@ class TableDemoService extends AbstractUIService
         if ($tableName === 'users_table') {
             return $this->getDataModel();
         }
-        
+
         return null;
     }
 
@@ -141,22 +144,19 @@ class TableDemoService extends AbstractUIService
      */
     public function onChangePage(array $params): array
     {
+        $page = $params['page'] ?? 1;
         // Map legacy parameters to generic format
         $genericParams = [
             'table_name' => 'users_table',
-            'page' => $params['page'] ?? 1
+            'page' => $page
         ];
 
         // Update current page in cache
-        UIStateManager::setComponentProperty(
-            static::class,
-            'table',
-            'users_table',
-            'current_page',
-            $params['page'] ?? 1
-        );
+        UIStateManager::setComponentProperty(static::class, 'table', 'users_table', 'current_page', $page);
+        // $this->users_table->currentPage($page);
+        $updated_cells = $this->onChangeTablePage($genericParams);
 
-        return $this->onChangeTablePage($genericParams);
+        return $updated_cells;
     }
 
     /**
@@ -173,7 +173,7 @@ class TableDemoService extends AbstractUIService
     //     if ($tableName === 'users_table') {
     //         return 40; // Further reduced height for more compact rows
     //     }
-        
+
     //     // Call the trait's default implementation
     //     return 40; // Default height for any other table
     // }
