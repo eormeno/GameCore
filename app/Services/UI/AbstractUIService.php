@@ -346,6 +346,99 @@ abstract class AbstractUIService
         // Only store JSON, container will be reconstructed when needed
         Cache::put($key, $ui->toJson(), 1800); // 30 minutes in seconds
     }
+
+    /**
+     * Update cache with current container state
+     * 
+     * Use this method when you modify component attributes outside of an event context
+     * and want those changes to persist immediately in the cache.
+     * 
+     * Example usage:
+     * ```php
+     * $this->container->findByName('my_label')->text('New Text');
+     * $this->updateCache(); // Persist change immediately
+     * ```
+     * 
+     * @return void
+     */
+    public function updateCache(): void
+    {
+        if (!isset($this->container)) {
+            // If container doesn't exist yet, load it first
+            $this->container = $this->getUIContainer();
+        }
+        
+        $this->storeUI($this->container);
+    }
+
+    /**
+     * Modify a component's properties directly in cache
+     * 
+     * This method works by modifying the cached JSON directly without reconstructing components.
+     * It's more efficient and reliable than reconstructing the entire container.
+     * 
+     * Example usage:
+     * ```php
+     * // Update text of a component by ID
+     * $service->updateComponentCache(12345, [
+     *     'text' => 'New Text',
+     *     'style' => 'success'
+     * ]);
+     * 
+     * // Update by name
+     * $service->updateComponentCache('my_label', ['text' => 'Hello']);
+     * ```
+     * 
+     * @param string|int $identifier Component name (string) or ID (int)
+     * @param array $properties Array of properties to update (key => value)
+     * @return void
+     * @throws \RuntimeException If component not found
+     */
+    public function updateComponentCache(string|int $identifier, array $properties): void
+    {
+        $key = $this->getUIStorageKey();
+        $cachedUI = Cache::get($key);
+        
+        if ($cachedUI === null) {
+            // No cache exists, build initial UI first
+            $cachedUI = $this->buildBaseUI()->toJson();
+        }
+        
+        // Find component in cached JSON
+        $componentKey = null;
+        
+        if (is_int($identifier)) {
+            // Search by ID (_id property)
+            foreach ($cachedUI as $key => $component) {
+                if (isset($component['_id']) && $component['_id'] === $identifier) {
+                    $componentKey = $key;
+                    break;
+                }
+            }
+        } else {
+            // Search by name
+            foreach ($cachedUI as $key => $component) {
+                if (isset($component['name']) && $component['name'] === $identifier) {
+                    $componentKey = $key;
+                    break;
+                }
+            }
+        }
+        
+        if ($componentKey === null) {
+            throw new \RuntimeException(
+                "Component with identifier '{$identifier}' not found in cached UI"
+            );
+        }
+        
+        // Update properties
+        foreach ($properties as $prop => $value) {
+            $cachedUI[$componentKey][$prop] = $value;
+        }
+        
+        // Save back to cache
+        Cache::put($this->getUIStorageKey(), $cachedUI, 1800);
+    }
     
     /**
      * Clear stored UI state

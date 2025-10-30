@@ -310,15 +310,9 @@ trait DataTableEventsTrait
         }
 
         // Update data model with new page
-        if (method_exists($dataModel, 'setCurrentPage')) {
-            $dataModel->setCurrentPage($page);
-        }
+        $dataModel->setCurrentPage($page);
 
         // Get formatted data for the new page
-        if (!method_exists($dataModel, 'getFormattedPageData')) {
-            return [];
-        }
-
         $formattedData = $dataModel->getFormattedPageData();
         $storedUI = $this->getStoredUI();
         $result = [];

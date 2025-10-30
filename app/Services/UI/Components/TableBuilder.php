@@ -438,6 +438,7 @@ class TableBuilder extends UIComponent
      * @param int $page Current page number (1-based)
      * @return self
      */
+    // TODO: I think is no longer used
     public function currentPage(int $page): self
     {
         return $this->setConfig('current_page', max(1, $page));
