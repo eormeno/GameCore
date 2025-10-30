@@ -37,7 +37,6 @@ class UsersDataTableModel extends AbstractDataTableModel
             'country' => ['label' => 'País', 'width' => [200, 250]],
             'actions' => ['label' => 'Acciones', 'width' => [80, 120]],
             'remove' => ['label' => '', 'width' => [80, 120]],
-            'otra' => ['label' => 'Otra', 'width' => [100, 150]]
         ];
     }
 

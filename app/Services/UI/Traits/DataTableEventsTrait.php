@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Services\UI\Traits;
 
 /**
  * Data Table Events Trait

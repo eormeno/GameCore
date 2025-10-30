@@ -22,7 +22,7 @@ body {
 .ui-container.vertical {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
 .ui-container.horizontal {
@@ -40,7 +40,6 @@ body {
 
 .ui-container > .title {
     font-size: 1.5rem;
-    font-weight: 600;
     color: #2c3e50;
     margin-bottom: 15px;
     border-bottom: 2px solid #e0e0e0;
@@ -696,8 +695,8 @@ body.modal-open #menu {
 /* Adjust main content to account for fixed header */
 #main {
     margin-top: 80px; /* 60px header + 20px spacing */
-    padding: 20px;
-    min-height: calc(100vh - 100px);
+    /* padding: 20px; */
+    /* min-height: calc(100vh - 100px); */
 }
 
 .menu-dropdown {

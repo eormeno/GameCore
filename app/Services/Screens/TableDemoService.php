@@ -2,12 +2,12 @@
 
 namespace App\Services\Screens;
 
+use App\Services\UI\UIBuilder;
+use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
+use App\Services\UI\Traits\DataTableEventsTrait;
 use App\Services\UI\DataTable\UsersDataTableModel;
-use App\Services\UI\Enums\LayoutType;
-use App\Services\UI\UIBuilder;
-use App\Traits\DataTableEventsTrait;
 
 /**
  * Table Demo Service
@@ -34,7 +34,7 @@ class TableDemoService extends AbstractUIService
     private function getDataModel(): UsersDataTableModel
     {
         if (!isset($this->dataModel)) {
-            $this->dataModel = new UsersDataTableModel(5, 1); // 5 per page, start at page 1
+            $this->dataModel = new UsersDataTableModel(7, 1); // 7 per page, start at page 1
         }
         return $this->dataModel;
     }
@@ -70,14 +70,12 @@ class TableDemoService extends AbstractUIService
         $table = UIBuilder::tableWithModel('users_table', $dataModel)
             ->title('Users Table')
             ->align('center')
-            ->rowMinHeight(35); // Further reduced for more compact rows
+            ->rowMinHeight(40); // Further reduced for more compact rows
 
         $container->add($table);
 
         return $container;
     }
-
-
 
     /**
      * Handle edit user action (legacy compatibility)
@@ -154,10 +152,10 @@ class TableDemoService extends AbstractUIService
     protected function getDefaultRowHeight(?string $tableName = null): int
     {
         if ($tableName === 'users_table') {
-            return 24; // Further reduced height for more compact rows
+            return 40; // Further reduced height for more compact rows
         }
         
         // Call the trait's default implementation
-        return 30; // Default height for any other table
+        return 40; // Default height for any other table
     }
 }
