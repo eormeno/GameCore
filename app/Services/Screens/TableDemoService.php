@@ -147,10 +147,14 @@ class TableDemoService extends AbstractUIService
             'page' => $params['page'] ?? 1
         ];
 
-        // TODO: Put this in setConfig
-        $this->updateComponentCache('users_table', [
-            'current_page' => $params['page'] ?? 1
-        ]);
+        // Update current page in cache
+        UIStateManager::setComponentProperty(
+            static::class,
+            'table',
+            'users_table',
+            'current_page',
+            $params['page'] ?? 1
+        );
 
         return $this->onChangeTablePage($genericParams);
     }
