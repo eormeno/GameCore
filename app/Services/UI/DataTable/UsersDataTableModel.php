@@ -65,7 +65,6 @@ class UsersDataTableModel extends AbstractDataTableModel
                         'parameters' => [
                             'user_id' => $user['id'],
                             'row' => $rowIndex,
-                            'name' => $user['name']
                         ]
                     ]
                 ],

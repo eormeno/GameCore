@@ -664,7 +664,7 @@ class TableComponent extends UIComponent {
             }
 
             const result = await response.json();
-            console.log('Page change response:', result);
+            console.log('Page change response:', JSON.stringify(result, null, 2));
 
             if (result && globalRenderer) {
                 // Update pagination config
@@ -1092,37 +1092,37 @@ class UIRenderer {
     }
 
     render() {
-        console.log('🎨 Rendering UI with data:', this.data);
+        // console.log('🎨 Rendering UI with data:', this.data);
 
         // Step 1: Build a map of internal ID -> JSON key
         // Each component now has _id in its config
         const internalIdToKey = new Map();
         const componentIds = Object.keys(this.data);
         
-        console.log('📋 Component IDs from JSON keys:', componentIds);
+        // console.log('📋 Component IDs from JSON keys:', componentIds);
         
         for (const key of componentIds) {
             const config = this.data[key];
             if (config._id !== undefined) {
                 internalIdToKey.set(config._id, key);
-                console.log(`  🔗 Mapped _id ${config._id} -> JSON key "${key}"`);
+                // console.log(`  🔗 Mapped _id ${config._id} -> JSON key "${key}"`);
             }
         }
 
         // Step 2: Create all component instances
         for (const id of componentIds) {
             const config = this.data[id];
-            console.log(`  🏗️ Creating component type="${config.type}" id="${id}"`, config);
+            // console.log(`  🏗️ Creating component type="${config.type}" id="${id}"`, config);
             const component = ComponentFactory.create(id, config);
             if (component) {
                 this.components.set(id, component);
-                console.log(`    ✅ Created successfully`);
+                // console.log(`    ✅ Created successfully`);
             } else {
                 console.log(`    ❌ Failed to create`);
             }
         }
 
-        console.log(`✅ Created ${this.components.size} components`);
+        // console.log(`✅ Created ${this.components.size} components`);
 
         // Step 3: Group components by parent and sort by _order
         const childrenByParent = new Map();
@@ -1203,7 +1203,7 @@ class UIRenderer {
 
                     const parentId = component.config.parent;
                     
-                    console.log(`  📍 Attempting to mount "${id}" (type: ${component.config.type}), parent: ${parentId}`);
+                    // console.log(`  📍 Attempting to mount "${id}" (type: ${component.config.type}), parent: ${parentId}`);
 
                     if (typeof parentId === 'string') {
                         // Parent is a DOM element (always available)
@@ -1249,9 +1249,9 @@ class UIRenderer {
                             
                             component.mount(mountTarget);
                             mounted.add(id);
-                            console.log(`    ✅ Mounted to component "${parentComponentKey}" (_id: ${parentId})`);
+                            // console.log(`    ✅ Mounted to component "${parentComponentKey}" (_id: ${parentId})`);
                         } else {
-                            console.log(`    ⏳ Waiting for parent "${parentComponentKey}" to be mounted first`);
+                            // console.log(`    ⏳ Waiting for parent "${parentComponentKey}" to be mounted first`);
                         }
                     }
                 }
@@ -1271,7 +1271,7 @@ class UIRenderer {
      * @param {object} uiUpdate - UI update object (same structure as initial render)
      */
     handleUIUpdate(uiUpdate) {
-        console.log('📦 Processing UI updates:', uiUpdate);
+        // console.log('📦 Processing UI updates:', uiUpdate);
         
         // Check if there are components with parent='modal' - if so, open modal
         let hasModalComponents = false;
@@ -1506,7 +1506,7 @@ class UIRenderer {
                 }
             }
             
-            console.log(`✅ Component ${changes._id} updated successfully`);
+            // console.log(`✅ Component ${changes._id} updated successfully`);
         } catch (error) {
             console.error(`❌ Error updating component ${changes._id}:`, error);
         }
@@ -1574,7 +1574,7 @@ async function loadDemoUI(demoName = null) {
         }
 
         const uiData = await response.json();
-        console.log('UI Data received:', uiData);
+        // console.log('UI Data received:', uiData);
         
         // If reset was requested, update URL to normal demo URL (without /reset)
         if (window.RESET_DEMO) {
@@ -2013,7 +2013,7 @@ class MenuDropdownComponent extends UIComponent {
         
         // Render submenu if exists
         if (item.submenu && item.submenu.length > 0) {
-            console.log(`🔄 Rendering submenu for "${item.label}" with ${item.submenu.length} items`);
+            // console.log(`🔄 Rendering submenu for "${item.label}" with ${item.submenu.length} items`);
             
             const submenu = document.createElement('div');
             submenu.className = 'submenu';
@@ -2100,7 +2100,7 @@ async function loadMenuUI() {
         const response = await fetch(`/api/${window.MENU_SERVICE}/${window.RESET_DEMO ? '1' : '0'}`);
         const uiData = await response.json();
         
-        console.log('📊 Menu UI Data received:', uiData);
+        // console.log('📊 Menu UI Data received:', uiData);
         
         const menuContainer = document.getElementById('menu');
         if (!menuContainer) {
@@ -2112,7 +2112,7 @@ async function loadMenuUI() {
         const menuRenderer = new UIRenderer(uiData);
         menuRenderer.render();
         
-        console.log('✅ Menu loaded successfully');
+        // console.log('✅ Menu loaded successfully');
     } catch (error) {
         console.error('❌ Error loading menu:', error);
     }

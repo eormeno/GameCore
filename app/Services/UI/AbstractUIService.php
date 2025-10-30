@@ -7,6 +7,7 @@ use App\Services\UI\Support\UIDiffer;
 use App\Services\UI\Enums\LayoutType;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Abstract UI Service
@@ -204,12 +205,15 @@ abstract class AbstractUIService
         $cachedUI = Cache::get($key);
         
         if ($cachedUI !== null) {
+            Log::info($cachedUI);
             return $cachedUI;
         }
         
         // Generate and cache new UI
         $ui = $this->buildBaseUI(...$params)->toJson();
         Cache::put($key, $ui, env('UI_CACHE_TTL', 1800)); // Default to 30 minutes
+
+        // Log::info("UI cached for key: {$key}");
         
         return $ui;
     }

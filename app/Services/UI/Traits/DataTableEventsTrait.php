@@ -400,7 +400,7 @@ trait DataTableEventsTrait
                 ];
 
                 // Preserve height consistency for button cells too
-                $this->preserveHeightProperties($component, $cellUpdate, $tableName);
+                // $this->preserveHeightProperties($component, $cellUpdate, $tableName);
                 
                 $result[$id] = $cellUpdate;
                 break;
@@ -496,7 +496,7 @@ trait DataTableEventsTrait
                 ];
 
                 // Preserve height consistency - maintain original cell height properties
-                $this->preserveHeightProperties($component, $cellUpdate, $tableName);
+                // $this->preserveHeightProperties($component, $cellUpdate, $tableName);
                 
                 $result[$id] = $cellUpdate;
                 break;
@@ -510,6 +510,7 @@ trait DataTableEventsTrait
      * @param array $originalComponent The original cell component
      * @param array &$cellUpdate The cell update being prepared
      * @param string|null $tableName The table name for context
+     * @deprecated This method is no longer needed. Height properties are now handled automatically.
      * @return void
      */
     protected function preserveHeightProperties(array $originalComponent, array &$cellUpdate, ?string $tableName = null): void
@@ -553,6 +554,7 @@ trait DataTableEventsTrait
      * 
      * @param string|null $tableName The table name
      * @return int The default minimum height in pixels
+     * @deprecated message
      */
     protected function getDefaultRowHeight(?string $tableName = null): int
     {

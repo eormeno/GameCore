@@ -34,7 +34,7 @@ class TableDemoService extends AbstractUIService
     private function getDataModel(): UsersDataTableModel
     {
         if (!isset($this->dataModel)) {
-            $this->dataModel = new UsersDataTableModel(7, 1); // 7 per page, start at page 1
+            $this->dataModel = new UsersDataTableModel(2, 1); // 7 per page, start at page 1
         }
         return $this->dataModel;
     }
@@ -149,13 +149,13 @@ class TableDemoService extends AbstractUIService
      * @param string|null $tableName The table name
      * @return int The default minimum height in pixels
      */
-    protected function getDefaultRowHeight(?string $tableName = null): int
-    {
-        if ($tableName === 'users_table') {
-            return 40; // Further reduced height for more compact rows
-        }
+    // protected function getDefaultRowHeight(?string $tableName = null): int
+    // {
+    //     if ($tableName === 'users_table') {
+    //         return 40; // Further reduced height for more compact rows
+    //     }
         
-        // Call the trait's default implementation
-        return 40; // Default height for any other table
-    }
+    //     // Call the trait's default implementation
+    //     return 40; // Default height for any other table
+    // }
 }

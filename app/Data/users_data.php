@@ -42,5 +42,4 @@ return [
     ['id' => 35, 'name' => 'Isabella Santos', 'country' => 'Portugal'],
     ['id' => 36, 'name' => 'Jack Wilson', 'country' => 'New Zealand'],
     ['id' => 37, 'name' => 'Katrina Müller', 'country' => 'Switzerland'],
-    ['id' => 38, 'name' => 'Liam Johnson', 'country' => 'Australia'],
 ];
