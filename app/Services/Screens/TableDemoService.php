@@ -6,6 +6,7 @@ use App\Services\UI\UIBuilder;
 use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
+use App\Services\UI\Support\UIStateManager;
 use App\Services\UI\Traits\DataTableEventsTrait;
 use App\Services\UI\DataTable\UsersDataTableModel;
 
@@ -29,14 +30,23 @@ class TableDemoService extends AbstractUIService
     /**
      * Get the data model instance
      * 
+     * Always creates a fresh instance with current_page from cache.
+     * This ensures pagination state is correctly restored.
+     * 
      * @return UsersDataTableModel
      */
     private function getDataModel(): UsersDataTableModel
     {
-        if (!isset($this->dataModel)) {
-            $this->dataModel = new UsersDataTableModel(2, 1); // 7 per page, start at page 1
-        }
-        return $this->dataModel;
+        // Read current_page from cache using UIStateManager
+        $currentPage = UIStateManager::getComponentProperty(
+            static::class,
+            'table',
+            'users_table',
+            'current_page',
+            1 // default
+        );
+        
+        return new UsersDataTableModel(2, $currentPage);
     }
 
     /**

@@ -8,6 +8,7 @@ use ReflectionProperty;
 use Illuminate\Support\Facades\Auth;
 use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\Support\UIDiffer;
+use App\Services\UI\Support\UIStateManager;
 use Illuminate\Support\Facades\Cache;
 use App\Services\UI\Support\UIIdGenerator;
 use App\Services\UI\Components\UIContainer;
@@ -203,10 +204,8 @@ abstract class AbstractUIService
      */
     protected function getStoredUI(...$params): array
     {
-        $key = $this->getUIStorageKey();
-
         // Check if UI exists in cache
-        $cachedUI = Cache::get($key);
+        $cachedUI = UIStateManager::get(static::class);
 
         if ($cachedUI !== null) {
             return $cachedUI;
@@ -214,7 +213,8 @@ abstract class AbstractUIService
 
         // Generate and cache new UI
         $ui = $this->buildBaseUI(...$params)->toJson();
-        Cache::put($key, $ui, env('UI_CACHE_TTL', 1800)); // Default to 30 minutes
+        $ttl = env('UI_CACHE_TTL', UIStateManager::DEFAULT_TTL);
+        UIStateManager::store(static::class, $ui, $ttl);
 
         return $ui;
     }
@@ -342,10 +342,7 @@ abstract class AbstractUIService
      */
     protected function storeUI(UIContainer $ui): void
     {
-        $key = $this->getUIStorageKey();
-
-        // Only store JSON, container will be reconstructed when needed
-        Cache::put($key, $ui->toJson(), 1800); // 30 minutes in seconds
+        UIStateManager::store(static::class, $ui->toJson());
     }
 
     /**
@@ -397,8 +394,7 @@ abstract class AbstractUIService
      */
     public function updateComponentCache(string|int $identifier, array $properties): void
     {
-        $key = $this->getUIStorageKey();
-        $cachedUI = Cache::get($key);
+        $cachedUI = UIStateManager::get(static::class);
 
         if ($cachedUI === null) {
             // No cache exists, build initial UI first
@@ -437,8 +433,8 @@ abstract class AbstractUIService
             $cachedUI[$componentKey][$prop] = $value;
         }
 
-        // Save back to cache
-        Cache::put($this->getUIStorageKey(), $cachedUI, 1800);
+        // Save back to cache using UIStateManager
+        UIStateManager::store(static::class, $cachedUI);
     }
 
     /**
@@ -448,20 +444,7 @@ abstract class AbstractUIService
      */
     public function clearStoredUI(): void
     {
-        Cache::forget($this->getUIStorageKey());
-    }
-
-    /**
-     * Generate unique storage key per service + user
-     * 
-     * @return string Cache key
-     */
-    private function getUIStorageKey(): string
-    {
-        $serviceClass = class_basename(static::class);
-        $userId = Auth::check() ? Auth::id() : session()->getId();
-
-        return "ui_state:{$serviceClass}:{$userId}";
+        UIStateManager::clear(static::class);
     }
 
     /**

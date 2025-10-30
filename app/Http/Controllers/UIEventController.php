@@ -117,8 +117,10 @@ class UIEventController extends Controller
                 $result = ['data' => $result];
             }
 
-            Log::info('UI Event: Action executed successfully', [
-                'service' => $serviceClass,
+            $simpleName = class_basename($serviceClass);
+
+            Log::info('UI Event: Action executed', [
+                'service' => $simpleName,
                 'method' => $method,
                 'component_id' => $componentId,
             ]);
