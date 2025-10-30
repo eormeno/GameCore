@@ -397,10 +397,6 @@
         }
 
         async function clearLog() {
-            if (!confirm('¿Estás seguro de que deseas limpiar este archivo de log?')) {
-                return;
-            }
-
             const file = document.getElementById('logFile').value;
             const container = document.getElementById('logContainer');
             const originalContent = container.innerHTML;
@@ -425,7 +421,6 @@
                     console.log('Response data:', data);
                     
                     if (data.success) {
-                        alert('✅ Log limpiado exitosamente');
                         loadLogs();
                     } else {
                         container.innerHTML = originalContent;
