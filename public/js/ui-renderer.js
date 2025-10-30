@@ -664,7 +664,7 @@ class TableComponent extends UIComponent {
             }
 
             const result = await response.json();
-            console.log('Page change response:', JSON.stringify(result, null, 2));
+            // console.log('Page change response:', JSON.stringify(result, null, 2));
 
             if (result && globalRenderer) {
                 // Update pagination config
@@ -1333,7 +1333,10 @@ class UIRenderer {
                 const element = document.querySelector(`[data-component-id="${componentId}"]`);
                 
                 if (element) {
-                    console.log(`✏️ Updating component ${componentId}`, changes);
+                    // remove type and _id from changes to avoid unnecessary updates
+                    delete changes.type;
+                    delete changes._id;
+                    console.log(`✏️ Updating ${componentId}`, changes);
                     this.updateComponent(element, changes);
                 } else {
                     console.log(`➕ Creating new component ${componentId}`, changes);
