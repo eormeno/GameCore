@@ -2,11 +2,16 @@
 
 namespace App\Services\UI;
 
-use App\Services\UI\Components\UIContainer;
-use App\Services\UI\Support\UIDiffer;
-use App\Services\UI\Enums\LayoutType;
-use Illuminate\Support\Facades\Cache;
+use ReflectionClass;
+use RuntimeException;
+use ReflectionProperty;
 use Illuminate\Support\Facades\Auth;
+use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\Support\UIDiffer;
+use Illuminate\Support\Facades\Cache;
+use App\Services\UI\Support\UIIdGenerator;
+use App\Services\UI\Components\UIContainer;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Abstract UI Service
@@ -32,17 +37,17 @@ abstract class AbstractUIService
      * Current UI container instance
      */
     protected UIContainer $container;
-    
+
     /**
      * UI state before modifications (for diff calculation)
      */
     protected ?array $oldUI = null;
-    
+
     /**
      * UI state after modifications (for diff calculation)
      */
     protected ?array $newUI = null;
-    
+
     /**
      * Whether the UI has been modified during event handling
      */
@@ -73,11 +78,11 @@ abstract class AbstractUIService
         $this->container = $this->getUIContainer();
         $this->oldUI = $this->container->toJson();
         $this->modified = false;
-        
+
         // Inject component references into protected properties
         $this->injectComponentReferences();
     }
-    
+
     /**
      * Inject component references into protected properties
      * 
@@ -92,35 +97,35 @@ abstract class AbstractUIService
      */
     private function injectComponentReferences(): void
     {
-        $reflection = new \ReflectionClass($this);
-        
-        foreach ($reflection->getProperties(\ReflectionProperty::IS_PROTECTED) as $property) {
+        $reflection = new ReflectionClass($this);
+
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PROTECTED) as $property) {
             // Skip properties declared in AbstractUIService itself
             if ($property->getDeclaringClass()->getName() === self::class) {
                 continue;
             }
-            
+
             $propertyType = $property->getType();
-            
+
             // Skip if no type hint or is a built-in type
             if (!$propertyType || $propertyType->isBuiltin()) {
                 continue;
             }
-            
+
             $typeName = $propertyType->getName();
-            
+
             // Only process UI component types
             if (str_starts_with($typeName, 'App\\Services\\UI\\Components\\')) {
                 $componentName = $property->getName();
                 $component = $this->container->findByName($componentName);
-                
+
                 if ($component) {
                     $property->setValue($this, $component);
                 } elseif (!$propertyType->allowsNull()) {
                     // Component not found and property is not nullable
-                    throw new \RuntimeException(
+                    throw new RuntimeException(
                         "Component '{$componentName}' not found in UI container. " .
-                        "Make sure the component exists or make the property nullable: protected ?{$typeName} \${$componentName};"
+                            "Make sure the component exists or make the property nullable: protected ?{$typeName} \${$componentName};"
                     );
                 }
             }
@@ -166,13 +171,13 @@ abstract class AbstractUIService
         }
 
         $diff = UIDiffer::compare($this->oldUI, $this->newUI);
-        
+
         $result = [];
         foreach ($diff as $componentId => $changes) {
             $changes['_id'] = $componentId;
             $result[$componentId] = $changes;
         }
-        
+
         return $result;
     }
 
@@ -189,7 +194,7 @@ abstract class AbstractUIService
     {
         return $this->getStoredUI(...$params);
     }
-    
+
     /**
      * Get stored UI state, regenerate if missing
      * 
@@ -199,21 +204,21 @@ abstract class AbstractUIService
     protected function getStoredUI(...$params): array
     {
         $key = $this->getUIStorageKey();
-        
+
         // Check if UI exists in cache
         $cachedUI = Cache::get($key);
-        
+
         if ($cachedUI !== null) {
             return $cachedUI;
         }
-        
+
         // Generate and cache new UI
         $ui = $this->buildBaseUI(...$params)->toJson();
         Cache::put($key, $ui, env('UI_CACHE_TTL', 1800)); // Default to 30 minutes
 
         return $ui;
     }
-    
+
     /**
      * Get UI container instance from cache, regenerate if missing
      * 
@@ -224,11 +229,11 @@ abstract class AbstractUIService
         // Always get JSON from cache and reconstruct container
         // This ensures we get the latest state after events modify it
         $jsonUI = $this->getStoredUI();
-        
+
         // Reconstruct container from JSON
         return $this->reconstructContainerFromJson($jsonUI);
     }
-    
+
     /**
      * Reconstruct UI container from JSON array
      * 
@@ -245,40 +250,40 @@ abstract class AbstractUIService
                 break;
             }
         }
-        
+
         if (!$containerData) {
             // No cached container, build fresh
             return $this->buildBaseUI();
         }
-        
+
         // Build container with cached properties
         $container = UIBuilder::container($containerData['name'] ?? 'main')
             ->parent($containerData['parent'] ?? 'main')
             ->layout(LayoutType::from($containerData['layout']))
             ->title($containerData['title'] ?? '');
-        
+
         // Restore container ID
         if (isset($containerData['_id'])) {
-            $reflection = new \ReflectionProperty(UIContainer::class, 'id');
+            $reflection = new ReflectionProperty(UIContainer::class, 'id');
             $reflection->setValue($container, $containerData['_id']);
         }
-        
+
         // Add all child components from JSON
         foreach ($jsonUI as $componentId => $componentData) {
             if ($componentData['type'] === 'container') {
                 continue; // Skip container itself
             }
-            
+
             // Recreate component based on type
             $component = $this->recreateComponentFromJson($componentData);
             if ($component) {
                 $container->add($component);
             }
         }
-        
+
         return $container;
     }
-    
+
     /**
      * Recreate a component from JSON data
      * 
@@ -290,13 +295,13 @@ abstract class AbstractUIService
         $type = $data['type'];
         $name = $data['name'] ?? null;  // Changed from '_name' to 'name'
         $originalId = $data['_id'] ?? null;
-        
+
         if (!$name || !$originalId) {
             return null;
         }
-        
+
         // Create component using UIBuilder
-        $component = match($type) {
+        $component = match ($type) {
             'label' => UIBuilder::label($name),
             'button' => UIBuilder::button($name),
             'input' => UIBuilder::input($name),
@@ -304,31 +309,31 @@ abstract class AbstractUIService
             'checkbox' => UIBuilder::checkbox($name),
             default => null
         };
-        
+
         if (!$component) {
             return null;
         }
-        
+
         // Restore original ID using reflection
-        $reflection = new \ReflectionProperty(get_class($component), 'id');
+        $reflection = new ReflectionProperty(get_class($component), 'id');
         $reflection->setValue($component, $originalId);
-        
+
         // Restore properties from JSON
         foreach ($data as $key => $value) {
             // Skip internal properties
             if (str_starts_with($key, '_')) {
                 continue;
             }
-            
+
             // Set property if method exists
             if (method_exists($component, $key)) {
                 $component->$key($value);
             }
         }
-        
+
         return $component;
     }
-    
+
     /**
      * Store UI state in cache
      * 
@@ -338,7 +343,7 @@ abstract class AbstractUIService
     protected function storeUI(UIContainer $ui): void
     {
         $key = $this->getUIStorageKey();
-        
+
         // Only store JSON, container will be reconstructed when needed
         Cache::put($key, $ui->toJson(), 1800); // 30 minutes in seconds
     }
@@ -363,7 +368,7 @@ abstract class AbstractUIService
             // If container doesn't exist yet, load it first
             $this->container = $this->getUIContainer();
         }
-        
+
         $this->storeUI($this->container);
     }
 
@@ -388,21 +393,21 @@ abstract class AbstractUIService
      * @param string|int $identifier Component name (string) or ID (int)
      * @param array $properties Array of properties to update (key => value)
      * @return void
-     * @throws \RuntimeException If component not found
+     * @throws RuntimeException If component not found
      */
     public function updateComponentCache(string|int $identifier, array $properties): void
     {
         $key = $this->getUIStorageKey();
         $cachedUI = Cache::get($key);
-        
+
         if ($cachedUI === null) {
             // No cache exists, build initial UI first
             $cachedUI = $this->buildBaseUI()->toJson();
         }
-        
+
         // Find component in cached JSON
         $componentKey = null;
-        
+
         if (is_int($identifier)) {
             // Search by ID (_id property)
             foreach ($cachedUI as $key => $component) {
@@ -420,22 +425,22 @@ abstract class AbstractUIService
                 }
             }
         }
-        
+
         if ($componentKey === null) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 "Component with identifier '{$identifier}' not found in cached UI"
             );
         }
-        
+
         // Update properties
         foreach ($properties as $prop => $value) {
             $cachedUI[$componentKey][$prop] = $value;
         }
-        
+
         // Save back to cache
         Cache::put($this->getUIStorageKey(), $cachedUI, 1800);
     }
-    
+
     /**
      * Clear stored UI state
      * 
@@ -445,7 +450,7 @@ abstract class AbstractUIService
     {
         Cache::forget($this->getUIStorageKey());
     }
-    
+
     /**
      * Generate unique storage key per service + user
      * 
@@ -455,18 +460,8 @@ abstract class AbstractUIService
     {
         $serviceClass = class_basename(static::class);
         $userId = Auth::check() ? Auth::id() : session()->getId();
-        
+
         return "ui_state:{$serviceClass}:{$userId}";
-    }
-    
-    /**
-     * Generate unique storage key for UI container object
-     * 
-     * @return string Cache key for container
-     */
-    private function getUIContainerStorageKey(): string
-    {
-        return $this->getUIStorageKey() . ':container';
     }
 
     /**
@@ -479,17 +474,17 @@ abstract class AbstractUIService
     protected function getServiceComponentId(): int
     {
         $ui = $this->getStoredUI();
-        
+
         // Find the first container (main container that represents the service)
         foreach ($ui as $id => $component) {
             if ($component['type'] === 'container') {
                 return (int)$id;
             }
         }
-        
+
         // Fallback: generate deterministic ID from service class name
-        return \App\Services\UI\Support\UIIdGenerator::generateFromName(
-            static::class, 
+        return UIIdGenerator::generateFromName(
+            static::class,
             'service_root'
         );
     }
