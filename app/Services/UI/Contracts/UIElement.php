@@ -36,6 +36,15 @@ interface UIElement
     public function toJson(?int $order = null): array;
 
     /**
+     * Create a UI element instance from its JSON representation
+     * 
+     * @param int $id The unique identifier for the element
+     * @param array $data The JSON data to create from
+     * @return self A new instance of the UI element
+     */
+    public static function fromJson(int $id, array $data): self;
+
+    /**
      * Get the visibility state of the element
      * 
      * @return bool True if visible, false otherwise

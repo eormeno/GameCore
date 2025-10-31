@@ -265,14 +265,27 @@ abstract class AbstractUIService
      */
     protected function reconstructContainerFromJson(array $jsonUI): UIContainer
     {
-        // Display the type of each component
-        foreach ($jsonUI as $component) {
-            $id = $component['_id'] ?? 'unknown';
-            $className = $this->mapTypeToClass($component['type'] ?? 'unknown');
-            $simpleName = $className ? (new ReflectionClass($className))->getShortName() : 'unknown';
+        $components = [];
+        $rootContainer = null;
 
-            Log::info("$id : $simpleName");
+        // First pass: instantiate all components
+
+        foreach ($jsonUI as $id => $component) {
+            $parent = $component['parent'];
+
+            $className = $this->mapTypeToClass($component['type']);
+
+            if ($className) {
+                $instanced = $className::fromJson($id, $component);
+                if ($parent === 'main') {
+                    $rootContainer = $instanced;
+                }
+                $components[$id] = $instanced;
+            }
         }
+
+        // Second pass: set up parent-child relationships
+
 
         // Find container component
         $containerData = null;
@@ -364,7 +377,7 @@ abstract class AbstractUIService
         };
 
         if (!$component) {
-            Log::warning("Failed to recreate component from JSON", ['data' => $data]);
+            // Log::warning("Failed to recreate component from JSON", ['data' => $data]);
             return null;
         }
 

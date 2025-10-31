@@ -12,8 +12,8 @@ use App\Services\UI\Enums\Align;
  */
 class TableCellBuilder extends UIComponent
 {
-    /** @var TableRowBuilder The parent row */
-    private TableRowBuilder $row;
+    /** @var TableRowBuilder|null The parent row */
+    private ?TableRowBuilder $row;
 
     /** @var UIComponent|null Optional child component */
     private ?UIComponent $child = null;
@@ -24,7 +24,7 @@ class TableCellBuilder extends UIComponent
      * @param TableRowBuilder $row The parent row this cell belongs to
      * @param string|null $name Optional name for the cell
      */
-    public function __construct(TableRowBuilder $row, ?string $name = null)
+    public function __construct(?TableRowBuilder $row = null, ?string $name = null)
     {
         $this->row = $row;
         parent::__construct($name);

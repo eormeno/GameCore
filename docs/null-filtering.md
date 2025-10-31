@@ -43,7 +43,6 @@ Se ha modificado el método `toJson()` en las siguientes clases para filtrar val
 
 3. **`TableBuilder.php`** - Usa `parent::toJson()` ✅
 4. **`FormBuilder.php`** - Usa `parent::toJson()` ✅
-5. **`ContainerBuilder.php`** - Delega a `container->toJson()` ✅
 
 ---
 

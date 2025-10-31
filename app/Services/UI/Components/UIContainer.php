@@ -49,7 +49,7 @@ class UIContainer implements UIElement
             'layout' => LayoutType::VERTICAL->value,
             'parent' => null,
             'title' => null,
-            
+
             // Flexbox properties
             'flex_direction' => null,
             'justify_content' => null,
@@ -60,7 +60,7 @@ class UIContainer implements UIElement
             'flex_shrink' => null,
             'flex_basis' => null,
             'order' => null,
-            
+
             // Grid properties
             'grid_template_columns' => null,
             'grid_template_rows' => null,
@@ -71,26 +71,26 @@ class UIContainer implements UIElement
             'grid_column' => null,
             'grid_row' => null,
             'grid_area' => null,
-            
+
             // Gap/Spacing
             'gap' => null,
             'row_gap' => null,
             'column_gap' => null,
-            
+
             // Padding
             'padding' => null,
             'padding_top' => null,
             'padding_right' => null,
             'padding_bottom' => null,
             'padding_left' => null,
-            
+
             // Margin
             'margin' => null,
             'margin_top' => null,
             'margin_right' => null,
             'margin_bottom' => null,
             'margin_left' => null,
-            
+
             // Sizing
             'width' => null,
             'height' => null,
@@ -98,7 +98,7 @@ class UIContainer implements UIElement
             'min_height' => null,
             'max_width' => null,
             'max_height' => null,
-            
+
             // Visual styling
             'background_color' => null,
             'background_image' => null,
@@ -108,7 +108,7 @@ class UIContainer implements UIElement
             'border_radius' => null,
             'box_shadow' => null,
             'opacity' => null,
-            
+
             // Position
             'position' => null,
             'top' => null,
@@ -116,27 +116,41 @@ class UIContainer implements UIElement
             'bottom' => null,
             'left' => null,
             'z_index' => null,
-            
+
             // Overflow & Scroll
             'overflow' => null,
             'overflow_x' => null,
             'overflow_y' => null,
             'scroll_behavior' => null,
-            
+
             // Display
             'display' => null,
-            
+
             // Responsive
             'responsive' => [],
             'breakpoints' => [],
             'hide_on' => [],
             'show_on' => [],
-            
+
             // Custom
             'custom_class' => null,
             'custom_style' => null,
             'data_attributes' => [],
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function fromJson(int $id, array $data): UIContainer
+    {
+        $container = new self();
+        $container->id = $id;
+        $container->type = $data['type'] ?? 'container';
+        $container->name = $data['name'] ?? null;
+        $container->parent = $data['parent'] ?? null;
+        $container->config = array_merge($container->config, $data);
+        return $container;
     }
 
     /**
@@ -343,7 +357,7 @@ class UIContainer implements UIElement
         if (isset($this->children[$elementId])) {
             // Mark the element for deletion by setting parent to null
             $this->children[$elementId]->setParent(null);
-            
+
             unset($this->children[$elementId]);
             return true;
         }
@@ -1437,7 +1451,7 @@ class UIContainer implements UIElement
             ];
             $shadow = $shadows[$intensity] ?? $intensity;
         }
-        
+
         return $this->boxShadow($shadow);
     }
 
@@ -1475,33 +1489,33 @@ class UIContainer implements UIElement
     {
         // Filter out null values from config
         $config = array_filter($this->config, fn($value) => $value !== null);
-        
+
         // Remove default visible value to save JSON size
         if (isset($config['visible']) && $config['visible'] === true) {
             unset($config['visible']);
         }
-        
+
         // Container receives its own _order from parent
         if ($order !== null) {
             $config['_order'] = $order;
         }
-        
+
         // CRITICAL: Include component ID in config for frontend lookups
         $config['_id'] = $this->id;
-        
+
         // Start with this container's config
         $result = [$this->id => $config];
-        
+
         // Append children with incremental order (1, 2, 3...)
         $childOrder = 1;
         foreach ($this->children as $childId => $child) {
             $childJson = $child->toJson($childOrder);
             $childOrder++;
-            
+
             // Use + operator to preserve numeric keys (array_merge reindexes them!)
             $result = $result + $childJson;
         }
-        
+
         return $result;
     }
 
@@ -1551,10 +1565,10 @@ class UIContainer implements UIElement
     {
         // Obtener offset del contexto (ej: 56150000)
         $offset = $this->getContextOffset($context);
-        
+
         // Hash del nombre (0-9999)
         $hash = abs(crc32($name)) % 9999;
-        
+
         // ID final: offset + hash + 1
         return $offset + $hash + 1;
     }
@@ -1570,14 +1584,14 @@ class UIContainer implements UIElement
         if ($context === 'default') {
             return 0;
         }
-        
+
         // Generar un hash numérico único del nombre de la clase usando CRC32
         $hash = crc32($context);
-        
+
         // Convertir a positivo si es negativo y escalar al rango deseado
         // Múltiplos de 10000, máximo 9999 contextos diferentes
         $offset = (abs($hash) % 9999) * 10000;
-        
+
         return $offset;
     }
 
@@ -1596,11 +1610,11 @@ class UIContainer implements UIElement
                 /** @var UIComponent|UIContainer $child */
                 $childName = $child->getName();
             }
-            
+
             if ($childName === $name) {
                 return $child;
             }
-            
+
             // Buscar recursivamente en contenedores
             if ($child instanceof UIContainer) {
                 $found = $child->findByName($name);
@@ -1609,7 +1623,7 @@ class UIContainer implements UIElement
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -1625,13 +1639,13 @@ class UIContainer implements UIElement
         if ($this->id === $id) {
             return $this;
         }
-        
+
         foreach ($this->children as $child) {
             // Verificar ID del hijo
             if ($child->getId() === $id) {
                 return $child;
             }
-            
+
             // Buscar recursivamente en contenedores
             if ($child instanceof UIContainer) {
                 $found = $child->findById($id);
@@ -1640,7 +1654,7 @@ class UIContainer implements UIElement
                 }
             }
         }
-        
+
         return null;
     }
 }

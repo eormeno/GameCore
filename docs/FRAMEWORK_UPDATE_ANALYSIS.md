@@ -159,11 +159,6 @@ UIBuilder::button(); // Equivalente
 - ✅ Compatibilidad con nuevo sistema
 - ✅ Children indexados por ID numérico
 
-### ContainerBuilder
-- ✅ Acepta `name` opcional en constructor
-- ✅ Delega a UIContainer
-- ✅ Mantiene compatibilidad
-
 ### UIBuilder (Factory)
 - ✅ Todos los métodos aceptan `?string $name`
 - ✅ Nombre es opcional (puede ser null)
@@ -313,7 +308,7 @@ Para migrar código existente:
 ```php
 UIBuilder::button(?string $name = null): ButtonBuilder
 UIBuilder::label(?string $name = null): LabelBuilder
-UIBuilder::container(?string $name = null): ContainerBuilder
+UIBuilder::container(?string $name = null): UIContainer
 UIBuilder::table(?string $name = null): TableBuilder
 ```
 

@@ -49,6 +49,18 @@ abstract class UIComponent implements UIElement
         }
     }
 
+    public static function fromJson(int $id, array $data): self
+    {
+        $component = new static();
+        $component->id = $id;
+        $component->type = $data['type'] ?? 'unknown';
+        $component->name = $data['name'] ?? null;
+        $component->parent = $data['parent'] ?? null;
+        $component->config = array_merge($component->config, $data);
+
+        return $component;
+    }
+
     /**
      * Detecta automáticamente la clase que está invocando el builder
      * Busca en el stack trace la primera clase fuera del namespace UI

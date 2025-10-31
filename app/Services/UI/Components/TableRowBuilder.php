@@ -10,8 +10,8 @@ namespace App\Services\UI\Components;
  */
 class TableRowBuilder extends UIComponent
 {
-    /** @var TableBuilder The parent table */
-    private TableBuilder $table;
+    /** @var TableBuilder|null The parent table */
+    private ?TableBuilder $table;
 
     /** @var array<TableCellBuilder> Array of cells in this row */
     private array $cellComponents = [];
@@ -19,10 +19,10 @@ class TableRowBuilder extends UIComponent
     /**
      * Create a new table row
      * 
-     * @param TableBuilder $table The parent table this row belongs to
+     * @param TableBuilder|null $table The parent table this row belongs to
      * @param string|null $name Optional name for the row
      */
-    public function __construct(TableBuilder $table, ?string $name = null)
+    public function __construct(?TableBuilder $table = null, ?string $name = null)
     {
         $this->table = $table;
         parent::__construct($name);

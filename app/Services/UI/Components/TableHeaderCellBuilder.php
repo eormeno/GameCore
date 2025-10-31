@@ -13,16 +13,16 @@ use App\Services\UI\Enums\FontWeight;
  */
 class TableHeaderCellBuilder extends UIComponent
 {
-    /** @var TableHeaderRowBuilder The parent header row */
-    private TableHeaderRowBuilder $headerRow;
+    /** @var TableHeaderRowBuilder|null The parent header row */
+    private ?TableHeaderRowBuilder $headerRow;
 
     /**
      * Create a new table header cell
      * 
-     * @param TableHeaderRowBuilder $headerRow The parent header row this cell belongs to
+     * @param TableHeaderRowBuilder|null $headerRow The parent header row this cell belongs to
      * @param string|null $name Optional name for the cell
      */
-    public function __construct(TableHeaderRowBuilder $headerRow, ?string $name = null)
+    public function __construct(?TableHeaderRowBuilder $headerRow = null, ?string $name = null)
     {
         $this->headerRow = $headerRow;
         parent::__construct($name);

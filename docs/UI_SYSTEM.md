@@ -323,7 +323,7 @@ $container->addMany([
 
 ```php
 // Contenedor
-UIBuilder::container(?string $name = null): ContainerBuilder
+UIBuilder::container(?string $name = null): UIContainer
 
 // Botón
 UIBuilder::button(?string $name = null): ButtonBuilder

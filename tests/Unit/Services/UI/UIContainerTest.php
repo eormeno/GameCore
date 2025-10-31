@@ -7,7 +7,8 @@ use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\UIBuilder;
 
 /**
- * NOTE: These tests were written for the old ContainerBuilder API.
+ * UIContainer Tests
+ * 
  * UIContainer now uses numeric IDs generated automatically and has a different API.
  * Many of these tests need to be updated to match the current UIContainer implementation.
  * 
