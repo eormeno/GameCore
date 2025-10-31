@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class UIDemoController extends Controller
 {
@@ -19,10 +20,10 @@ class UIDemoController extends Controller
         // Convert kebab-case to PascalCase and append 'Service'
         // Example: 'demo-ui' -> 'DemoUi' -> 'DemoUiService'
         $serviceName = Str::studly($demo) . 'Service';
-        
+
         // Build fully qualified class name
         $serviceClass = "App\\Services\\Screens\\{$serviceName}";
-        
+
         // Check if service class exists
         if (!class_exists($serviceClass)) {
             return response()->json([
@@ -30,7 +31,7 @@ class UIDemoController extends Controller
                 'service' => $serviceName
             ], 404);
         }
-        
+
         // Instantiate service using Laravel's service container
         // This allows dependency injection to work
         $service = app($serviceClass);
@@ -39,8 +40,15 @@ class UIDemoController extends Controller
         if ($reset) {
             $service->clearStoredUI();
         }
-        
+
+        $ui = $service->getUI();
+
+        $firstElementType = $ui[array_keys($ui)[0]]['type'] ?? null;
+        if ($firstElementType !== 'menu_dropdown') {
+            //Log::info("\n" . json_encode($ui, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        }
+
         // Return UI JSON
-        return response()->json($service->getUI());
+        return response()->json($ui);
     }
 }

@@ -49,7 +49,7 @@ class TableDemoService extends AbstractUIService
             1 // default
         );
 
-        return new UsersDataTableModel(2, $currentPage);
+        return new UsersDataTableModel(1, $currentPage);
     }
 
     /**
@@ -142,7 +142,7 @@ class TableDemoService extends AbstractUIService
      * @param array $params Action parameters with 'page' key
      * @return array UI updates
      */
-    public function onChangePage(array $params): array
+    public function onChangePage(array $params): void
     {
         $page = $params['page'] ?? 1;
         // Map legacy parameters to generic format
@@ -152,29 +152,12 @@ class TableDemoService extends AbstractUIService
         ];
 
         // Update current page in cache
-        UIStateManager::setComponentProperty(static::class, 'table', 'users_table', 'current_page', $page);
-        // $this->users_table->currentPage($page);
-        $updated_cells = $this->onChangeTablePage($genericParams);
+        // UIStateManager::setComponentProperty(static::class, 'table', 'users_table', 'current_page', $page);
+        $this->users_table->currentPage($page);
+        $updated_cells = [];
+        //$updated_cells = $this->onChangeTablePage($genericParams);
 
-        return $updated_cells;
+        //return $updated_cells;
     }
 
-    /**
-     * Get the default row height for the users table
-     * 
-     * Override to ensure consistent row heights across all states
-     * (data rows, removed rows, and empty rows).
-     * 
-     * @param string|null $tableName The table name
-     * @return int The default minimum height in pixels
-     */
-    // protected function getDefaultRowHeight(?string $tableName = null): int
-    // {
-    //     if ($tableName === 'users_table') {
-    //         return 40; // Further reduced height for more compact rows
-    //     }
-
-    //     // Call the trait's default implementation
-    //     return 40; // Default height for any other table
-    // }
 }

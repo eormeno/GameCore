@@ -90,32 +90,34 @@ class UIEventController extends Controller
             }
 
             // Check if service uses new AbstractUIService architecture
-            $usesAbstractService = $service instanceof \App\Services\UI\AbstractUIService;
+            // $usesAbstractService = $service instanceof \App\Services\UI\AbstractUIService;
 
             // Initialize event context for AbstractUIService
-            if ($usesAbstractService) {
+            // if ($usesAbstractService) {
                 $service->initializeEventContext();
-            }
+            // }
 
             // Invoke method
-            $result = $service->$method($parameters);
+            // $result = $service->$method($parameters);
+            $service->$method($parameters);
+            $result = $service->finalizeEventContext();
 
             // Finalize event context for AbstractUIService
-            if ($usesAbstractService) {
-                $autoDetectedChanges = $service->finalizeEventContext();
-                
+            // if ($usesAbstractService) {
+                // $autoDetectedChanges = $service->finalizeEventContext();
+
                 // If handler returned explicit changes, use those
                 // Otherwise, use auto-detected changes from UI comparison
-                if (empty($result) || !is_array($result)) {
-                    $result = $autoDetectedChanges;
-                }
+                // if (empty($result) || !is_array($result)) {
+                //     $result = $autoDetectedChanges;
+                // }
                 // If handler returned changes, keep them (don't overwrite)
-            }
+            // }
 
             // Ensure result is an array
-            if (!is_array($result)) {
-                $result = ['data' => $result];
-            }
+            // if (!is_array($result)) {
+            //     $result = ['data' => $result];
+            // }
 
             $simpleName = class_basename($serviceClass);
 
@@ -126,7 +128,6 @@ class UIEventController extends Controller
             ]);
 
             return response()->json($result);
-
         } catch (\Exception $e) {
             Log::error('UI Event: Exception during action execution', [
                 'component_id' => $componentId,
@@ -159,7 +160,7 @@ class UIEventController extends Controller
     {
         // Replace underscores with spaces, capitalize words, remove spaces
         $pascalCase = str_replace(' ', '', ucwords(str_replace('_', ' ', $action)));
-        
+
         return 'on' . $pascalCase;
     }
 }

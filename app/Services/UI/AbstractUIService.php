@@ -5,14 +5,26 @@ namespace App\Services\UI;
 use ReflectionClass;
 use RuntimeException;
 use ReflectionProperty;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\Support\UIDiffer;
-use App\Services\UI\Support\UIStateManager;
 use Illuminate\Support\Facades\Cache;
 use App\Services\UI\Support\UIIdGenerator;
+use App\Services\UI\Components\CardBuilder;
+use App\Services\UI\Components\FormBuilder;
 use App\Services\UI\Components\UIContainer;
-use Illuminate\Support\Facades\Log;
+use App\Services\UI\Support\UIStateManager;
+use App\Services\UI\Components\InputBuilder;
+use App\Services\UI\Components\LabelBuilder;
+use App\Services\UI\Components\TableBuilder;
+use App\Services\UI\Components\ButtonBuilder;
+use App\Services\UI\Components\SelectBuilder;
+use App\Services\UI\Components\CheckboxBuilder;
+use App\Services\UI\Components\TableRowBuilder;
+use App\Services\UI\Components\TableCellBuilder;
+use App\Services\UI\Components\TableHeaderRowBuilder;
+use App\Services\UI\Components\TableHeaderCellBuilder;
 
 /**
  * Abstract UI Service
@@ -144,8 +156,12 @@ abstract class AbstractUIService
      */
     public function finalizeEventContext(): array
     {
+        Log::debug("Old UI:\n" . json_encode($this->oldUI, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+
         // Get current UI state
         $this->newUI = $this->container->toJson();
+
+        Log::debug("New UI:\n" . json_encode($this->newUI, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 
         // Auto-detect if UI was modified by comparing states
         if ($this->oldUI === $this->newUI) {
@@ -176,6 +192,12 @@ abstract class AbstractUIService
         $result = [];
         foreach ($diff as $componentId => $changes) {
             $changes['_id'] = $componentId;
+
+            // Always include 'type' from newUI so frontend knows how to handle the change
+            if (isset($this->newUI[$componentId]['type'])) {
+                $changes['type'] = $this->newUI[$componentId]['type'];
+            }
+
             $result[$componentId] = $changes;
         }
 
@@ -229,7 +251,7 @@ abstract class AbstractUIService
         // Always get JSON from cache and reconstruct container
         // This ensures we get the latest state after events modify it
         $jsonUI = $this->getStoredUI();
-        Log::info(json_encode($jsonUI));
+        // Log::info(json_encode($jsonUI));
 
         // Reconstruct container from JSON
         return $this->reconstructContainerFromJson($jsonUI);
@@ -243,6 +265,15 @@ abstract class AbstractUIService
      */
     protected function reconstructContainerFromJson(array $jsonUI): UIContainer
     {
+        // Display the type of each component
+        foreach ($jsonUI as $component) {
+            $id = $component['_id'] ?? 'unknown';
+            $className = $this->mapTypeToClass($component['type'] ?? 'unknown');
+            $simpleName = $className ? (new ReflectionClass($className))->getShortName() : 'unknown';
+
+            Log::info("$id : $simpleName");
+        }
+
         // Find container component
         $containerData = null;
         foreach ($jsonUI as $component) {
@@ -251,8 +282,6 @@ abstract class AbstractUIService
                 break;
             }
         }
-
-        // TODO: Trabajando en esto
 
         if (!$containerData) {
             // No cached container, build fresh
@@ -285,6 +314,26 @@ abstract class AbstractUIService
         }
 
         return $container;
+    }
+
+    private function mapTypeToClass(string $type): ?string
+    {
+        return match ($type) {
+            'label' => LabelBuilder::class,
+            'button' => ButtonBuilder::class,
+            'input' => InputBuilder::class,
+            'select' => SelectBuilder::class,
+            'checkbox' => CheckboxBuilder::class,
+            'card' => CardBuilder::class,
+            'table' => TableBuilder::class,
+            'container' => UIContainer::class,
+            'tablerow' => TableRowBuilder::class,
+            'tablecell' => TableCellBuilder::class,
+            'tableheadercell' => TableHeaderCellBuilder::class,
+            'form' => FormBuilder::class,
+            'tableheaderrow' => TableHeaderRowBuilder::class,
+            default => null,
+        };
     }
 
     /**
