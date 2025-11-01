@@ -2,8 +2,9 @@
 
 namespace App\Services\UI\Components;
 
-use App\Services\UI\Contracts\UIElement;
+use Illuminate\Support\Facades\Log;
 use App\Services\UI\Enums\LayoutType;
+use App\Services\UI\Contracts\UIElement;
 use App\Services\UI\Support\UIIdGenerator;
 
 /**
@@ -45,6 +46,7 @@ class UIContainer implements UIElement
 
         $this->config = [
             'type' => $this->type,
+            'name' => $this->name,
             'visible' => true,
             'layout' => LayoutType::VERTICAL->value,
             'parent' => null,
@@ -142,7 +144,7 @@ class UIContainer implements UIElement
     /**
      * {@inheritDoc}
      */
-    public static function fromJson(int $id, array $data): UIContainer
+    public static function deserialize(int $id, array $data): UIContainer
     {
         $container = new self();
         $container->id = $id;
@@ -151,6 +153,14 @@ class UIContainer implements UIElement
         $container->parent = $data['parent'] ?? null;
         $container->config = array_merge($container->config, $data);
         return $container;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function connectChild(UIElement $element): void
+    {
+        $this->add($element);
     }
 
     /**

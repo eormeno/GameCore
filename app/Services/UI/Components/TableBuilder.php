@@ -2,6 +2,9 @@
 
 namespace App\Services\UI\Components;
 
+use Illuminate\Support\Facades\Log;
+use App\Services\UI\Contracts\UIElement;
+
 /**
  * Table Builder
  * 
@@ -44,18 +47,18 @@ class TableBuilder extends UIComponent
     public function __construct(?string $name = null, int $rows = 0, int $cols = 0)
     {
         parent::__construct($name);
-        
+
         // Create the rows container
         $this->rowsContainer = new UIContainer('rows');
         $this->rowsContainer->setParent($this->id);
         $this->config['rows_container'] = $this->rowsContainer->getId();
-        
+
         $this->rows = $rows;
         $this->cols = $cols;
-        
+
         $this->setConfig('rows', $rows);
         $this->setConfig('cols', $cols);
-        
+
         // Initialize empty cells if dimensions are provided
         if ($rows > 0 && $cols > 0) {
             $this->initializeEmptyCells();
@@ -77,6 +80,28 @@ class TableBuilder extends UIComponent
         ];
     }
 
+    public function connectChild(UIElement $element): void
+    {
+        if ($element instanceof UIContainer) {
+            if ($element->getName() === 'rows') {
+                $this->rowsContainer = $element;
+                $this->config['rows_container'] = $element->getId();
+            }
+            return;
+        }
+
+        if ($element instanceof TableHeaderRowBuilder) {
+            $this->headerRow = $element;
+            $this->config['header_row'] = $element->getId();
+            return;
+        }
+
+        if ($element instanceof TableRowBuilder) {
+            $this->addRow($element);
+            return;
+        }
+    }
+
     /**
      * Create and return a header row for this table
      * Only one header row is allowed per table
@@ -93,7 +118,7 @@ class TableBuilder extends UIComponent
         $this->headerRow = new TableHeaderRowBuilder($this, $name ?? 'header');
         $this->headerRow->setParent($this->id);
         $this->config['header_row'] = $this->headerRow->getId();
-        
+
         return $this->headerRow;
     }
 
@@ -155,12 +180,12 @@ class TableBuilder extends UIComponent
     {
         $this->rows = $rows;
         $this->cols = $cols;
-        
+
         $this->setConfig('rows', $rows);
         $this->setConfig('cols', $cols);
-        
+
         $this->initializeEmptyCells();
-        
+
         return $this;
     }
 
@@ -171,18 +196,18 @@ class TableBuilder extends UIComponent
     {
         // Create header row
         $headerRow = $this->createHeaderRow('header');
-        
+
         // Create empty header cells with column index
         for ($col = 0; $col < $this->cols; $col++) {
             $headerRow->createCell("header_$col")->text('')->column($col);
         }
-        
+
         // Create data rows with empty cells
         for ($row = 0; $row < $this->rows; $row++) {
             $rowBuilder = $this->createRow("row_$row");
             $rowBuilder->row($row); // Set row index for ordering
             $this->rowBuilders[$row] = $rowBuilder;
-            
+
             // Create empty cells for this row with column index
             $this->cells[$row] = [];
             for ($col = 0; $col < $this->cols; $col++) {
@@ -203,19 +228,19 @@ class TableBuilder extends UIComponent
     public function fillHeaderRow(array $data): self
     {
         $headerRow = $this->getHeaderRow();
-        
+
         if (!$headerRow) {
             throw new \LogicException("Table dimensions must be set before filling header row");
         }
-        
+
         $cells = $headerRow->getCells();
-        
+
         for ($col = 0; $col < min(count($data), $this->cols); $col++) {
             if (isset($cells[$col])) {
                 $cells[$col]->text($data[$col]);
             }
         }
-        
+
         return $this;
     }
 
@@ -232,7 +257,7 @@ class TableBuilder extends UIComponent
                 $this->cells[$row][$col]->text('');
             }
         }
-        
+
         return $this;
     }
 
@@ -252,11 +277,11 @@ class TableBuilder extends UIComponent
         if ($row < 0 || $row >= $this->rows) {
             throw new \OutOfBoundsException("Row index $row is out of bounds (0-" . ($this->rows - 1) . ")");
         }
-        
+
         for ($col = 0; $col < min(count($data), $this->cols); $col++) {
             $value = $data[$col];
             $cell = $this->cells[$row][$col];
-            
+
             if (is_string($value) || is_numeric($value)) {
                 // Simple text (string or number)
                 $cell->text((string)$value)->padding(4); // Compact padding for text cells
@@ -275,7 +300,7 @@ class TableBuilder extends UIComponent
                 }
             }
         }
-        
+
         return $this;
     }
 
@@ -294,11 +319,11 @@ class TableBuilder extends UIComponent
         if ($row < 0 || $row >= $this->rows) {
             throw new \OutOfBoundsException("Row index $row is out of bounds");
         }
-        
+
         if ($col < 0 || $col >= $this->cols) {
             throw new \OutOfBoundsException("Column index $col is out of bounds");
         }
-        
+
         return $this->cells[$row][$col]->getId();
     }
 
@@ -314,11 +339,11 @@ class TableBuilder extends UIComponent
         if ($row < 0 || $row >= $this->rows) {
             throw new \OutOfBoundsException("Row index $row is out of bounds");
         }
-        
+
         if ($col < 0 || $col >= $this->cols) {
             throw new \OutOfBoundsException("Column index $col is out of bounds");
         }
-        
+
         return $this->cells[$row][$col];
     }
 
@@ -344,7 +369,7 @@ class TableBuilder extends UIComponent
         if (!in_array($align, ['left', 'center', 'right'])) {
             throw new \InvalidArgumentException("Invalid alignment: $align. Use 'left', 'center', or 'right'.");
         }
-        
+
         return $this->setConfig('align', $align);
     }
 
@@ -360,7 +385,7 @@ class TableBuilder extends UIComponent
         foreach ($this->rowBuilders as $row) {
             $row->minHeight($height);
         }
-        
+
         return $this;
     }
 
@@ -570,19 +595,19 @@ class TableBuilder extends UIComponent
     {
         // Get the table's JSON
         $tableJson = parent::toJson();
-        
+
         // Get the rows container's JSON
         $rowsContainerJson = $this->rowsContainer->toJson();
-        
+
         // Start with table + rows container
         $result = $tableJson + $rowsContainerJson;
-        
+
         // Add header row if it exists
         if ($this->headerRow !== null) {
             $headerRowJson = $this->headerRow->toJson();
             $result = $result + $headerRowJson;
         }
-        
+
         return $result;
     }
 

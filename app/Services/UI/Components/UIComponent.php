@@ -49,7 +49,10 @@ abstract class UIComponent implements UIElement
         }
     }
 
-    public static function fromJson(int $id, array $data): self
+    /**
+     * {@inheritDoc}
+     */
+    public static function deserialize(int $id, array $data): self
     {
         $component = new static();
         $component->id = $id;
@@ -59,6 +62,13 @@ abstract class UIComponent implements UIElement
         $component->config = array_merge($component->config, $data);
 
         return $component;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function connectChild(UIElement $element): void
+    {
     }
 
     /**

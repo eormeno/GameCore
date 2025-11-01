@@ -2,6 +2,9 @@
 
 namespace App\Services\UI\Components;
 
+use Illuminate\Support\Facades\Log;
+use App\Services\UI\Contracts\UIElement;
+
 /**
  * Builder for Table Row UI components
  * 
@@ -38,6 +41,13 @@ class TableRowBuilder extends UIComponent
             'row' => null, // Row index for ordering
             'min_height' => null, // Minimum height in pixels
         ];
+    }
+
+    public function connectChild(UIElement $element): void
+    {
+        if ($element instanceof TableCellBuilder) {
+            $this->addCell($element);
+        }
     }
 
     /**

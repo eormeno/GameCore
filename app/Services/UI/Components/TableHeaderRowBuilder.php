@@ -2,6 +2,9 @@
 
 namespace App\Services\UI\Components;
 
+use Illuminate\Support\Facades\Log;
+use App\Services\UI\Contracts\UIElement;
+
 /**
  * Builder for Table Header Row UI components
  * 
@@ -31,6 +34,13 @@ class TableHeaderRowBuilder extends UIComponent
     protected function getDefaultConfig(): array
     {
         return [];
+    }
+
+    public function connectChild(UIElement $element): void
+    {
+        if ($element instanceof TableHeaderCellBuilder) {
+            $this->addCell($element);
+        }
     }
 
     /**
