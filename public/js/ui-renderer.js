@@ -547,10 +547,14 @@ class TableComponent extends UIComponent {
         paginationDiv.className = 'ui-pagination';
         paginationDiv.setAttribute('data-component-id', this.id);
 
-        const currentPage = this.config.current_page || 1;
-        const perPage = this.config.per_page || 10;
-        const totalItems = this.config.total_items || 0;
-        const totalPages = totalItems > 0 ? Math.ceil(totalItems / perPage) : 1;
+        // Read pagination from the new nested structure
+        const pagination = this.config.pagination || {};
+        const currentPage = pagination.current_page || 1;
+        const perPage = pagination.per_page || 10;
+        const totalItems = pagination.total_items || 0;
+        const totalPages = pagination.total_pages || 1;
+        const canNext = pagination.can_next !== undefined ? pagination.can_next : (currentPage < totalPages);
+        const canPrev = pagination.can_prev !== undefined ? pagination.can_prev : (currentPage > 1);
 
         // Info text
         const start = (currentPage - 1) * perPage + 1;
@@ -564,12 +568,49 @@ class TableComponent extends UIComponent {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'ui-pagination-controls';
 
+        // Loading indicator (hidden by default)
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'ui-pagination-loading';
+        loadingDiv.style.display = 'none';
+        loadingDiv.style.marginLeft = '16px';
+        loadingDiv.style.alignItems = 'center';
+        loadingDiv.style.gap = '8px';
+        loadingDiv.innerHTML = `
+            <span class="spinner" style="
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid #f3f3f3;
+                border-top: 2px solid #3498db;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            "></span>
+            <span>Loading...</span>
+        `;
+        
+        // Add CSS animation if not already present
+        if (!document.querySelector('#pagination-spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'pagination-spinner-style';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        controlsDiv.appendChild(loadingDiv);
+        loadingDiv.style.display = 'none';
+        controlsDiv.paginationLoading = loadingDiv;
+
         // Previous button
         const prevBtn = document.createElement('button');
         prevBtn.className = 'ui-pagination-button';
         prevBtn.textContent = '« Previous';
-        prevBtn.disabled = currentPage === 1;
-        prevBtn.addEventListener('click', () => this.changePage(currentPage - 1));
+        prevBtn.disabled = !canPrev;
+        prevBtn.addEventListener('click', () => this.changePage(currentPage - 1, paginationDiv));
         controlsDiv.appendChild(prevBtn);
 
         // Page numbers
@@ -587,7 +628,7 @@ class TableComponent extends UIComponent {
                     pageBtn.classList.add('active');
                 }
                 pageBtn.textContent = page;
-                pageBtn.addEventListener('click', () => this.changePage(page));
+                pageBtn.addEventListener('click', () => this.changePage(page, paginationDiv));
                 controlsDiv.appendChild(pageBtn);
             }
         });
@@ -596,8 +637,8 @@ class TableComponent extends UIComponent {
         const nextBtn = document.createElement('button');
         nextBtn.className = 'ui-pagination-button';
         nextBtn.textContent = 'Next »';
-        nextBtn.disabled = currentPage === totalPages;
-        nextBtn.addEventListener('click', () => this.changePage(currentPage + 1));
+        nextBtn.disabled = !canNext;
+        nextBtn.addEventListener('click', () => this.changePage(currentPage + 1, paginationDiv));
         controlsDiv.appendChild(nextBtn);
 
         paginationDiv.appendChild(controlsDiv);
@@ -637,8 +678,18 @@ class TableComponent extends UIComponent {
         return pages;
     }
 
-    async changePage(page) {
+    async changePage(page, paginationDiv = null) {
         console.log('Changing to page:', page);
+
+        // Get the pagination div if not provided
+        if (!paginationDiv) {
+            paginationDiv = this.element?.querySelector('.ui-pagination');
+        }
+
+        // Show loading state
+        if (paginationDiv) {
+            this.setLoadingState(paginationDiv, true);
+        }
 
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -664,26 +715,80 @@ class TableComponent extends UIComponent {
             }
 
             const result = await response.json();
-            // console.log('Page change response:', JSON.stringify(result, null, 2));
 
-            if (result && globalRenderer) {
-                // Update pagination config
-                this.config.current_page = page;
+            if (result) {
+                // Extract table data - it's returned with component ID as key
+                const tableData = result[this.id];
                 
-                // Re-render pagination controls
-                const oldPagination = this.element.querySelector('.ui-pagination');
-                if (oldPagination) {
-                    const newPagination = this.createPaginationControls();
-                    oldPagination.replaceWith(newPagination);
+                if (tableData && tableData.pagination) {
+                    // Update this component's config with new pagination data
+                    this.config.pagination = tableData.pagination;
+                    
+                    // Now re-render pagination controls with updated config
+                    const oldPagination = this.element.querySelector('.ui-pagination');
+                    if (oldPagination) {
+                        const newPagination = this.createPaginationControls();
+                        oldPagination.replaceWith(newPagination);
+                    }
+                } else {
+                    console.log('No pagination found in response');
                 }
-
-                // Apply UI updates from server
-                // The result is already the updates object (id => component)
-                globalRenderer.handleUIUpdate(result);
+                
+                // Apply all other UI updates from server
+                if (globalRenderer) {
+                    globalRenderer.handleUIUpdate(result);
+                }
             }
 
         } catch (error) {
             console.error('Error changing page:', error);
+            
+            // Hide loading state on error
+            if (paginationDiv) {
+                this.setLoadingState(paginationDiv, false);
+            }
+        }
+    }
+
+    setLoadingState(paginationDiv, isLoading) {
+        const controlsDiv = paginationDiv.querySelector('.ui-pagination-controls');
+        if (!controlsDiv) return;
+
+        const buttons = controlsDiv.querySelectorAll('button');
+        const loadingDiv = controlsDiv.querySelector('.ui-pagination-loading');
+
+        if (isLoading) {
+            // Disable all buttons
+            buttons.forEach(btn => btn.disabled = true);
+            // Show loading indicator
+            if (loadingDiv) {
+                loadingDiv.style.display = 'flex';
+            }
+        } else {
+            // Re-enable buttons based on pagination state
+            const pagination = this.config.pagination || {};
+            const currentPage = pagination.current_page || 1;
+            const totalPages = pagination.total_pages || 1;
+            const canNext = pagination.can_next !== undefined ? pagination.can_next : (currentPage < totalPages);
+            const canPrev = pagination.can_prev !== undefined ? pagination.can_prev : (currentPage > 1);
+
+            buttons.forEach((btn, index) => {
+                const btnText = btn.textContent.trim();
+                
+                if (btnText === '« Previous') {
+                    btn.disabled = !canPrev;
+                } else if (btnText === 'Next »') {
+                    btn.disabled = !canNext;
+                } else if (!isNaN(btnText)) {
+                    // Page number button
+                    btn.disabled = false;
+                }
+            });
+
+            // Hide loading indicator
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
         }
     }
 

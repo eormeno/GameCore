@@ -92,16 +92,18 @@ class TableBuilder extends UIComponent
     public function page(int $page): self
     {
         $pagination = $this->config['pagination'];
-        $currentPage = $pagination['current_page'];
         $perPage = $pagination['per_page'];
+        
         if ($page < 1) {
             $page = 1;
         } elseif ($page > $pagination['total_pages']) {
             $page = $pagination['total_pages'];
         }
+        
+        // Update current page BEFORE calling updatePaginationData
         $pagination['current_page'] = $page;
-        $this->updatePaginationData();
         $this->setConfig('pagination', $pagination);
+        $this->updatePaginationData();
 
         return $this;
     }
