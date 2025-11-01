@@ -40,16 +40,7 @@ class TableDemoService extends AbstractUIService
      */
     private function getDataModel(): UsersDataTableModel
     {
-        // Read current_page from cache using UIStateManager
-        $currentPage = UIStateManager::getComponentProperty(
-            static::class,
-            'table',
-            'users_table',
-            'current_page',
-            1 // default
-        );
-
-        return new UsersDataTableModel(1, $currentPage);
+        return new UsersDataTableModel();
     }
 
     /**
@@ -80,8 +71,10 @@ class TableDemoService extends AbstractUIService
 
         // Create table with data model - everything is configured automatically
         $dataModel = $this->getDataModel();
-        $table = UIBuilder::tableWithModel('users_table', $dataModel)
+        $table = UIBuilder::table('users_table')
             ->title('Users Table')
+            ->pagination(5)
+            ->dataModel($dataModel)
             ->align('center')
             ->rowMinHeight(40); // Further reduced for more compact rows
 
@@ -146,14 +139,14 @@ class TableDemoService extends AbstractUIService
     {
         $page = $params['page'] ?? 1;
         // Map legacy parameters to generic format
-        $genericParams = [
-            'table_name' => 'users_table',
-            'page' => $page
-        ];
+        // $genericParams = [
+        //     'table_name' => 'users_table',
+        //     'page' => $page
+        // ];
 
         // Update current page in cache
         // UIStateManager::setComponentProperty(static::class, 'table', 'users_table', 'current_page', $page);
-        $this->users_table->currentPage($page);
+        $this->users_table->page($page);
         $updated_cells = [];
         //$updated_cells = $this->onChangeTablePage($genericParams);
 

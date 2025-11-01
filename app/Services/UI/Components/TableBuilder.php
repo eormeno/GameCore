@@ -2,8 +2,10 @@
 
 namespace App\Services\UI\Components;
 
+use App\Services\UI\DataTable\UsersDataTableModel;
 use Illuminate\Support\Facades\Log;
 use App\Services\UI\Contracts\UIElement;
+use App\Services\UI\DataTable\AbstractDataTableModel;
 
 /**
  * Table Builder
@@ -21,6 +23,8 @@ class TableBuilder extends UIComponent
 
     /** @var TableHeaderRowBuilder|null The header row (optional) */
     private ?TableHeaderRowBuilder $headerRow = null;
+
+    private ?AbstractDataTableModel $model = null;
 
     /** @var int Number of data rows (excluding header) */
     private int $rows;
@@ -70,14 +74,64 @@ class TableBuilder extends UIComponent
         return [
             'title' => '',
             'header_row' => null,
-            'pagination' => false,
-            'per_page' => 10,
-            'current_page' => 1,
-            'total_items' => 0,
+            'pagination' => [
+                'enabled' => true,
+                'per_page' => 10,
+                'current_page' => 1,
+                'total_items' => 0,
+                'can_next' => true,
+                'can_prev' => false,
+                'total_pages' => 0,
+            ],
             'rows' => 0,
             'cols' => 0,
             'align' => 'left', // Alignment: left, center, right
         ];
+    }
+
+    public function page(int $page): self
+    {
+        $pagination = $this->config['pagination'];
+        $currentPage = $pagination['current_page'];
+        $perPage = $pagination['per_page'];
+        if ($page < 1) {
+            $page = 1;
+        } elseif ($page > $pagination['total_pages']) {
+            $page = $pagination['total_pages'];
+        }
+        $pagination['current_page'] = $page;
+        $this->updatePaginationData();
+        $this->setConfig('pagination', $pagination);
+
+        return $this;
+    }
+
+    public function updatePaginationData(): void
+    {
+        // Momentaneamente
+        if ($this->model === null) {
+            // TODO: Replace with actual data model assignment
+            $this->model = new UsersDataTableModel();
+        }
+        $totalItems = $this->model->getTotalItems();
+        // por compatibilidad momentánea paara testing
+        $this->config['total_items'] = $totalItems;
+
+        $pagination = $this->config['pagination'];
+        $currentPage = $pagination['current_page'];
+        $perPage = $pagination['per_page'];
+
+        $pagination['total_items'] = $totalItems;
+        $pagination['total_pages'] = (int)ceil($totalItems / $perPage);
+        $pagination['can_next'] = $currentPage < $pagination['total_pages'];
+        $pagination['can_prev'] = $currentPage > 1;
+
+        if ($currentPage > $pagination['total_pages']) {
+            $currentPage = $pagination['total_pages'];
+            $pagination['current_page'] = $currentPage;
+        }
+
+        $this->config['pagination'] = $pagination;
     }
 
     public function connectChild(UIElement $element): void
@@ -444,40 +498,18 @@ class TableBuilder extends UIComponent
     }
 
     /**
-     * Enable or disable pagination
+     * Set pagination page size. If perPage is 0, pagination is disabled.
      * 
-     * @param bool $enabled True to enable pagination
      * @param int $perPage Number of items per page
      * @return self
      */
-    public function pagination(bool $enabled = true, int $perPage = 10): self
+    public function pagination(int $perPage = 10): self
     {
-        $this->setConfig('pagination', $enabled);
-        $this->setConfig('per_page', $perPage);
+        $pagination = $this->config['pagination'];
+        $pagination['enabled'] = $perPage > 0;
+        $pagination['per_page'] = $perPage;
+        $this->setConfig('pagination', $pagination);
         return $this;
-    }
-
-    /**
-     * Set the current page
-     * 
-     * @param int $page Current page number (1-based)
-     * @return self
-     */
-    // TODO: I think is no longer used
-    public function currentPage(int $page): self
-    {
-        return $this->setConfig('current_page', max(1, $page));
-    }
-
-    /**
-     * Set the total number of items (for calculating total pages)
-     * 
-     * @param int $total Total number of items
-     * @return self
-     */
-    public function totalItems(int $total): self
-    {
-        return $this->setConfig('total_items', $total);
     }
 
     /**
@@ -490,29 +522,18 @@ class TableBuilder extends UIComponent
      * @param mixed $dataModel The data model instance
      * @return self
      */
-    public function dataModel($dataModel): self
+    public function dataModel(AbstractDataTableModel $dataModel): self
     {
-        if (!$dataModel) {
-            return $this;
-        }
-
+        $this->model = $dataModel;
         // Get columns and pagination configuration
         $columns = null;
-        if (method_exists($dataModel, 'getColumns')) {
-            $columns = $dataModel->getColumns();
-            $this->cols = count($columns);
-            $this->setConfig('cols', $this->cols);
-        }
+        $columns = $dataModel->getColumns();
+        $this->cols = count($columns);
+        $this->setConfig('cols', $this->cols);
 
-        if (method_exists($dataModel, 'getPaginationInfo')) {
-            $paginationInfo = $dataModel->getPaginationInfo();
-            $this->rows = $paginationInfo['per_page'];
-            $this->setConfig('rows', $this->rows);
-            $this->setConfig('pagination', true);
-            $this->setConfig('per_page', $paginationInfo['per_page']);
-            $this->setConfig('current_page', $paginationInfo['current_page']);
-            $this->setConfig('total_items', $paginationInfo['total_items']);
-        }
+        $this->updatePaginationData();
+        $this->rows = $this->config['pagination']['per_page'];
+        $this->setConfig('rows', $this->rows);
 
         // Initialize cells now that we have dimensions
         if ($this->rows > 0 && $this->cols > 0) {
@@ -536,44 +557,23 @@ class TableBuilder extends UIComponent
             }
 
             // Fill data rows
-            if (method_exists($dataModel, 'getFormattedPageData')) {
-                $formattedData = $dataModel->getFormattedPageData();
-                $row = 0;
-                foreach ($formattedData as $rowData) {
-                    if ($row >= $this->rows) {
-                        break;
-                    }
-
-                    // Convert associative array to indexed array for fillRow
-                    $rowValues = array_values($rowData);
-                    $this->fillRow($row, $rowValues);
-                    $row++;
+            $formattedData = $dataModel->getFormattedPageData(1, $this->config['pagination']['per_page']);
+            $row = 0;
+            foreach ($formattedData as $rowData) {
+                if ($row >= $this->rows) {
+                    break;
                 }
+
+                // Convert associative array to indexed array for fillRow
+                $rowValues = array_values($rowData);
+                $this->fillRow($row, $rowValues);
+                $row++;
             }
         }
 
         return $this;
     }
 
-    /**
-     * Get pagination info
-     * 
-     * @return array ['current_page' => int, 'per_page' => int, 'total_items' => int, 'total_pages' => int]
-     */
-    public function getPaginationInfo(): array
-    {
-        $perPage = $this->config['per_page'];
-        $totalItems = $this->config['total_items'];
-        $currentPage = $this->config['current_page'];
-        $totalPages = $totalItems > 0 ? (int)ceil($totalItems / $perPage) : 1;
-
-        return [
-            'current_page' => $currentPage,
-            'per_page' => $perPage,
-            'total_items' => $totalItems,
-            'total_pages' => $totalPages,
-        ];
-    }
 
     /**
      * Get table dimensions

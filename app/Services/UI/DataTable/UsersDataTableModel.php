@@ -45,14 +45,14 @@ class UsersDataTableModel extends AbstractDataTableModel
      * 
      * @return array
      */
-    public function getFormattedPageData(): array
+    public function getFormattedPageData(int $currentPage, int $perPage): array
     {
-        $users = $this->getPageData();
+        $users = $this->getPageData($currentPage, $perPage);
         $formatted = [];
 
         foreach ($users as $index => $user) {
-            $rowIndex = (($this->currentPage - 1) * $this->perPage) + $index;
-            
+            $rowIndex = ($currentPage - 1) * $perPage + $index;
+
             $formatted[] = [
                 'id' => $user['id'],
                 'name' => $user['name'],

@@ -14,21 +14,36 @@ abstract class AbstractDataTableModel
     protected int $currentPage;
     protected ?int $totalItems = null;
 
-    public function __construct(int $perPage = 10, int $currentPage = 1)
-    {
-        $this->perPage = $perPage;
-        $this->currentPage = $currentPage;
-    }
+    /**
+     * Get table columns definition
+     * 
+     * This method should return an array defining the table columns,
+     * including their names, types, and any other relevant metadata. For example:
+     * 
+     * [
+     *     ['name' => 'id', 'type' => 'int'],
+     *     ['name' => 'title', 'type' => 'string'],
+     *     ['name' => 'created_at', 'type' => 'datetime'],
+     * ]
+     * 
+     * @return array
+     */
+    abstract public function getColumns(): array;
+
+    abstract public function getFormattedPageData(int $currentPage, int $perPage): array;
 
     /**
      * Get data for the current page
      * 
      * @return array
      */
-    public function getPageData(): array
+    public function getPageData(int $currentPage, int $perPage): array
     {
-        $offset = ($this->currentPage - 1) * $this->perPage;
-        return $this->fetchData($offset, $this->perPage);
+        $this->currentPage = $currentPage;
+        $this->perPage = $perPage;
+
+        $offset = ($currentPage - 1) * $perPage;
+        return $this->fetchData($offset, $perPage);
     }
 
     /**
@@ -80,50 +95,6 @@ abstract class AbstractDataTableModel
     }
 
     /**
-     * Get current page
-     * 
-     * @return int
-     */
-    public function getCurrentPage(): int
-    {
-        return $this->currentPage;
-    }
-
-    /**
-     * Set current page
-     * 
-     * @param int $page
-     * @return self
-     */
-    public function setCurrentPage(int $page): self
-    {
-        $this->currentPage = max(1, $page);
-        return $this;
-    }
-
-    /**
-     * Get items per page
-     * 
-     * @return int
-     */
-    public function getPerPage(): int
-    {
-        return $this->perPage;
-    }
-
-    /**
-     * Set items per page
-     * 
-     * @param int $perPage
-     * @return self
-     */
-    public function setPerPage(int $perPage): self
-    {
-        $this->perPage = max(1, $perPage);
-        return $this;
-    }
-
-    /**
      * Get total number of pages
      * 
      * @return int
@@ -131,71 +102,6 @@ abstract class AbstractDataTableModel
     public function getTotalPages(): int
     {
         return (int) ceil($this->getTotalItems() / $this->perPage);
-    }
-
-    /**
-     * Check if there is a next page
-     * 
-     * @return bool
-     */
-    public function hasNextPage(): bool
-    {
-        return $this->currentPage < $this->getTotalPages();
-    }
-
-    /**
-     * Check if there is a previous page
-     * 
-     * @return bool
-     */
-    public function hasPreviousPage(): bool
-    {
-        return $this->currentPage > 1;
-    }
-
-    /**
-     * Get pagination info
-     * 
-     * @return array
-     */
-    public function getPaginationInfo(): array
-    {
-        return [
-            'current_page' => $this->getCurrentPage(),
-            'per_page' => $this->getPerPage(),
-            'total_items' => $this->getTotalItems(),
-            'total_pages' => $this->getTotalPages(),
-            'has_next' => $this->hasNextPage(),
-            'has_previous' => $this->hasPreviousPage(),
-            'from' => (($this->currentPage - 1) * $this->perPage) + 1,
-            'to' => min($this->currentPage * $this->perPage, $this->getTotalItems())
-        ];
-    }
-
-    /**
-     * Navigate to next page
-     * 
-     * @return self
-     */
-    public function nextPage(): self
-    {
-        if ($this->hasNextPage()) {
-            $this->currentPage++;
-        }
-        return $this;
-    }
-
-    /**
-     * Navigate to previous page
-     * 
-     * @return self
-     */
-    public function previousPage(): self
-    {
-        if ($this->hasPreviousPage()) {
-            $this->currentPage--;
-        }
-        return $this;
     }
 
     /**
@@ -227,7 +133,7 @@ abstract class AbstractDataTableModel
     {
         $config = $this->getRemovedRowConfig();
         $values = [];
-        
+
         for ($i = 0; $i < $columnCount; $i++) {
             if ($i === 0) {
                 $values[$i] = $config['id_placeholder']; // ID column
@@ -239,7 +145,7 @@ abstract class AbstractDataTableModel
                 $values[$i] = $config['secondary_message']; // Data columns
             }
         }
-        
+
         return $values;
     }
 }

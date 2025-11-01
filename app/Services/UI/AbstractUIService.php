@@ -6,10 +6,7 @@ use ReflectionClass;
 use RuntimeException;
 use ReflectionProperty;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\Support\UIDiffer;
-use Illuminate\Support\Facades\Cache;
 use App\Services\UI\Support\UIIdGenerator;
 use App\Services\UI\Components\CardBuilder;
 use App\Services\UI\Components\FormBuilder;
@@ -239,7 +236,7 @@ abstract class AbstractUIService
             $ui,
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
-        // Log::debug("Generated new UI for " . static::class . ":\n" . $formatted);
+        Log::debug("Generated new UI for " . static::class . ":\n" . $formatted);
         $ttl = env('UI_CACHE_TTL', UIStateManager::DEFAULT_TTL);
         UIStateManager::store(static::class, $ui, $ttl);
 
@@ -273,11 +270,18 @@ abstract class AbstractUIService
         $components = [];
         $rootContainer = null;
 
+        // $formatted = json_encode(
+        //     $jsonUI,
+        //     JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        // );
+        // Log::debug("Reconstructing UI Container from JSON:\n" . $formatted);
+
         // First pass: instantiate all components
         foreach ($jsonUI as $id => $component) {
-            $className = $this->mapTypeToClass($component['type']);
+            $type = $component['type'];
+            $className = $this->mapTypeToClass($type);
             if (!$className) {
-                throw new RuntimeException("Unknown component type '{$component['type']}'");
+                throw new RuntimeException("Unknown component type '{$type}'.");
             }
             $components[$id] = $className::deserialize($id, $component);
         }
@@ -310,49 +314,6 @@ abstract class AbstractUIService
         // Log::debug("Reconstructed UI Container:\n" . $formatted);
 
         return $rootContainer;
-
-        // // A PARTIR DE ACÁ, está implementada la versión anterior que sólo sirve para test.
-
-        // // Find container component
-        // $containerData = null;
-        // foreach ($jsonUI as $component) {
-        //     if ($component['type'] === 'container') {
-        //         $containerData = $component;
-        //         break;
-        //     }
-        // }
-
-        // if (!$containerData) {
-        //     // No cached container, build fresh
-        //     return $this->buildBaseUI();
-        // }
-
-        // // Build container with cached properties
-        // $container = UIBuilder::container($containerData['name'] ?? 'main')
-        //     ->parent($containerData['parent'] ?? 'main')
-        //     ->layout(LayoutType::from($containerData['layout']))
-        //     ->title($containerData['title'] ?? '');
-
-        // // Restore container ID
-        // if (isset($containerData['_id'])) {
-        //     $reflection = new ReflectionProperty(UIContainer::class, 'id');
-        //     $reflection->setValue($container, $containerData['_id']);
-        // }
-
-        // // Add all child components from JSON
-        // foreach ($jsonUI as $componentId => $componentData) {
-        //     if ($componentData['type'] === 'container') {
-        //         continue; // Skip container itself
-        //     }
-
-        //     // Recreate component based on type
-        //     $component = $this->recreateComponentFromJson($componentData);
-        //     if ($component) {
-        //         $container->add($component);
-        //     }
-        // }
-
-        // return $container;
     }
 
     private function mapTypeToClass(string $type): ?string
@@ -376,58 +337,6 @@ abstract class AbstractUIService
     }
 
     /**
-     * Recreate a component from JSON data
-     * 
-     * @param array $data Component JSON data
-     * @return mixed Component builder instance or null
-     */
-    protected function recreateComponentFromJson(array $data)
-    {
-        $type = $data['type'];
-        $name = $data['name'] ?? null;
-        $originalId = $data['_id'] ?? null;
-
-        if (!$name || !$originalId) {
-            return null;
-        }
-
-        // Create component using UIBuilder
-        $component = match ($type) {
-            'label' => UIBuilder::label($name),
-            'button' => UIBuilder::button($name),
-            'input' => UIBuilder::input($name),
-            'select' => UIBuilder::select($name),
-            'checkbox' => UIBuilder::checkbox($name),
-            'table' => UIBuilder::table($name),
-            default => null
-        };
-
-        if (!$component) {
-            // Log::warning("Failed to recreate component from JSON", ['data' => $data]);
-            return null;
-        }
-
-        // Restore original ID using reflection
-        $reflection = new ReflectionProperty(get_class($component), 'id');
-        $reflection->setValue($component, $originalId);
-
-        // Restore properties from JSON
-        foreach ($data as $key => $value) {
-            // Skip internal properties
-            if (str_starts_with($key, '_')) {
-                continue;
-            }
-
-            // Set property if method exists
-            if (method_exists($component, $key)) {
-                $component->$key($value);
-            }
-        }
-
-        return $component;
-    }
-
-    /**
      * Store UI state in cache
      * 
      * @param UIContainer $ui UI container to store
@@ -436,30 +345,6 @@ abstract class AbstractUIService
     protected function storeUI(UIContainer $ui): void
     {
         UIStateManager::store(static::class, $ui->toJson());
-    }
-
-    /**
-     * Update cache with current container state
-     * 
-     * Use this method when you modify component attributes outside of an event context
-     * and want those changes to persist immediately in the cache.
-     * 
-     * Example usage:
-     * ```php
-     * $this->container->findByName('my_label')->text('New Text');
-     * $this->updateCache(); // Persist change immediately
-     * ```
-     * 
-     * @return void
-     */
-    public function updateCache(): void
-    {
-        if (!isset($this->container)) {
-            // If container doesn't exist yet, load it first
-            $this->container = $this->getUIContainer();
-        }
-
-        $this->storeUI($this->container);
     }
 
     /**

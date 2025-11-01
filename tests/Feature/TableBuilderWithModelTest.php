@@ -21,7 +21,7 @@ class TableBuilderWithModelTest extends TestCase
     public function it_can_create_table_with_data_model()
     {
         // Arrange
-        $dataModel = new UsersDataTableModel(3, 1); // 3 per page, page 1
+        $dataModel = new UsersDataTableModel(); // 3 per page, page 1
         
         // Act
         $table = UIBuilder::tableWithModel('test_table', $dataModel);
@@ -157,30 +157,5 @@ class TableBuilderWithModelTest extends TestCase
         $dimensions = $table->getDimensions();
         $this->assertEquals(0, $dimensions['rows']);
         $this->assertEquals(0, $dimensions['cols']);
-    }
-
-    /**
-     * @test
-     */
-    public function it_works_with_traditional_api_too()
-    {
-        // Arrange & Act - using traditional API
-        $table = UIBuilder::table('traditional_table', 2, 3)
-            ->title('Traditional Table')
-            ->pagination(true, 5)
-            ->currentPage(1)
-            ->totalItems(10);
-        
-        // Assert
-        $this->assertInstanceOf(TableBuilder::class, $table);
-        
-        $dimensions = $table->getDimensions();
-        $this->assertEquals(2, $dimensions['rows']);
-        $this->assertEquals(3, $dimensions['cols']);
-        
-        $paginationInfo = $table->getPaginationInfo();
-        $this->assertEquals(1, $paginationInfo['current_page']);
-        $this->assertEquals(5, $paginationInfo['per_page']);
-        $this->assertEquals(10, $paginationInfo['total_items']);
     }
 }
