@@ -232,11 +232,11 @@ abstract class AbstractUIService
 
         // Generate and cache new UI
         $ui = $this->buildBaseUI(...$params)->toJson();
-        $formatted = json_encode(
-            $ui,
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-        );
-        Log::debug("Generated new UI for " . static::class . ":\n" . $formatted);
+        // $formatted = json_encode(
+        //     $ui,
+        //     JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        // );
+        // Log::debug("Generated new UI for " . static::class . ":\n" . $formatted);
         $ttl = env('UI_CACHE_TTL', UIStateManager::DEFAULT_TTL);
         UIStateManager::store(static::class, $ui, $ttl);
 
@@ -289,14 +289,15 @@ abstract class AbstractUIService
         // Second pass: set up parent-child relationships
         foreach ($components as $id => $component) {
             $parentId = $jsonUI[$id]['parent'] ?? null;
-            if ($parentId === 'main') {
+            if ($parentId === 'main' || $parentId === 'menu') {
+                // TODO: Esto está mal. Hay que buscar otra forma de identificar el root container
                 $rootContainer = $component;
             }
             if (!$parentId) {
                 throw new RuntimeException("Component '{$id}' has no parent defined.");
             }
 
-            if  (!isset($components[$parentId])) {
+            if  (!$parentId || !isset($components[$parentId])) {
                 continue;
             }
 

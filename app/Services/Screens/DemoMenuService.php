@@ -20,7 +20,7 @@ class DemoMenuService extends AbstractUIService
     {
         // Menu doesn't use a container, but AbstractUIService requires this method.
         // Returning empty container - actual menu is built in getUI()
-        return UIBuilder::container('_menu_placeholder');
+        return UIBuilder::container('_menu_placeholder')->parent('menu');
         // Explicación: Este método buildBaseUI es necesario para cumplir con la interfaz
         // de AbstractUIService, pero en este caso no se utiliza para construir el menú real.
         // En su lugar, devolvemos un contenedor vacío llamado '_menu_placeholder' como marcador de posición.

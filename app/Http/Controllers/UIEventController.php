@@ -94,24 +94,25 @@ class UIEventController extends Controller
 
             // Initialize event context for AbstractUIService
             // if ($usesAbstractService) {
-                $service->initializeEventContext();
+            $service->initializeEventContext();
             // }
 
             // Invoke method
-            // $result = $service->$method($parameters);
-            $service->$method($parameters);
-            $result = $service->finalizeEventContext();
+            $result = $service->$method($parameters);
+            if (!is_array($result)) {
+                $result = $service->finalizeEventContext();
+            }
 
             // Finalize event context for AbstractUIService
             // if ($usesAbstractService) {
-                // $autoDetectedChanges = $service->finalizeEventContext();
+            // $autoDetectedChanges = $service->finalizeEventContext();
 
-                // If handler returned explicit changes, use those
-                // Otherwise, use auto-detected changes from UI comparison
-                // if (empty($result) || !is_array($result)) {
-                //     $result = $autoDetectedChanges;
-                // }
-                // If handler returned changes, keep them (don't overwrite)
+            // If handler returned explicit changes, use those
+            // Otherwise, use auto-detected changes from UI comparison
+            // if (empty($result) || !is_array($result)) {
+            //     $result = $autoDetectedChanges;
+            // }
+            // If handler returned changes, keep them (don't overwrite)
             // }
 
             // Ensure result is an array
@@ -119,13 +120,13 @@ class UIEventController extends Controller
             //     $result = ['data' => $result];
             // }
 
-            $simpleName = class_basename($serviceClass);
+            // $simpleName = class_basename($serviceClass);
 
-            Log::info('UI Event: Action executed', [
-                'service' => $simpleName,
-                'method' => $method,
-                'component_id' => $componentId,
-            ]);
+            // Log::info('UI Event: Action executed', [
+            //     'service' => $simpleName,
+            //     'method' => $method,
+            //     'component_id' => $componentId,
+            // ]);
 
             return response()->json($result);
         } catch (\Exception $e) {

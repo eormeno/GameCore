@@ -79,7 +79,7 @@ class UIComponent {
             // Use internal component ID (_id), not the JSON key
             const componentId = this.config._id || parseInt(this.id);
 
-            console.log('Sending event:', { component_id: componentId, action, csrfToken });
+            // console.log('Sending event:', { component_id: componentId, action, csrfToken });
 
             const response = await fetch('/api/ui-event', {
                 method: 'POST',
@@ -102,7 +102,7 @@ class UIComponent {
 
             // ÉXITO: response.ok = true (status 200-299)
             if (response.ok) {
-                console.log('✅ Action executed:', action, result);
+                // console.log('✅ Action executed:', action, result);
                 
                 // Handle UI updates using global renderer
                 if (result && Object.keys(result).length > 0) {
@@ -177,7 +177,7 @@ class ButtonComponent extends UIComponent {
 
         if (this.config.action) {
             button.addEventListener('click', () => {
-                console.log('Button action:', this.config.action, this.config.parameters || {});
+                // console.log('Button action:', this.config.action, this.config.parameters || {});
                 this.handleAction(this.config.action, this.config.parameters);
             });
         }
@@ -220,13 +220,10 @@ class ButtonComponent extends UIComponent {
         if (!container) {
             console.log('⚠️ No .ui-container found, using document');
             container = document;
-        } else {
-            console.log('✅ Found container:', container);
         }
         
         // Collect values from text inputs
         const inputs = container.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), textarea');
-        console.log(`🔍 Found ${inputs.length} text inputs`);
         inputs.forEach(input => {
             console.log(`  - Input: type="${input.type}", name="${input.name}", value="${input.value}"`);
             if (input.name) {
@@ -236,7 +233,6 @@ class ButtonComponent extends UIComponent {
         
         // Collect values from selects
         const selects = container.querySelectorAll('select');
-        console.log(`🔍 Found ${selects.length} selects`);
         selects.forEach(select => {
             if (select.name) {
                 values[select.name] = select.value;
@@ -245,7 +241,6 @@ class ButtonComponent extends UIComponent {
         
         // Collect values from checkboxes
         const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-        console.log(`🔍 Found ${checkboxes.length} checkboxes`);
         checkboxes.forEach(checkbox => {
             if (checkbox.name) {
                 values[checkbox.name] = checkbox.checked;
@@ -254,15 +249,12 @@ class ButtonComponent extends UIComponent {
         
         // Collect values from radio buttons (only checked ones)
         const radios = container.querySelectorAll('input[type="radio"]:checked');
-        console.log(`🔍 Found ${radios.length} checked radios`);
         radios.forEach(radio => {
             if (radio.name) {
                 values[radio.name] = radio.value;
             }
         });
-        
-        console.log('📋 Collected context values:', values);
-        
+                
         return values;
     }
 }
@@ -1832,11 +1824,7 @@ function startModalCountdown(totalMs, initialValue, timeUnit, timeUnitLabel, tim
             console.log('📋 Modal HTML:', document.querySelector('#modal')?.innerHTML || 'Modal not found');
             return;
         }
-        
-        console.log('✅ Countdown label found!');
-        console.log('📝 Element:', countdownLabel);
-        console.log('📝 Initial text:', countdownLabel.textContent);
-        
+                
         const startTime = Date.now();
         const endTime = startTime + totalMs;
         
@@ -1850,8 +1838,8 @@ function startModalCountdown(totalMs, initialValue, timeUnit, timeUnitLabel, tim
             if (remaining <= 0) {
                 clearInterval(window.modalTimeoutId);
                 window.modalTimeoutId = null;
-                console.log(`⏱️ Timeout completed after ${updateCount} updates`);
-                console.log('🎬 Executing action:', timeoutAction);
+                // console.log(`⏱️ Timeout completed after ${updateCount} updates`);
+                // console.log('🎬 Executing action:', timeoutAction);
                 executeTimeoutAction(timeoutAction, callerServiceId);
             } else {
                 // Calculate remaining time in the original unit
@@ -1860,12 +1848,7 @@ function startModalCountdown(totalMs, initialValue, timeUnit, timeUnitLabel, tim
                 const newText = `${remainingValue} ${label}`;
                 
                 // Update the label
-                countdownLabel.textContent = newText;
-                
-                // Log every second for debugging (every 10 updates at 100ms)
-                if (updateCount % 10 === 0) {
-                    console.log(`⏱️ Countdown: ${newText} (remaining: ${remaining}ms)`);
-                }
+                countdownLabel.textContent = newText;                
             }
         }, 100);
         
