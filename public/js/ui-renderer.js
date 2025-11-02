@@ -577,7 +577,6 @@ class TableComponent extends UIComponent {
                 border-radius: 50%;
                 animation: spin 1s linear infinite;
             "></span>
-            <span>Loading...</span>
         `;
         
         // Add CSS animation if not already present
@@ -671,8 +670,6 @@ class TableComponent extends UIComponent {
     }
 
     async changePage(page, paginationDiv = null) {
-        console.log('Changing to page:', page);
-
         // Get the pagination div if not provided
         if (!paginationDiv) {
             paginationDiv = this.element?.querySelector('.ui-pagination');
