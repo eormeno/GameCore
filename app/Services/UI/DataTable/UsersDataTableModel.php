@@ -137,10 +137,26 @@ class UsersDataTableModel extends AbstractDataTableModel
                         $user[$key] = $value;
                     }
                 }
+                Log::debug("User #$userId updated. " . json_encode($user));
                 return true;
             }
         }
         return false;
+    }
+
+    public function updateRow(int $rowId, array $newData): void
+    {
+        $this->updateUser($rowId, $newData);
+    }
+
+    public function updateCell(int $rowIndex, int $columnIndex, $newValue): void
+    {
+        $globalIndex = ($this->currentPage - 1) * $this->perPage + $rowIndex;
+        $columns = array_keys($this->getColumns());
+        if (isset(self::$dataCache[$globalIndex]) && isset($columns[$columnIndex])) {
+            $columnKey = $columns[$columnIndex];
+            self::$dataCache[$globalIndex][$columnKey] = $newValue;
+        }
     }
 
     /**

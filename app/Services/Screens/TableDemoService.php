@@ -82,9 +82,10 @@ class TableDemoService extends AbstractUIService
 
     public function onEditUser(array $params): void
     {
-        $userId = $params['user_id'] ?? null;
+        $rowId = $params['user_id'] ?? null;
         $row = $params['row'] ?? null;
-        $this->users_table->editCell($row, 1, 'EDITADO');
+        //$this->users_table->editCell($row, 1, 'EDITADO');
+        $this->users_table->getModel()->updateRow($rowId, ['name' => 'EDITADO']);
     }
 
     public function onRemoveUser(array $params): void

@@ -95,13 +95,26 @@ abstract class AbstractDataTableModel
     }
 
     /**
-     * Get total number of pages
+     * Updates the content of the row.
      * 
-     * @return int
+     * @param int $rowIndex Row index to update, in the current page
+     * @param array $newData New data for the row.
+     * @return void
      */
-    public function getTotalPages(): int
+    public function updateRow(int $rowIndex, array $newData): void
     {
-        return (int) ceil($this->getTotalItems() / $this->perPage);
+    }
+
+    /**
+     * Updates the content of a specific cell.
+     * 
+     * @param int $rowIndex Row index to update, in the current page
+     * @param int $columnIndex Column index to update
+     * @param mixed $newValue New value for the cell.
+     * @return void
+     */
+    public function updateCell(int $rowIndex, int $columnIndex, $newValue): void
+    {
     }
 
     /**
