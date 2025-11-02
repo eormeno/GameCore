@@ -24,6 +24,7 @@ class TableBuilder extends UIComponent
     /** @var TableHeaderRowBuilder|null The header row (optional) */
     private ?TableHeaderRowBuilder $headerRow = null;
 
+    /** @var AbstractDataTableModel|null The data model instance */
     private ?AbstractDataTableModel $model = null;
 
     /** @var int Number of data rows (excluding header) */
@@ -92,30 +93,98 @@ class TableBuilder extends UIComponent
     public function page(int $page): self
     {
         $pagination = $this->config['pagination'];
-        $perPage = $pagination['per_page'];
-        
+
         if ($page < 1) {
             $page = 1;
         } elseif ($page > $pagination['total_pages']) {
             $page = $pagination['total_pages'];
         }
-        
+
         // Update current page BEFORE calling updatePaginationData
         $pagination['current_page'] = $page;
         $this->setConfig('pagination', $pagination);
         $this->updatePaginationData();
 
+        // Update table data for the new page
+        $this->updateTableData();
+
         return $this;
+    }
+
+    /**
+     * Update table data for the current page
+     * Clears existing rows and fills them with data from the current page
+     */
+    private function updateTableData(): void
+    {
+        $model = $this->getModel();
+        if (!$model) {
+            return;
+        }
+
+        $pagination = $this->config['pagination'];
+        $currentPage = $pagination['current_page'];
+        $perPage = $pagination['per_page'];
+
+        // Ensure $this->rows is set to perPage if it's 0
+        if ($this->rows === 0) {
+            $this->rows = $perPage;
+            $this->setConfig('rows', $this->rows);
+        }
+
+        // Clear current rows
+        $this->clearRows();
+
+        // Fetch data for current page
+        $formattedData = $model->getFormattedPageData($currentPage, $perPage);
+
+        // Fill rows with new data and track actual row count
+        $row = 0;
+        foreach ($formattedData as $rowData) {
+            if ($row >= $this->rows) {
+                break;
+            }
+            $rowValues = array_values($rowData);
+            $this->fillRow($row, $rowValues);
+            $row++;
+        }
+
+        // Update $this->rows with the actual number of rows displayed
+        // This is important for the last page which may have fewer rows than per_page
+        $this->rows = $row;
+        $this->setConfig('rows', $this->rows);
+    }
+
+    /**
+     * Get the data model instance
+     * 
+     * @return AbstractDataTableModel|null
+     */
+    public function getModel(): ?AbstractDataTableModel
+    {
+        if ($this->model === null) {
+            $modelClass = $this->config['data_model'] ?? null;
+            if ($modelClass) {
+                $this->model = new $modelClass();
+            }
+        }
+        return $this->model;
+    }
+
+    /**
+     * Get the current configuration
+     * 
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 
     public function updatePaginationData(): void
     {
-        // Momentaneamente
-        if ($this->model === null) {
-            // TODO: Replace with actual data model assignment
-            $this->model = new UsersDataTableModel();
-        }
-        $totalItems = $this->model->getTotalItems();
+        $model = $this->getModel();
+        $totalItems = $model->getTotalItems();
         // por compatibilidad momentánea paara testing
         $this->config['total_items'] = $totalItems;
 
@@ -155,6 +224,72 @@ class TableBuilder extends UIComponent
         if ($element instanceof TableRowBuilder) {
             $this->addRow($element);
             return;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function postConnect(): void
+    {
+        $this->cols = $this->config['cols'];
+        // After deserialization and reconnection, rebuild the row builders array
+        // and cells matrix from the rowsContainer
+        $this->reconstructRowBuilders();
+        $this->reconstructCellsMatrix();
+
+        // quiero logear el contenido de la celda [4][1] para verificar (use toString())
+        // Log::debug("Contenido de la celda [4][1]: " . $this->cells[4][1]->toString());
+    }
+
+    /**
+     * Reconstruct the rowBuilders array from rowsContainer's children
+     * 
+     * After deserialization, $rowBuilders is empty so we need to rebuild it
+     * by iterating through the rowsContainer's children.
+     * 
+     * @return void
+     */
+    private function reconstructRowBuilders(): void
+    {
+        $this->rowBuilders = [];
+        $rowIndex = 0;
+
+        // Get all children from rowsContainer
+        $children = $this->rowsContainer->getChildren();
+
+        foreach ($children as $child) {
+            // Only process TableRowBuilder instances
+            if ($child instanceof TableRowBuilder) {
+                $this->rowBuilders[$rowIndex] = $child;
+                $rowIndex++;
+            }
+        }
+    }
+
+    /**
+     * Reconstruct the cells matrix from the component hierarchy
+     * 
+     * Iterates through rows stored in $rowBuilders and extracts their cells
+     * to rebuild the $this->cells two-dimensional array.
+     * 
+     * This is called after deserialization when the component tree is fully
+     * reconnected, ensuring we have access to all cell components.
+     * 
+     * @return void
+     */
+    private function reconstructCellsMatrix(): void
+    {
+        $this->cells = [];
+
+        // Iterate through all row builders and extract their cells
+        foreach ($this->rowBuilders as $rowIndex => $rowBuilder) {
+            $cellsInRow = $rowBuilder->getCells();
+
+            // Log::debug("Reconstructing cells for row $rowIndex: " . $cellsInRow[1]->toString());
+            if (!empty($cellsInRow)) {
+                $this->cells[$rowIndex] = $cellsInRow;
+            }
         }
     }
 
@@ -226,26 +361,6 @@ class TableBuilder extends UIComponent
     }
 
     /**
-     * Set table dimensions and initialize empty cells
-     * 
-     * @param int $rows Number of data rows
-     * @param int $cols Number of columns
-     * @return self
-     */
-    public function dimensions(int $rows, int $cols): self
-    {
-        $this->rows = $rows;
-        $this->cols = $cols;
-
-        $this->setConfig('rows', $rows);
-        $this->setConfig('cols', $cols);
-
-        $this->initializeEmptyCells();
-
-        return $this;
-    }
-
-    /**
      * Initialize all cells as empty
      */
     private function initializeEmptyCells(): void
@@ -310,7 +425,7 @@ class TableBuilder extends UIComponent
     {
         for ($row = 0; $row < $this->rows; $row++) {
             for ($col = 0; $col < $this->cols; $col++) {
-                $this->cells[$row][$col]->text('');
+                $this->cells[$row][$col]->clearCell();
             }
         }
 
@@ -338,6 +453,8 @@ class TableBuilder extends UIComponent
             $value = $data[$col];
             $cell = $this->cells[$row][$col];
 
+            // Log::info("Filling cell at ($row, $col) with value: " . json_encode($value));
+            
             if (is_string($value) || is_numeric($value)) {
                 // Simple text (string or number)
                 $cell->text((string)$value)->padding(4); // Compact padding for text cells
@@ -526,7 +643,10 @@ class TableBuilder extends UIComponent
      */
     public function dataModel(AbstractDataTableModel $dataModel): self
     {
+        // Set the data model class in config
+        $this->setConfig('data_model', get_class($dataModel));
         $this->model = $dataModel;
+
         // Get columns and pagination configuration
         $columns = null;
         $columns = $dataModel->getColumns();
@@ -559,7 +679,11 @@ class TableBuilder extends UIComponent
             }
 
             // Fill data rows
-            $formattedData = $dataModel->getFormattedPageData(1, $this->config['pagination']['per_page']);
+            $pagination = $this->config['pagination'];
+            $currentPage = $pagination['current_page'];
+            $perPage = $pagination['per_page'];
+
+            $formattedData = $dataModel->getFormattedPageData($currentPage, $perPage);
             $row = 0;
             foreach ($formattedData as $rowData) {
                 if ($row >= $this->rows) {

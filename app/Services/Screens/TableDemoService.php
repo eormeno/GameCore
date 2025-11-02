@@ -6,7 +6,6 @@ use App\Services\UI\UIBuilder;
 use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
-use App\Services\UI\Support\UIStateManager;
 use App\Services\UI\Components\TableBuilder;
 use App\Services\UI\Traits\DataTableEventsTrait;
 use App\Services\UI\DataTable\UsersDataTableModel;
@@ -69,14 +68,12 @@ class TableDemoService extends AbstractUIService
             ->layout(LayoutType::VERTICAL)
             ->title('Table Component Demo');
 
-        // Create table with data model - everything is configured automatically
-        $dataModel = $this->getDataModel();
         $table = UIBuilder::table('users_table')
             ->title('Users Table')
             ->pagination(5)
-            ->dataModel($dataModel)
+            ->dataModel(new UsersDataTableModel())
             ->align('center')
-            ->rowMinHeight(40); // Further reduced for more compact rows
+            ->rowMinHeight(40);
 
         $container->add($table);
 
@@ -128,29 +125,22 @@ class TableDemoService extends AbstractUIService
     }
 
     /**
-     * Handle page change action (legacy compatibility)
+     * Handle page change action
      * 
-     * Maps to the generic onChangePage method with proper parameters.
+     * Simply delegates to TableBuilder which handles all updates transparently
      * 
      * @param array $params Action parameters with 'page' key
-     * @return array UI updates
+     * @return void
      */
     public function onChangePage(array $params): void
     {
         $page = $params['page'] ?? 1;
-        // Map legacy parameters to generic format
-        // $genericParams = [
-        //     'table_name' => 'users_table',
-        //     'page' => $page
-        // ];
-
-        // Update current page in cache
-        // UIStateManager::setComponentProperty(static::class, 'table', 'users_table', 'current_page', $page);
+        
+        // TableBuilder.page() handles everything:
+        // - Updates current_page in pagination
+        // - Recalculates pagination metadata (can_next, can_prev, total_pages)
+        // - Clears and refills table rows with new page data
         $this->users_table->page($page);
-        $updated_cells = [];
-        //$updated_cells = $this->onChangeTablePage($genericParams);
-
-        //return $updated_cells;
     }
 
 }

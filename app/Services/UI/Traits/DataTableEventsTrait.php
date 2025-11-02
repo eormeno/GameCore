@@ -2,6 +2,8 @@
 
 namespace App\Services\UI\Traits;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Data Table Events Trait
  * 
@@ -26,6 +28,8 @@ trait DataTableEventsTrait
      */
     public function onEditRow(array $params): array
     {
+        Log::info('onEditRow called with: ' . json_encode($params));
+
         $tableName = $params['table_name'] ?? null;
         $rowId = $params['id'] ?? null;
         $newData = $params['data'] ?? [];
@@ -152,10 +156,10 @@ trait DataTableEventsTrait
 
         $storedUI = $this->getStoredUI();
         $perPage = $dataModel->getPerPage();
-        
+
         // Calculate the row position on current page
         $pageRow = $row % $perPage;
-        
+
         $result = [];
 
         // Update cells based on the new data
@@ -188,18 +192,18 @@ trait DataTableEventsTrait
 
         $storedUI = $this->getStoredUI();
         $perPage = $dataModel->getPerPage();
-        
+
         // Calculate the row position on current page
         $pageRow = $row % $perPage;
-        
+
         $result = [];
 
         // Get column count to clear all cells in the row
         $columnCount = $this->getColumnCountForTable($tableName, $dataModel);
-        
+
         // Get removal values using model configuration
         $removalValues = $this->getRemovalValuesForRow($columnCount, $description, $dataModel);
-        
+
         // Update all cells in the row
         for ($col = 0; $col < $columnCount; $col++) {
             $cellName = "{$pageRow}_{$col}";
@@ -233,7 +237,7 @@ trait DataTableEventsTrait
         ];
 
         $columnIndex = $fieldMapping[$dataKey] ?? null;
-        
+
         return $columnIndex !== null ? "{$pageRow}_{$columnIndex}" : null;
     }
 
@@ -249,7 +253,7 @@ trait DataTableEventsTrait
         if (method_exists($dataModel, 'getColumns')) {
             return count($dataModel->getColumns());
         }
-        
+
         // Default fallback
         return 5;
     }
@@ -316,7 +320,7 @@ trait DataTableEventsTrait
         $formattedData = $dataModel->getFormattedPageData();
         $storedUI = $this->getStoredUI();
         $result = [];
-        
+
         // Update data cells
         $row = 0;
         foreach ($formattedData as $rowData) {
@@ -352,13 +356,13 @@ trait DataTableEventsTrait
     {
         // Get column mapping for this data model
         $columnMapping = $this->getColumnMappingForModel($dataModel);
-        
+
         foreach ($rowData as $fieldName => $value) {
             $columnIndex = $columnMapping[$fieldName] ?? null;
-            
+
             if ($columnIndex !== null) {
                 $cellName = "{$row}_{$columnIndex}";
-                
+
                 if (is_array($value) && isset($value['button'])) {
                     // Handle button cells
                     $this->updateButtonCell($storedUI, $result, $cellName, $value, $tableName);
@@ -383,10 +387,12 @@ trait DataTableEventsTrait
     protected function updateButtonCell(array $storedUI, array &$result, string $cellName, array $buttonData, ?string $tableName = null): void
     {
         foreach ($storedUI as $id => $component) {
-            if ($component['type'] === 'tablecell' && 
-                isset($component['name']) && 
-                $component['name'] === $cellName) {
-                
+            if (
+                $component['type'] === 'tablecell' &&
+                isset($component['name']) &&
+                $component['name'] === $cellName
+            ) {
+
                 $cellUpdate = [
                     'type' => 'tablecell',
                     'button' => $buttonData['button'],
@@ -395,7 +401,7 @@ trait DataTableEventsTrait
 
                 // Preserve height consistency for button cells too
                 // $this->preserveHeightProperties($component, $cellUpdate, $tableName);
-                
+
                 $result[$id] = $cellUpdate;
                 break;
             }
@@ -435,7 +441,7 @@ trait DataTableEventsTrait
         if (method_exists($dataModel, 'getPerPage')) {
             return $dataModel->getPerPage();
         }
-        
+
         // Default fallback
         return 10;
     }
@@ -479,10 +485,12 @@ trait DataTableEventsTrait
     protected function updateCellInResponse(array $storedUI, array &$result, string $cellName, $value, string $tableName = null): void
     {
         foreach ($storedUI as $id => $component) {
-            if ($component['type'] === 'tablecell' && 
-                isset($component['name']) && 
-                $component['name'] === $cellName) {
-                
+            if (
+                $component['type'] === 'tablecell' &&
+                isset($component['name']) &&
+                $component['name'] === $cellName
+            ) {
+
                 $cellUpdate = [
                     'type' => 'tablecell',
                     'text' => (string)$value,
@@ -491,7 +499,7 @@ trait DataTableEventsTrait
 
                 // Preserve height consistency - maintain original cell height properties
                 // $this->preserveHeightProperties($component, $cellUpdate, $tableName);
-                
+
                 $result[$id] = $cellUpdate;
                 break;
             }
@@ -513,17 +521,17 @@ trait DataTableEventsTrait
         if (isset($originalComponent['min_height'])) {
             $cellUpdate['min_height'] = $originalComponent['min_height'];
         }
-        
+
         // Preserve height if it was set
         if (isset($originalComponent['height'])) {
             $cellUpdate['height'] = $originalComponent['height'];
         }
-        
+
         // Preserve padding for compact cells
         if (isset($originalComponent['padding'])) {
             $cellUpdate['padding'] = $originalComponent['padding'];
         }
-        
+
         // Preserve any other height-related properties
         $heightProperties = ['max_height', 'line_height', 'padding_top', 'padding_bottom'];
         foreach ($heightProperties as $property) {

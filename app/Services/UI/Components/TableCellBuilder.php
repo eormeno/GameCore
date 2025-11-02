@@ -45,6 +45,24 @@ class TableCellBuilder extends UIComponent
         ];
     }
 
+    public function toString(): string
+    {
+        return "TableCell(id={$this->id}, "  .
+            //", name={$this->name}, text=" .
+            ", column=" . ($this->config['column'] ?? 'null') .
+            ", text=" . ($this->config['text'] ?? 'null') .
+            ")";
+    }
+
+    public function clearCell(): self
+    {
+        $this->setConfig('text', '');
+        $this->setConfig('url_image', null);
+        $this->setConfig('button', null);
+        $this->child = null;
+        return $this;
+    }
+
     /**
      * Set the column index (for ordering)
      * 

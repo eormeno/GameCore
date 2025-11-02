@@ -1430,7 +1430,7 @@ class UIRenderer {
                 const element = document.querySelector(`[data-component-id="${componentId}"]`);
                 
                 if (element) {
-                    console.log(`✏️ Updating ${componentId}`, changes);
+                    // console.log(`✏️ Updating ${componentId}`, changes);
                     this.updateComponent(element, changes);
                 } else {
                     console.log(`➕ Creating new component ${componentId}`, changes);
@@ -1452,6 +1452,11 @@ class UIRenderer {
             if (changes.button !== undefined && element.tagName === 'TD') {
                 // Clear the cell and re-render with new button
                 element.innerHTML = '';
+
+                // si el botón es null, no hacemos nada más
+                if (changes.button === null) {
+                    return;
+                }
                 
                 const btn = document.createElement('button');
                 btn.className = `ui-button ${changes.button.style || 'default'}`;

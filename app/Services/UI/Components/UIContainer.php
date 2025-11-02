@@ -166,6 +166,19 @@ class UIContainer implements UIElement
     /**
      * {@inheritDoc}
      */
+    public function postConnect(): void
+    {
+        // No-op for container
+    }
+
+    public function toString(): string
+    {
+        return "UIContainer(id={$this->id}, name={$this->name})";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getId(): int
     {
         return $this->id;

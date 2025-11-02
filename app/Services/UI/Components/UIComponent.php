@@ -72,6 +72,25 @@ abstract class UIComponent implements UIElement
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function postConnect(): void
+    {
+        // No-op for leaf components
+    }
+
+    public function toString(): string
+    {
+        return sprintf(
+            "%s (ID: %d, Name: %s, Parent: %s)",
+            ucfirst($this->type),
+            $this->id,
+            $this->name ?? 'null',
+            $this->parent !== null ? (string)$this->parent : 'null'
+        );
+    }
+
+    /**
      * Detecta automáticamente la clase que está invocando el builder
      * Busca en el stack trace la primera clase fuera del namespace UI
      * 

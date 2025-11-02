@@ -57,6 +57,15 @@ interface UIElement
     public function connectChild(UIElement $element): void;
 
     /**
+     * Perform any post-connection initialization after all children are connected.
+     * This method is called after the two-pass deserialization is complete,
+     * allowing the element to finalize its state based on its children.
+     * 
+     * @return void
+     */
+    public function postConnect(): void;
+
+    /**
      * Get the visibility state of the element
      * 
      * @return bool True if visible, false otherwise
@@ -87,4 +96,6 @@ interface UIElement
      * @return self For method chaining
      */
     public function setParent(int|string|null $parent): self;
+
+    public function toString(): string;
 }

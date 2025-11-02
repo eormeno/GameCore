@@ -304,6 +304,11 @@ abstract class AbstractUIService
             $components[$parentId]->connectChild($component);
         }
 
+        // Third pass: post-connection initialization
+        foreach ($components as $component) {
+            $component->postConnect();
+        }
+
         if (!$rootContainer) {
             throw new RuntimeException("No root container found in UI JSON.");
         }

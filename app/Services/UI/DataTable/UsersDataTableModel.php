@@ -9,19 +9,33 @@ namespace App\Services\UI\DataTable;
  */
 class UsersDataTableModel extends AbstractDataTableModel
 {
-    private ?array $usersData = null;
+    private static array $dataCache = [];
+    private static bool $cacheInitialized = false;
+
+    public function __construct()
+    {
+        $this->initializeCache();
+    }
 
     /**
-     * Get all users data from file
+     * Initialize the data cache from file on first load
+     */
+    private function initializeCache(): void
+    {
+        if (!self::$cacheInitialized) {
+            self::$dataCache = require app_path('Data/users_data.php');
+            self::$cacheInitialized = true;
+        }
+    }
+
+    /**
+     * Get all users data from cache
      * 
      * @return array
      */
     protected function getAllData(): array
     {
-        if ($this->usersData === null) {
-            $this->usersData = require app_path('Data/users_data.php');
-        }
-        return $this->usersData;
+        return self::$dataCache;
     }
 
     /**
@@ -103,8 +117,7 @@ class UsersDataTableModel extends AbstractDataTableModel
     }
 
     /**
-     * Update user data (for demo purposes)
-     * In a real implementation, this would update the database
+     * Update user data in cache
      * 
      * @param int $userId
      * @param array $data
@@ -112,23 +125,37 @@ class UsersDataTableModel extends AbstractDataTableModel
      */
     public function updateUser(int $userId, array $data): bool
     {
-        // For demo purposes, we just return true
-        // In a real implementation, this would update the database
-        return true;
+        foreach (self::$dataCache as &$user) {
+            if ($user['id'] == $userId) {
+                // Update only the fields provided
+                foreach ($data as $key => $value) {
+                    if (isset($user[$key])) {
+                        $user[$key] = $value;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Remove user (for demo purposes)
-     * In a real implementation, this would delete from database
+     * Remove user from cache (mark as removed)
      * 
      * @param int $userId
      * @return bool
      */
     public function removeUser(int $userId): bool
     {
-        // For demo purposes, we just return true
-        // In a real implementation, this would delete from database
-        return true;
+        foreach (self::$dataCache as $index => $user) {
+            if ($user['id'] == $userId) {
+                unset(self::$dataCache[$index]);
+                // Reindex the array to maintain consistency
+                self::$dataCache = array_values(self::$dataCache);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
