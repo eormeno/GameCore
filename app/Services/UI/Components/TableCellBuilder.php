@@ -117,6 +117,15 @@ class TableCellBuilder extends UIComponent
     }
 
     /**
+     * Get simple text content of the cell
+     * @return string|null
+     */
+    public function getText(): ?string
+    {
+        return $this->config['text'];
+    }
+
+    /**
      * Set horizontal alignment for the cell content
      * 
      * @param Align $align The alignment (left, center, right)

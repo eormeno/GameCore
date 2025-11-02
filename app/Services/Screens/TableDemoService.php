@@ -80,66 +80,22 @@ class TableDemoService extends AbstractUIService
         return $container;
     }
 
-    /**
-     * Handle edit user action (legacy compatibility)
-     * 
-     * Maps to the generic onEditRow method with proper parameters.
-     * 
-     * @param array $params Action parameters
-     * @return array UI updates
-     */
-    public function onEditUser(array $params): array
+    public function onEditUser(array $params): void
     {
-        // Map legacy parameters to generic format
-        $genericParams = [
-            'table_name' => 'users_table',
-            'id' => $params['user_id'] ?? null,
-            'row' => $params['row'] ?? null,
-            'data' => [
-                'name' => ($params['name'] ?? 'Unknown') . ' [EDITED]'
-            ]
-        ];
-
-        return $this->onEditRow($genericParams);
+        $userId = $params['user_id'] ?? null;
+        $row = $params['row'] ?? null;
+        $this->users_table->editCell($row, 1, 'EDITADO');
     }
 
-    /**
-     * Handle remove user action (legacy compatibility)
-     * 
-     * Maps to the generic onRemoveRow method with proper parameters.
-     * 
-     * @param array $params Action parameters
-     * @return array UI updates
-     */
-    public function onRemoveUser(array $params): array
+    public function onRemoveUser(array $params): void
     {
-        // Map legacy parameters to generic format
-        $genericParams = [
-            'table_name' => 'users_table',
-            'id' => $params['user_id'] ?? null,
-            'row' => $params['row'] ?? null,
-            'description' => '[REMOVED]'
-        ];
-
-        return $this->onRemoveRow($genericParams);
+        $userId = $params['user_id'] ?? null;
+        $row = $params['row'] ?? null;
     }
 
-    /**
-     * Handle page change action
-     * 
-     * Simply delegates to TableBuilder which handles all updates transparently
-     * 
-     * @param array $params Action parameters with 'page' key
-     * @return void
-     */
     public function onChangePage(array $params): void
     {
         $page = $params['page'] ?? 1;
-        
-        // TableBuilder.page() handles everything:
-        // - Updates current_page in pagination
-        // - Recalculates pagination metadata (can_next, can_prev, total_pages)
-        // - Clears and refills table rows with new page data
         $this->users_table->page($page);
     }
 

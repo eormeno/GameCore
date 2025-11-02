@@ -265,6 +265,8 @@ class TableBuilder extends UIComponent
                 $rowIndex++;
             }
         }
+
+        $this->rows = count($this->rowBuilders);
     }
 
     /**
@@ -291,6 +293,14 @@ class TableBuilder extends UIComponent
                 $this->cells[$rowIndex] = $cellsInRow;
             }
         }
+        // Mostrar en debug los contenidos de las celdas reconstruidas
+        // for ($i = 0; $i < count($this->cells); $i++) {
+        //     for ($j = 0; $j < count($this->cells[$i]); $j++) {
+        //         $cell = $this->cells[$i][$j];
+        //         Log::debug("Celda [$i][$j]: " . $cell->getText());
+        //     }
+        // }
+        // Log::debug("Reconstructed cells matrix with " . $this->getCell(0, 1)->getText());
     }
 
     /**
@@ -454,7 +464,7 @@ class TableBuilder extends UIComponent
             $cell = $this->cells[$row][$col];
 
             // Log::info("Filling cell at ($row, $col) with value: " . json_encode($value));
-            
+
             if (is_string($value) || is_numeric($value)) {
                 // Simple text (string or number)
                 $cell->text((string)$value)->padding(4); // Compact padding for text cells
@@ -509,6 +519,7 @@ class TableBuilder extends UIComponent
      */
     public function getCell(int $row, int $col): TableCellBuilder
     {
+        // Log::debug("Getting cell at ($row, $col) {$this->rows}x{$this->cols}");
         if ($row < 0 || $row >= $this->rows) {
             throw new \OutOfBoundsException("Row index $row is out of bounds");
         }
@@ -518,6 +529,25 @@ class TableBuilder extends UIComponent
         }
 
         return $this->cells[$row][$col];
+    }
+
+    /**
+     * Edit the content of a specific cell
+     * 
+     * This is a convenience method to quickly update a cell's text content.
+     * For more complex cell modifications (buttons, images, etc.), use getCell()
+     * and modify the cell builder directly.
+     * 
+     * @param int $row Row index (0-based)
+     * @param int $col Column index (0-based)
+     * @param string $text New text content for the cell
+     * @return self For method chaining
+     */
+    public function editCell(int $row, int $col, string $text): self
+    {
+        $cell = $this->getCell($row, $col);
+        $cell->text($text);
+        return $this;
     }
 
     /**

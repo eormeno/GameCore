@@ -2,6 +2,8 @@
 
 namespace App\Services\UI\DataTable;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Users Data Table Model
  * 
@@ -65,7 +67,9 @@ class UsersDataTableModel extends AbstractDataTableModel
         $formatted = [];
 
         foreach ($users as $index => $user) {
-            $rowIndex = ($currentPage - 1) * $perPage + $index;
+            // rowIndex is the visual row index in the table (0-based within current page)
+            // Not the global index across all pages
+            $rowIndex = $index;
 
             $formatted[] = [
                 'id' => $user['id'],
