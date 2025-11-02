@@ -3,13 +3,14 @@
 namespace App\Services\Screens;
 
 use App\Services\UI\UIBuilder;
+use Illuminate\Support\Facades\Log;
 use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
 use App\Services\UI\Components\TableBuilder;
+use App\Services\UI\DataTable\UsersTableModel;
 use App\Services\UI\Traits\DataTableEventsTrait;
 use App\Services\UI\DataTable\UsersDataTableModel;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Table Demo Service
@@ -71,7 +72,7 @@ class TableDemoService extends AbstractUIService
         $table = UIBuilder::table('users_table')
             ->title('Users Table')
             ->pagination(5)
-            ->dataModel(new UsersDataTableModel())
+            ->dataModel(new UsersTableModel())
             ->align('center')
             ->rowMinHeight(40);
 
