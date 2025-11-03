@@ -111,6 +111,8 @@ class TableBuilder extends UIComponent
         return $this;
     }
 
+
+
     /**
      * Update table data for the current page
      * Clears existing rows and fills them with data from the current page
@@ -165,7 +167,7 @@ class TableBuilder extends UIComponent
         if ($this->model === null) {
             $modelClass = $this->config['data_model'] ?? null;
             if ($modelClass) {
-                $this->model = new $modelClass();
+                $this->model = new $modelClass($this);
             }
         }
         return $this->model;
@@ -661,6 +663,11 @@ class TableBuilder extends UIComponent
         return $this;
     }
 
+    public function getPaginationData(): array
+    {
+        return $this->config['pagination'];
+    }
+
     /**
      * Configure table using a data model
      * The data model should provide methods like:
@@ -671,15 +678,20 @@ class TableBuilder extends UIComponent
      * @param mixed $dataModel The data model instance
      * @return self
      */
-    public function dataModel(AbstractDataTableModel $dataModel): self
+    //public function dataModel(AbstractDataTableModel $dataModel): self
+    public function dataModel(string $dataModel): self
     {
+        // asegura que $dataModel es una :class de tipo AbstractDataTableModel
+        if (!is_subclass_of($dataModel, AbstractDataTableModel::class)) {
+            throw new \InvalidArgumentException("Data model must be a subclass of AbstractDataTableModel");
+        }
         // Set the data model class in config
-        $this->setConfig('data_model', get_class($dataModel));
-        $this->model = $dataModel;
+        $this->setConfig('data_model', $dataModel);
+        $this->model = new $dataModel($this);
 
         // Get columns and pagination configuration
         $columns = null;
-        $columns = $dataModel->getColumns();
+        $columns = $this->model->getColumns();
         $this->cols = count($columns);
         $this->setConfig('cols', $this->cols);
 
@@ -713,7 +725,7 @@ class TableBuilder extends UIComponent
             $currentPage = $pagination['current_page'];
             $perPage = $pagination['per_page'];
 
-            $formattedData = $dataModel->getFormattedPageData($currentPage, $perPage);
+            $formattedData = $this->model->getFormattedPageData($currentPage, $perPage);
             $row = 0;
             foreach ($formattedData as $rowData) {
                 if ($row >= $this->rows) {

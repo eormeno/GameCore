@@ -2,6 +2,8 @@
 
 namespace App\Services\UI\DataTable;
 
+use App\Services\UI\Components\TableBuilder;
+
 /**
  * Abstract Data Table Model
  * 
@@ -10,9 +12,14 @@ namespace App\Services\UI\DataTable;
  */
 abstract class AbstractDataTableModel
 {
-    protected int $perPage;
-    protected int $currentPage;
     protected ?int $totalItems = null;
+
+    protected TableBuilder $tableBuilder;
+
+    public function __construct(TableBuilder $tableBuilder)
+    {
+        $this->tableBuilder = $tableBuilder;
+    }
 
     /**
      * Get table columns definition
@@ -37,10 +44,11 @@ abstract class AbstractDataTableModel
      * 
      * @return array
      */
-    public function getPageData(int $currentPage, int $perPage): array
+    public function getPageData(): array
     {
-        $this->currentPage = $currentPage;
-        $this->perPage = $perPage;
+        $paginationData = $this->tableBuilder->getPaginationData();
+        $currentPage = $paginationData['current_page'];
+        $perPage = $paginationData['per_page'];
 
         $offset = ($currentPage - 1) * $perPage;
         return $this->fetchData($offset, $perPage);

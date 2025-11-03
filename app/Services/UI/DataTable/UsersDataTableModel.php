@@ -63,7 +63,7 @@ class UsersDataTableModel extends AbstractDataTableModel
      */
     public function getFormattedPageData(int $currentPage, int $perPage): array
     {
-        $users = $this->getPageData($currentPage, $perPage);
+        $users = $this->getPageData();
         $formatted = [];
 
         foreach ($users as $index => $user) {
@@ -151,7 +151,8 @@ class UsersDataTableModel extends AbstractDataTableModel
 
     public function updateCell(int $rowIndex, int $columnIndex, $newValue): void
     {
-        $globalIndex = ($this->currentPage - 1) * $this->perPage + $rowIndex;
+        $pageData = $this->tableBuilder->getPaginationData();
+        $globalIndex = ($pageData['current_page'] - 1) * $pageData['per_page'] + $rowIndex;
         $columns = array_keys($this->getColumns());
         if (isset(self::$dataCache[$globalIndex]) && isset($columns[$columnIndex])) {
             $columnKey = $columns[$columnIndex];

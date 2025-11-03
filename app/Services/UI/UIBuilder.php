@@ -58,22 +58,6 @@ class UIBuilder
     }
 
     /**
-     * Create a new table component with data model
-     * 
-     * @param string|null $name The optional semantic name for the table
-     * @param mixed $dataModel The data model that provides table configuration and data
-     * @return TableBuilder
-     */
-    public static function tableWithModel(?string $name = null, $dataModel = null): TableBuilder
-    {
-        $table = new TableBuilder($name);
-        if ($dataModel !== null) {
-            $table->dataModel($dataModel);
-        }
-        return $table;
-    }
-
-    /**
      * Create a new table row component
      * 
      * @param TableBuilder $table The parent table this row belongs to
