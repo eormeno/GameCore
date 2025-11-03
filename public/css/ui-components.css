@@ -14,7 +14,7 @@ body {
 .ui-container {
     background: white;
     border-radius: 8px;
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
@@ -39,9 +39,9 @@ body {
 }
 
 .ui-container > .title {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: #2c3e50;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border-bottom: 2px solid #e0e0e0;
     padding-bottom: 10px;
 }
@@ -345,7 +345,7 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    margin: 15px 0;
+    margin: 5px 0;
     width: fit-content; /* Let wrapper size based on table content */
     max-width: 100%; /* But don't overflow container */
 }
@@ -368,13 +368,14 @@ body {
 
 /* Table Title */
 .ui-table-title {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #2c3e50;
-    padding: 16px 20px;
+    padding: 10px 10px;
     background: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
     margin: 0;
+    text-align: center;
 }
 
 /* Table */
@@ -694,7 +695,7 @@ body.modal-open #menu {
 
 /* Adjust main content to account for fixed header */
 #main {
-    margin-top: 80px; /* 60px header + 20px spacing */
+    margin-top: 60px; /* 60px header + 20px spacing */
     /* padding: 20px; */
     /* min-height: calc(100vh - 100px); */
 }

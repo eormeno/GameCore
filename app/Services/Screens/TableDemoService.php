@@ -38,10 +38,10 @@ class TableDemoService extends AbstractUIService
 
         $table = UIBuilder::table('users_table')
             ->title('Users Table')
-            ->pagination(7)
+            ->pagination(10)
             ->dataModel(UsersTableModel::class)
             ->align('center')
-            ->rowMinHeight(50);
+            ->rowMinHeight(40);
 
         $container->add($table);
 
