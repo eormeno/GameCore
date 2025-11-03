@@ -132,7 +132,7 @@ class UsersTableModel extends AbstractDataTableModel
 
         $row = $this->getRowIndexInPage($user->id);
         if ($row !== null) {
-            $this->tableBuilder->editCell($row, 0, 'EDITADO');
+            $this->tableBuilder->editCell($row, 0, $user->name);
         }
 
     }

@@ -2,13 +2,14 @@
 
 namespace App\Services\Screens;
 
+use App\Models\User;
 use App\Services\UI\UIBuilder;
+use Illuminate\Support\Facades\Log;
 use App\Services\UI\Enums\LayoutType;
 use App\Services\UI\AbstractUIService;
 use App\Services\UI\Components\UIContainer;
 use App\Services\UI\Components\TableBuilder;
 use App\Services\UI\DataTable\UsersTableModel;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Table Demo Service
@@ -50,7 +51,9 @@ class TableDemoService extends AbstractUIService
     public function onEditUser(array $params): void
     {
         $id = $params['user_id'] ?? null;
-        $this->users_table->getModel()->updateRow($id, ['name' => 'EDITADO']);
+        $user = User::find($id);
+        $updateData = ['name' => "{$user->name} (E)"];
+        $this->users_table->getModel()->updateRow($id, $updateData);
     }
 
     public function onRemoveUser(array $params): void
