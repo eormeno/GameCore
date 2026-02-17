@@ -72,9 +72,11 @@ class GameAppController extends Controller
             ], 404);
         } catch (Exception $e) {
             return response()->json([
+                //DEBUG: Agrego el mensaje de la excepción para facilitar el debug.
                 'exception' => [
-                    'error' => ['message' => 'An error occurred while trying to play the game.']
-                ]
+                    'error' => ['message' => 'An error occurred while trying to play the game.'],
+                    'detail' => ['message' => $e->getMessage()]
+                    ]
             ], 500);
         }
     }
