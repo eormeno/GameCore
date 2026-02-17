@@ -61,6 +61,8 @@ class ComponentBase extends Model implements IGameEventListener
 
 	public function findGameObject(string $name): GameObject|null
 	{
+		//DEBUG: Obtiene todos los GameObjects con id y nombre
+		// $gameObjects = $this->game()->gameObjects->pluck('id', 'name')->toArray();
 		return $this->game()->findGameObject($name);
 	}
 
@@ -76,12 +78,12 @@ class ComponentBase extends Model implements IGameEventListener
 		return $this->belongsTo(Component::class, 'id');
 	}
 
-    public function subclass(): Component
-    {
-        return ReflectionUtils::isSubclassOf($this->type, PersistentComponent::class)
-            ? $this->type::find($this->id)
-            : new $this->type($this->attributes);
-    }
+	public function subclass(): Component
+	{
+		return ReflectionUtils::isSubclassOf($this->type, PersistentComponent::class)
+			? $this->type::find($this->id)
+			: new $this->type($this->attributes);
+	}
 
 	public function view()
 	{
