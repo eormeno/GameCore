@@ -164,9 +164,16 @@ abstract class Base extends Model
     }
 
     public function getComponent(string $slug_type): ?Component
-    {
-        $type = ReflectionUtils::componentClassFromSlug($slug_type);
-        return $this->components()->where('type', $type)->first()?->subclass();
+    { 
+        //FIX: La busqueda se hace tambien en los namespaces de las apps. 
+        //ReflectionUtils solo buscaba en Common: App\GameApps\Common\Components\RoleManagerComponent
+        //Fix busca tambien en los namespace de las gameapps: App\GameApps\wwg\Components\RoleManagerComponent
+
+        $targetBasename = class_basename(ReflectionUtils::componentClassFromSlug($slug_type));
+        $component = $this->components->first(function ($c) use ($targetBasename) {
+            return class_basename($c->type) === $targetBasename;
+        });
+        return $component?->subclass();
     }
 
     public function removeComponent(string $slug_type): bool
