@@ -177,6 +177,24 @@ class GameRenderer {
                     element.textContent = component.text;
                     if (component.event) element.addEventListener('click', () => this.pushEvent(component.event, {}));
                     break;
+                //
+                case 'text_input':
+                    element = document.createElement('input');
+                    element.type = 'text';
+                    if (component.placeholder) {
+                        element.placeholder = component.placeholder;
+                    }
+                    if (component.event) {
+                        element.addEventListener('input', (e) => {
+                            this.pushEvent(component.event, { 
+                                value: e.target.value,
+                                id: id 
+                            });
+                        });
+                    }
+                    break;
+
+                //
                 case 'sprite':
                     element = document.createElement('img');
                     this.fetchResourceWithCacheAndBearer(`${this.resourceUrl}/${component.texture}`, (url) => {
