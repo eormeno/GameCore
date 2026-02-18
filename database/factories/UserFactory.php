@@ -39,4 +39,13 @@ class UserFactory extends Factory
             'password' => Hash::make(env('ADMIN_PASSWORD')),
         ]);
     }
+
+    public function testUser(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'name' => "test",
+            'email' => "test@gamecore.com",
+            'password' => Hash::make("test"),
+        ]);
+    }
 }
