@@ -26,6 +26,9 @@ abstract class Base extends Model
 
     public static function findPrefab(string $name): ?Prefab
     {
+        //DEBUG: list all prefabs by name
+        $prefabs = self::all()->keyBy('name');
+        
         $prefab = self::where('name', $name)->first();
         if (!$prefab) {
             throw new InvalidArgumentException("Prefab $name not found");
