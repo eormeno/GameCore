@@ -49,7 +49,7 @@ class WerewolvesRootPrefab extends Prefab
             'create_game_button:button' => ['attributes' => ['text' => 'Create Game', 'event' => 'create_room', 'style' => 'primary']],
             'joint_game_button:button' => ['attributes' => ['text' => 'Join Game', 'event' => 'join_room', 'style' => 'primary']],
             'exit_button:button' => ['attributes' => ['text' => 'Exit', 'event' => 'exit', 'style' => 'danger']],
-        ];
+            ];
     }
 
     private static function createRoomView(): array
@@ -63,9 +63,11 @@ class WerewolvesRootPrefab extends Prefab
                 'height' => '100%'
             ],
             'title:label' => ['attributes' => ['text' => 'Create Room', 'style' => 'title']],
-            'description:label' => ['attributes' => ['text' => 'Haz clic en Iniciar para comenzar', 'style' => 'paragraph']],
-            'start_button:button' => ['attributes' => ['text' => 'Iniciar', 'event' => 'start', 'style' => 'primary']],
-        ];
+            'create_room_code:button' => ['attributes' => ['text' => 'Create', 'event' => 'create_room_code', 'style' => 'primary']],
+            'help:label' => ['active' => false, 'attributes' => ['text' => 'Share this code with other players:', 'style' => 'paragraph']],
+            'room_code:label' => ['active' => false, 'attributes' => ['text' => '', 'style' => 'paragraph']],
+            'lobby_button:button' => ['active' => false, 'attributes' => ['text' => 'Go to Lobby', 'event' => 'lobby', 'style' => 'primary']],
+            ];
     }
     private static function lobbyView(): array
     {
@@ -96,7 +98,7 @@ class WerewolvesRootPrefab extends Prefab
             'title:label' => ['attributes' => ['text' => 'Join Room', 'style' => 'title']],
             'description:label' => ['attributes' => ['text' => 'Haz clic en Iniciar para comenzar', 'style' => 'paragraph']],
             'start_button:button' => ['attributes' => ['text' => 'Iniciar', 'event' => 'start', 'style' => 'primary']],
-
+            'input_text:text-input' => ['attributes' => ['placeholder' => 'Enter Room Code','event' => 'input', 'value' => '', 'style' => '']],
         ];
     }
 

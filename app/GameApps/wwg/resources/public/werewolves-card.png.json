@@ -1,1 +1,8 @@
-{"ext":"png","text":"werewolves-card.png","color":"black","fontSize":8,"width":160,"height":90}
+{
+    "ext": "png",
+    "text": "werewolves-card.png",
+    "color": "black",
+    "fontSize": 20,
+    "width": 320,
+    "height": 200
+}
