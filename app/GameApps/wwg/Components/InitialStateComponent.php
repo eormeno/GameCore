@@ -26,19 +26,11 @@ class InitialStateComponent extends PersistentComponent
 	}
 	public function onCreateRoomEvent(): string|null
 	{
-		$this->assignRole(role: 'moderator');
 		return 'create_room';
 	}
 	public function onJoinRoomEvent(): string|null
 	{
-		$this->assignRole(role: 'player');
 		return 'join_room';
 	}
 
-	private function assignRole(string $role): void
-	{
-		$roleManager = $this->findGameObject(name: 'wwg.werewolves-root-prefab')->getComponent('role-manager');
-		$roleManager->fill(attributes: ['role' => $role]);
-		return;
-	}
 }

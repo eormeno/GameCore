@@ -12,15 +12,13 @@ class WerewolvesRootPrefab extends Prefab
             'states' => self::states(),
             'initial_view:container' => self::initialView(),
             'create_room_view:container' => self::createRoomView(),
+            'join_room_view:container' => self::joinRoomView(),
             'lobby_view:container' => self::lobbyView(),
             'playing_view:container' => self::playingView(),
             'night_view:container' => self::nightView(),
             'day_view:container' => self::dayView(),
             'vote_view:container' => self::voteView(),
             'game_over_view:container' => self::gameOverView(),
-            'components' => [
-                'wwg.role_manager' => ['role' => ''],
-            ]
         ];
     }
     private static function states(): array
@@ -28,6 +26,7 @@ class WerewolvesRootPrefab extends Prefab
         return [
             'initial' => ['wwg.initial-state' => []],
             'create_room' => ['wwg.create-room-state' => []],
+            'join_room' => ['wwg.join-room-state' => []],
             'lobby' => ['wwg.lobby-state' => []],
             'playing' => ['wwg.playing-state' => []],
             'night' => ['wwg.night-state' => []],
@@ -48,8 +47,8 @@ class WerewolvesRootPrefab extends Prefab
             ],
             'create_game_button:button' => ['attributes' => ['text' => 'Create Game', 'event' => 'create_room', 'style' => 'primary']],
             'joint_game_button:button' => ['attributes' => ['text' => 'Join Game', 'event' => 'join_room', 'style' => 'primary']],
-            'exit_button:button' => ['attributes' => ['text' => 'Exit', 'event' => 'exit', 'style' => 'danger']],
-            ];
+            'initial_sound:sound' => ['attributes' => ['sound' => 'initial-music.wav', 'loop' => true, 'volume' => 0.25]],
+        ];
     }
 
     private static function createRoomView(): array
@@ -67,7 +66,7 @@ class WerewolvesRootPrefab extends Prefab
             'help:label' => ['active' => false, 'attributes' => ['text' => 'Share this code with other players:', 'style' => 'paragraph']],
             'room_code:label' => ['active' => false, 'attributes' => ['text' => '', 'style' => 'paragraph']],
             'lobby_button:button' => ['active' => false, 'attributes' => ['text' => 'Go to Lobby', 'event' => 'lobby', 'style' => 'primary']],
-            ];
+        ];
     }
     private static function lobbyView(): array
     {
@@ -96,9 +95,10 @@ class WerewolvesRootPrefab extends Prefab
                 'height' => '100%'
             ],
             'title:label' => ['attributes' => ['text' => 'Join Room', 'style' => 'title']],
-            'description:label' => ['attributes' => ['text' => 'Haz clic en Iniciar para comenzar', 'style' => 'paragraph']],
-            'start_button:button' => ['attributes' => ['text' => 'Iniciar', 'event' => 'start', 'style' => 'primary']],
-            'input_text:text-input' => ['attributes' => ['placeholder' => 'Enter Room Code','event' => 'input', 'value' => '', 'style' => '']],
+            'description:label' => ['attributes' => ['text' => 'Insert room code to join', 'style' => 'paragraph']],
+            'room_code_input:text-input' => ['attributes' => ['placeholder' => 'Enter Room Code', 'event' => 'input', 'value' => '', 'style' => '']],
+            'warning_text:label' => ['active' => false, 'attributes' => ['text' => 'The Room Code has to be 13 characters long', 'style' => 'danger']],
+            'join_button:button' => ['attributes' => ['text' => 'Join', 'event' => 'join', 'style' => 'primary']],
         ];
     }
 
@@ -179,8 +179,6 @@ class WerewolvesRootPrefab extends Prefab
             ],
             'title:label' => ['attributes' => ['text' => 'GameOver', 'style' => 'title']],
             //'description:label' => ['attributes' => ['text' => 'Haz clic en Iniciar para comenzar', 'style' => 'paragraph']],
-            //'start_button:button' => ['attributes' => ['text' => 'Iniciar', 'event' => 'start', 'style' => 'primary']],
-
         ];
     }
 }

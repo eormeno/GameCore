@@ -16,7 +16,10 @@ class DayStateComponent extends PersistentComponent
 			$initialView->activate();
 		}
 	}
-
+	public function onStartEvent(): string|null
+	{
+		return 'vote';
+	}
 	public function onExit(): void
 	{
 		$initialView = $this->gameObject->findChild('day_view');
@@ -25,9 +28,6 @@ class DayStateComponent extends PersistentComponent
 		}
 	}
 
-	public function onStartEvent(): string|null
-	{
-		return 'game_over';
-	}
+
 
 }

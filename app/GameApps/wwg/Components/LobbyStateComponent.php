@@ -16,6 +16,7 @@ class LobbyStateComponent extends PersistentComponent
         if ($lobbyView) {
             $lobbyView->activate();
         }
+        //TODO: change the background image of the lobby view
     }
 
     public function onExit(): void
@@ -26,22 +27,11 @@ class LobbyStateComponent extends PersistentComponent
         }
     }
 
-    public function onStartGameEvent(): string|null
-    {
-        return 'start_game';
-    }
 
     public function onLeaveRoomEvent(): string|null
     {
-        $this->clearRole();
-        return 'initial_state';
+        return 'initial';
     }
 
-    public function clearRole(): void
-    {
-        $roleManager = $this->findGameObject(name: 'wwg.werewolves-root-prefab')->getComponent('role-manager');
-        $roleManager->fill(attributes: ['role' => null]);
-        return;
-    }
 
 }
